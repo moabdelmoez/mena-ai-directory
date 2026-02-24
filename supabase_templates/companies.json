@@ -1,0 +1,17 @@
+[
+  {
+    "company_id": "core42",
+    "name": "Core42",
+    "logo": "https://example.com/logo.png",
+    "website": "https://www.core42.ai/",
+    "description": "Core42 empowers individuals, enterprises, and nations to unlock the full potential of AI through its comprehensive enablement capabilities.",
+    "hq_region": "MENA",
+    "hq_country": "United Arab Emirates",
+    "domain_verticals": ["Government", "Healthcare", "Finance"],
+    "ai_infrastructure": true,
+    "ai_platform": true,
+    "derived_capabilities": ["GPU Cloud", "On Prem", "GPU Compute Management", "AI Agent"],
+    "scrape_confidence": 0.88,
+    "last_updated": "2026-02-02"
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "product_id": "compass-chat",
+    "company_id": "core42",
+    "name": "Compass Chat",
+    "description": "An AI-powered assistant powered by GPT-4o and Jais 30B models for conversational AI interactions.",
+    "category": "ai_platform",
+    "capabilities": ["ai_agent"],
+    "use_cases": ["conversational AI", "customer support"],
+    "target_customers": ["Enterprise", "Government"],
+    "deployment": ["cloud"],
+    "maturity": "production",
+    "pricing_model": "enterprise",
+    "confidence": 0.88,
+    "sources": ["https://www.core42.ai/", "https://www.core42.ai/products"]
+  }
+]
