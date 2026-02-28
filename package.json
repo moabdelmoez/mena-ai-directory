@@ -9,6 +9,8 @@
     "lint": "next lint",
     "seed:admin": "npx tsx scripts/seed-admin.ts",
     "import:json": "npx tsx scripts/import-json.ts",
+    "import:products": "npx tsx scripts/import-products.ts",
+    "import:classifications": "npx tsx scripts/import-classifications.ts",
     "remove-broken-logos": "npx tsx scripts/remove-broken-logos.ts",
     "remove-all-logos": "npx tsx scripts/remove-all-logos.ts",
     "test:e2e": "playwright test"

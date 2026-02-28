@@ -6,15 +6,7 @@ export interface Product {
   company_id: string;
   name: string;
   description: string;
-  category: string | null;
-  capabilities: string[];
-  use_cases: string[];
-  target_customers: string[];
-  deployment: string[];
-  maturity: string | null;
-  pricing_model: string | null;
-  confidence: number | null;
-  sources: string[];
+  product_url: string | null;
   embedding: number[] | null;
   created_at: string;
   updated_at: string;
@@ -23,13 +15,15 @@ export interface Product {
 export interface ProductInput {
   name: string;
   description: string;
-  category?: string;
-  capabilities?: string[];
-  use_cases?: string[];
-  target_customers?: string[];
-  deployment?: string[];
-  maturity?: string;
-  pricing_model?: string;
+}
+
+export interface ProductClassification {
+  id: string;
+  product_id: string;
+  company_id: string;
+  tech_category: string | null;
+  industry: string | null;
+  created_at: string;
 }
 
 export interface Company {
@@ -37,16 +31,11 @@ export interface Company {
   company_id: string | null;
   name: string;
   slug: string;
-  website: string;
+  company_url: string | null;
+  linkedin_profile: string | null;
   description: string;
   logo: string | null;
-  derived_capabilities: string[];
-  domain_verticals: string[];
   hq_country: Country;
-  hq_region: string | null;
-  ai_infrastructure: boolean;
-  ai_platform: boolean;
-  scrape_confidence: number | null;
   status: 'pending' | 'approved' | 'rejected';
   embedding: number[] | null;
   submitted_by: string | null;
@@ -109,11 +98,7 @@ export interface SearchResult {
 
 export interface SearchFilters {
   query?: string;
-  derived_capabilities?: string[];
-  domain_verticals?: string[];
   hq_country?: Country;
-  ai_infrastructure?: boolean;
-  ai_platform?: boolean;
   page?: number;
   limit?: number;
 }
@@ -128,14 +113,10 @@ export interface PaginatedResponse<T> {
 
 export interface CompanyRegistrationInput {
   name: string;
-  website: string;
+  company_url?: string;
+  linkedin_profile?: string;
   description: string;
-  derived_capabilities: string[];
-  domain_verticals: string[];
   hq_country: Country;
-  hq_region?: string;
-  ai_infrastructure?: boolean;
-  ai_platform?: boolean;
   logo?: File;
   products?: ProductInput[];
 }
