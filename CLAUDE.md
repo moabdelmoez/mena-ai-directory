@@ -14,6 +14,8 @@ npm run build             # Production build
 npm run lint              # Run ESLint
 npm run seed:admin        # Create/update admin user from ADMIN_EMAIL/ADMIN_PASSWORD env vars
 npm run import:json       # Import companies from JSON file
+npm run import:products   # Import products from JSON file (generates embeddings, namespaces product_id)
+npm run import:classifications  # Import product tech_category/industry classifications from JSON file
 npm run remove-broken-logos  # Remove broken logo URLs from database
 npm run test:e2e          # Run Playwright E2E tests
 ```
@@ -59,6 +61,11 @@ npm run test:e2e          # Run Playwright E2E tests
   - `sources`: Array of data source URLs
 - **reviews**: User reviews with rating (1-5), one per user per company constraint
 - **company_edits**: Edit requests (id, company_id, proposed_data JSONB, submitted_by, status pending/approved/rejected)
+- **product_classification**: AI-generated classifications for products
+  - `product_id`: FK → products(id) ON DELETE CASCADE
+  - `company_id`: FK → companies(id) ON DELETE CASCADE (redundant but explicit; enables fast per-company queries)
+  - `tech_category`: AI/ML technology category
+  - `industry`: Target industry vertical
 - **companies_with_ratings**: View with computed average_rating and review_count
 
 ### Authentication Patterns
@@ -97,6 +104,14 @@ In-memory rate limiter in `/lib/rate-limit.ts` with max store size of 10,000 ent
 The admin import API (`/api/admin/import`) supports:
 - **JSON format**: `{ companies: [...], autoApprove: boolean }` with nested products
 - **CSV format**: FormData with file upload, supports legacy column names (tags→derived_capabilities, industries→domain_verticals, country→hq_country)
+
+#### Offline Import Scripts (run order matters)
+
+1. **`import:json`** — imports companies (with any nested products) from a JSON file
+2. **`import:products`** — imports products from a separate JSON file; looks up companies by external `company_id`, generates OpenAI embeddings, namespaces `product_id` as `{company_id}--{original_id}` to prevent cross-company collisions
+3. **`import:classifications`** — imports `tech_category` / `industry` classifications from a JSON file; strips namespace prefix to match original `product_id`, inserts into `product_classification` with both `product_id` and `company_id`
+
+All three scripts are idempotent: they delete existing rows for the target records before re-inserting.
 
 ### SEO
 
