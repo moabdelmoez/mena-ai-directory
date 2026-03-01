@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getCompanyProducts } from '@/lib/search';
@@ -243,22 +244,33 @@ export async function PUT(
           productDbId = newProduct?.id;
         }
 
-        // Upsert classification only when at least one field is set
-        if (productDbId && (product.tech_category || product.industry)) {
-          await supabaseAdmin
-            .from('product_classification')
-            .upsert(
-              {
-                product_id: productDbId,
-                company_id: id,
-                tech_category: product.tech_category ?? null,
-                industry: product.industry ?? null,
-              },
-              { onConflict: 'product_id' }
-            );
+        // Upsert or delete classification
+        if (productDbId) {
+          if (product.tech_category || product.industry) {
+            await supabaseAdmin
+              .from('product_classification')
+              .upsert(
+                {
+                  product_id: productDbId,
+                  company_id: id,
+                  tech_category: product.tech_category ?? null,
+                  industry: product.industry ?? null,
+                },
+                { onConflict: 'product_id' }
+              );
+          } else {
+            // Both fields cleared — remove stale classification row
+            await supabaseAdmin
+              .from('product_classification')
+              .delete()
+              .eq('product_id', productDbId);
+          }
         }
       }
     }
+
+    // Invalidate ISR cache so public page reflects changes immediately
+    revalidatePath('/company/' + company.slug);
 
     return NextResponse.json(company);
   } catch (error) {
