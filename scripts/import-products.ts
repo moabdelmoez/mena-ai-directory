@@ -6,7 +6,7 @@ import * as path from 'path';
 config({ path: path.join(__dirname, '..', '.env.local') });
 
 // Configuration
-const PRODUCTS_FILE = '/Users/mostafa/Downloads/Coding_Projects/tinyfish-scraping-product-workflow/output/products_output_26-02-2026.json';
+const PRODUCTS_FILE = '/Users/mostafa/Downloads/Coding_Projects/tinyfish-scraping-product-workflow/output/products_output_27-02-2026.json';
 
 // Dynamic imports (after env is loaded)
 async function getSupabaseAdmin() {
