@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Card, Badge, Button, Select, Input } from '@/components/ui';
+import { Card, Button, Select, Input } from '@/components/ui';
 import { Pagination } from '@/components/Pagination';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Company, PaginatedResponse } from '@/types';
@@ -17,8 +17,6 @@ export default function CompaniesPage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
-  const [aiInfraFilter, setAiInfraFilter] = useState(false);
-  const [aiPlatformFilter, setAiPlatformFilter] = useState(false);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -29,8 +27,6 @@ export default function CompaniesPage() {
       const params = new URLSearchParams({ page: page.toString() });
       if (statusFilter) params.set('status', statusFilter);
       if (countryFilter) params.set('hq_country', countryFilter);
-      if (aiInfraFilter) params.set('ai_infrastructure', 'true');
-      if (aiPlatformFilter) params.set('ai_platform', 'true');
       if (search) params.set('search', search);
 
       const response = await fetch(`/api/admin/companies?${params.toString()}`);
@@ -46,7 +42,7 @@ export default function CompaniesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, statusFilter, countryFilter, aiInfraFilter, aiPlatformFilter, search, router]);
+  }, [page, statusFilter, countryFilter, search, router]);
 
   useEffect(() => {
     fetchCompanies();
@@ -83,14 +79,12 @@ export default function CompaniesPage() {
   const clearFilters = () => {
     setStatusFilter('');
     setCountryFilter('');
-    setAiInfraFilter(false);
-    setAiPlatformFilter(false);
     setSearchInput('');
     setSearch('');
     setPage(1);
   };
 
-  const hasActiveFilters = statusFilter || countryFilter || aiInfraFilter || aiPlatformFilter || search;
+  const hasActiveFilters = statusFilter || countryFilter || search;
 
   return (
     <div>
@@ -108,7 +102,7 @@ export default function CompaniesPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <Input
               placeholder="Search companies..."
@@ -142,32 +136,6 @@ export default function CompaniesPage() {
               options={MENA_COUNTRIES.map((c) => ({ value: c, label: c }))}
             />
           </div>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={aiInfraFilter}
-                onChange={(e) => {
-                  setAiInfraFilter(e.target.checked);
-                  setPage(1);
-                }}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-              />
-              AI Infra
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={aiPlatformFilter}
-                onChange={(e) => {
-                  setAiPlatformFilter(e.target.checked);
-                  setPage(1);
-                }}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-              />
-              AI Platform
-            </label>
-          </div>
         </div>
         {hasActiveFilters && (
           <div className="mt-4 flex items-center gap-2">
@@ -195,9 +163,6 @@ export default function CompaniesPage() {
                     Company
                   </th>
                   <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Country
                   </th>
                   <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -221,7 +186,7 @@ export default function CompaniesPage() {
                           <img
                             src={company.logo}
                             alt=""
-                            className="w-10 h-10 rounded-lg object-contain bg-gray-50"
+                            className={`w-10 h-10 rounded-lg object-contain ${company.logo_bg === 'black' ? 'bg-black' : company.logo_bg === 'white' ? 'bg-white' : 'bg-gray-50'}`}
                           />
                         ) : (
                           <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
@@ -234,21 +199,12 @@ export default function CompaniesPage() {
                           <div className="text-sm font-medium text-gray-900">
                             {company.name}
                           </div>
-                          <div className="text-sm text-gray-500 truncate max-w-xs">
-                            {company.website}
-                          </div>
+                          {company.company_url && (
+                            <div className="text-sm text-gray-500 truncate max-w-xs">
+                              {company.company_url}
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex gap-1">
-                        {company.ai_infrastructure && (
-                          <Badge variant="default" size="sm">AI Infra</Badge>
-                        )}
-                        {company.ai_platform && (
-                          <Badge variant="primary" size="sm">AI Platform</Badge>
-                        )}
-                        {!company.ai_infrastructure && !company.ai_platform && '-'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

@@ -3,8 +3,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getCompanyBySlug, getCompanyProducts } from '@/lib/search';
-import { Badge, Card } from '@/components/ui';
-import { TagBadges } from '@/components/TagBadges';
+import { Card } from '@/components/ui';
 import { StarRating } from '@/components/StarRating';
 import { CompanyReviews } from './CompanyReviews';
 import { ProductList } from '@/components/ProductList';
@@ -56,13 +55,12 @@ export default async function CompanyPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: company.name,
-    url: company.website,
+    url: company.company_url,
     description: company.description,
     logo: company.logo,
     address: {
       '@type': 'PostalAddress',
       addressCountry: company.hq_country,
-      addressRegion: company.hq_region,
     },
     aggregateRating: company.average_rating
       ? {
@@ -105,23 +103,13 @@ export default async function CompanyPage({ params }: Props) {
         {/* Company Header */}
         <Card className="mb-8">
           <div className="flex flex-col sm:flex-row gap-6">
-            <CompanyLogo logo={company.logo} name={company.name} size="lg" />
+            <CompanyLogo logo={company.logo} name={company.name} size="lg" logo_bg={company.logo_bg} />
 
             <div className="flex-1">
               <div className="flex flex-wrap items-start gap-3 mb-2">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   {company.name}
                 </h1>
-                {company.ai_infrastructure && (
-                  <Badge variant="default" size="md">
-                    AI Infrastructure
-                  </Badge>
-                )}
-                {company.ai_platform && (
-                  <Badge variant="primary" size="md">
-                    AI Platform
-                  </Badge>
-                )}
               </div>
 
               {company.average_rating !== undefined && company.average_rating > 0 && (
@@ -137,27 +125,47 @@ export default async function CompanyPage({ params }: Props) {
               <p className="text-gray-600 mb-4">{company.description}</p>
 
               <div className="flex flex-wrap gap-4">
-                <a
-                  href={company.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                {company.company_url && (
+                  <a
+                    href={company.company_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                    />
-                  </svg>
-                  Visit Website
-                </a>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                    Visit Website
+                  </a>
+                )}
+
+                {company.linkedin_profile && (
+                  <a
+                    href={company.linkedin_profile}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                    </svg>
+                    LinkedIn
+                  </a>
+                )}
 
                 <span className="text-gray-500 flex items-center gap-2">
                   <svg
@@ -180,29 +188,11 @@ export default async function CompanyPage({ params }: Props) {
                     />
                   </svg>
                   {company.hq_country}
-                  {company.hq_region && `, ${company.hq_region}`}
                 </span>
               </div>
             </div>
           </div>
         </Card>
-
-        {/* Capabilities and Verticals */}
-        <div className="grid sm:grid-cols-2 gap-6 mb-8">
-          {company.derived_capabilities.length > 0 && (
-            <Card>
-              <h2 className="font-semibold text-gray-900 mb-3">Capabilities</h2>
-              <TagBadges tags={company.derived_capabilities} variant="primary" />
-            </Card>
-          )}
-
-          {company.domain_verticals.length > 0 && (
-            <Card>
-              <h2 className="font-semibold text-gray-900 mb-3">Target Industries</h2>
-              <TagBadges tags={company.domain_verticals} variant="default" />
-            </Card>
-          )}
-        </div>
 
         {/* Products Section */}
         {products.length > 0 && (

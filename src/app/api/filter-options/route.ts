@@ -1,71 +1,28 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
+import { MENA_COUNTRIES } from '@/constants';
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
 export async function GET() {
-  try {
-    const supabase = getSupabaseAdmin();
+  const { data } = await supabaseAdmin
+    .from('product_classification')
+    .select('tech_category, industry');
 
-    // Fetch unique derived_capabilities from approved companies
-    const { data: capabilitiesData, error: capabilitiesError } = await supabase
-      .from('companies')
-      .select('derived_capabilities')
-      .eq('status', 'approved')
-      .not('derived_capabilities', 'is', null);
+  const tech_categories = [...new Set(
+    (data || []).map((r) => r.tech_category).filter(Boolean) as string[]
+  )].sort();
 
-    if (capabilitiesError) {
-      throw capabilitiesError;
-    }
+  const industries = [...new Set(
+    (data || []).map((r) => r.industry).filter(Boolean) as string[]
+  )].sort();
 
-    // Fetch unique domain_verticals from approved companies
-    const { data: verticalsData, error: verticalsError } = await supabase
-      .from('companies')
-      .select('domain_verticals')
-      .eq('status', 'approved')
-      .not('domain_verticals', 'is', null);
-
-    if (verticalsError) {
-      throw verticalsError;
-    }
-
-    // Extract and dedupe capabilities from all companies
-    const capabilitiesSet = new Set<string>();
-    for (const company of capabilitiesData || []) {
-      if (Array.isArray(company.derived_capabilities)) {
-        for (const cap of company.derived_capabilities) {
-          if (cap) capabilitiesSet.add(cap);
-        }
-      }
-    }
-
-    // Extract and dedupe verticals from all companies
-    const verticalsSet = new Set<string>();
-    for (const company of verticalsData || []) {
-      if (Array.isArray(company.domain_verticals)) {
-        for (const vert of company.domain_verticals) {
-          if (vert) verticalsSet.add(vert);
-        }
-      }
-    }
-
-    // Sort alphabetically
-    const capabilities = Array.from(capabilitiesSet).sort();
-    const verticals = Array.from(verticalsSet).sort();
-
-    return NextResponse.json({
-      capabilities,
-      verticals,
-    }, {
+  return NextResponse.json(
+    { tech_categories, industries, countries: MENA_COUNTRIES },
+    {
       headers: {
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
       },
-    });
-  } catch (error) {
-    console.error('Error fetching filter options:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch filter options' },
-      { status: 500 }
-    );
-  }
+    }
+  );
 }

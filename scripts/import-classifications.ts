@@ -5,7 +5,7 @@ import * as path from 'path';
 // Load environment variables from .env.local
 config({ path: path.join(__dirname, '..', '.env.local') });
 
-const CLASSIFICATIONS_FILE = '/Users/mostafa/Downloads/Coding_Projects/classification-products/output/classified_2026-02-27.json';
+const CLASSIFICATIONS_FILE = '/Users/mostafa/Downloads/Coding_Projects/classification-products/output/classified_2026-03-01_1.json';
 
 async function getSupabaseAdmin() {
   const { supabaseAdmin } = await import('../src/lib/supabase');
@@ -13,6 +13,7 @@ async function getSupabaseAdmin() {
 }
 
 interface RawClassification {
+  company_id: string;
   product_id: string;
   tech_category: string;
   industry: string;
@@ -27,10 +28,12 @@ async function main() {
   const classifications: RawClassification[] = Array.isArray(raw) ? raw : [];
   console.log(`Found ${classifications.length} classification entries`);
 
-  // Build lookup map: original product_id → { tech_category, industry }
+  // Build lookup map: "company_id--product_id" (namespaced) → { tech_category, industry }
+  // Keying by the full namespace avoids collisions when two companies share the same short product_id
   const classificationMap = new Map<string, { tech_category: string; industry: string }>();
   for (const entry of classifications) {
-    classificationMap.set(entry.product_id, {
+    const key = `${entry.company_id}--${entry.product_id}`;
+    classificationMap.set(key, {
       tech_category: entry.tech_category,
       industry: entry.industry,
     });
@@ -48,16 +51,13 @@ async function main() {
   if (fetchError) throw new Error(`Failed to fetch products: ${fetchError.message}`);
   console.log(`Found ${products?.length ?? 0} products with product_id`);
 
-  // Match products to classifications
+  // Match products to classifications using the full namespaced product_id
   const matched: Array<{ uuid: string; company_uuid: string; tech_category: string; industry: string }> = [];
   const unmatched: string[] = [];
 
   for (const product of products ?? []) {
-    // Strip namespace prefix: "synapse-analytics--konan" → "konan"
-    const parts = (product.product_id as string).split('--');
-    const originalId = parts[parts.length - 1];
-
-    const classification = classificationMap.get(originalId);
+    // DB stores "company_id--product_id" — use it directly as the map key
+    const classification = classificationMap.get(product.product_id as string);
     if (classification) {
       matched.push({
         uuid: product.id,
@@ -66,7 +66,7 @@ async function main() {
         industry: classification.industry,
       });
     } else {
-      unmatched.push(`${product.product_id} (original: ${originalId})`);
+      unmatched.push(product.product_id as string);
     }
   }
 

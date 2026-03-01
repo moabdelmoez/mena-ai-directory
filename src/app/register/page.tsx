@@ -4,7 +4,7 @@ import { useState, FormEvent } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Input, Select, Textarea, Button, Card } from '@/components/ui';
-import { TAGS, INDUSTRIES, MENA_COUNTRIES } from '@/constants';
+import { MENA_COUNTRIES } from '@/constants';
 import { ProductInputList } from '@/components/ProductInputList';
 import { ProductInput } from '@/types';
 
@@ -14,14 +14,10 @@ export default function RegisterPage() {
 
   const [formData, setFormData] = useState({
     name: '',
-    website: '',
+    company_url: '',
+    linkedin_profile: '',
     description: '',
-    derived_capabilities: [] as string[],
-    domain_verticals: [] as string[],
     hq_country: '',
-    hq_region: '',
-    ai_infrastructure: false,
-    ai_platform: false,
   });
   const [products, setProducts] = useState<ProductInput[]>([]);
   const [logo, setLogo] = useState<File | null>(null);
@@ -56,7 +52,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    if (!formData.name || !formData.website || !formData.description || !formData.hq_country) {
+    if (!formData.name || !formData.description || !formData.hq_country) {
       setError('Please fill in all required fields');
       return;
     }
@@ -66,16 +62,14 @@ export default function RegisterPage() {
     try {
       const data = new FormData();
       data.append('name', formData.name);
-      data.append('website', formData.website);
+      if (formData.company_url) {
+        data.append('company_url', formData.company_url);
+      }
+      if (formData.linkedin_profile) {
+        data.append('linkedin_profile', formData.linkedin_profile);
+      }
       data.append('description', formData.description);
       data.append('hq_country', formData.hq_country);
-      if (formData.hq_region) {
-        data.append('hq_region', formData.hq_region);
-      }
-      data.append('ai_infrastructure', formData.ai_infrastructure.toString());
-      data.append('ai_platform', formData.ai_platform.toString());
-      formData.derived_capabilities.forEach((cap) => data.append('derived_capabilities', cap));
-      formData.domain_verticals.forEach((vert) => data.append('domain_verticals', vert));
       if (logo) {
         data.append('logo', logo);
       }
@@ -244,13 +238,21 @@ export default function RegisterPage() {
           />
 
           <Input
-            label="Website"
-            id="website"
+            label="Website (optional)"
+            id="company_url"
             type="url"
-            required
-            value={formData.website}
-            onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+            value={formData.company_url}
+            onChange={(e) => setFormData({ ...formData, company_url: e.target.value })}
             placeholder="https://example.com"
+          />
+
+          <Input
+            label="LinkedIn Profile (optional)"
+            id="linkedin_profile"
+            type="url"
+            value={formData.linkedin_profile}
+            onChange={(e) => setFormData({ ...formData, linkedin_profile: e.target.value })}
+            placeholder="https://linkedin.com/company/example"
           />
 
           <Textarea
@@ -263,33 +265,6 @@ export default function RegisterPage() {
             rows={4}
           />
 
-          {/* Company Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Company Type
-            </label>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.ai_infrastructure}
-                  onChange={(e) => setFormData({ ...formData, ai_infrastructure: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">AI Infrastructure Provider</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.ai_platform}
-                  onChange={(e) => setFormData({ ...formData, ai_platform: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">AI Platform Provider</span>
-              </label>
-            </div>
-          </div>
-
           {/* Country */}
           <Select
             label="Headquarters Country"
@@ -300,65 +275,6 @@ export default function RegisterPage() {
             placeholder="Select a country"
             options={MENA_COUNTRIES.map((c) => ({ value: c, label: c }))}
           />
-
-          {/* Region */}
-          <Input
-            label="Headquarters Region (optional)"
-            id="hq_region"
-            value={formData.hq_region}
-            onChange={(e) => setFormData({ ...formData, hq_region: e.target.value })}
-            placeholder="e.g., Dubai, Riyadh"
-          />
-
-          {/* Capabilities */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              AI Capabilities (select all that apply)
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {TAGS.map((tag) => (
-                <label key={tag} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.derived_capabilities.includes(tag)}
-                    onChange={(e) => {
-                      const newCaps = e.target.checked
-                        ? [...formData.derived_capabilities, tag]
-                        : formData.derived_capabilities.filter((t) => t !== tag);
-                      setFormData({ ...formData, derived_capabilities: newCaps });
-                    }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">{tag}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Industries */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Target Industries (select all that apply)
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {INDUSTRIES.map((industry) => (
-                <label key={industry} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.domain_verticals.includes(industry)}
-                    onChange={(e) => {
-                      const newVerticals = e.target.checked
-                        ? [...formData.domain_verticals, industry]
-                        : formData.domain_verticals.filter((i) => i !== industry);
-                      setFormData({ ...formData, domain_verticals: newVerticals });
-                    }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">{industry}</span>
-                </label>
-              ))}
-            </div>
-          </div>
 
           {/* Products */}
           <ProductInputList

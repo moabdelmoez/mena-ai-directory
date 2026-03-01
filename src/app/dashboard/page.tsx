@@ -98,11 +98,6 @@ export default function DashboardPage() {
                       {company.description}
                     </p>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        {company.ai_infrastructure && 'AI Infra'}
-                        {company.ai_infrastructure && company.ai_platform && ' / '}
-                        {company.ai_platform && 'AI Platform'}
-                      </span>
                       <span>{company.hq_country}</span>
                       <span>Submitted {formatDate(company.created_at)}</span>
                     </div>

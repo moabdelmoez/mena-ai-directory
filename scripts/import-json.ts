@@ -6,8 +6,8 @@ import * as path from 'path';
 config({ path: path.join(__dirname, '..', '.env.local') });
 
 // Configuration - update these paths as needed
-const COMPANIES_FILE = '/Users/mostafa/Downloads/Coding_Projects/scraping_tool/output/results/companies_20260202_190051.json';
-const PRODUCTS_FILE = '/Users/mostafa/Downloads/Coding_Projects/scraping_tool/output/results/products_20260202_190051.json';
+const COMPANIES_FILE = '/Users/mostafa/Downloads/Coding_Projects/extracting-company-description/output/companies_2026-02-26.json';
+const PRODUCTS_FILE: string | null = null;
 const AUTO_APPROVE = true;
 
 // API endpoint
@@ -28,23 +28,11 @@ interface RawCompany {
   company_id: string;
   name: string;
   logo: string | null;
-  website: string;
+  company_url?: string;
+  website?: string;
+  linkedin_profile?: string;
   description: string | null;
-  hq_region: string | null;
   hq_country: string | null;
-  domain_verticals: string[];
-  solution_layers: {
-    ai_infrastructure: boolean;
-    ai_platform: boolean;
-  };
-  derived_capabilities: string[];
-  metadata: {
-    scrape_confidence: number;
-    last_updated: string;
-    pages_scraped: string[];
-    scrape_status: string;
-    error_message: string | null;
-  };
 }
 
 interface RawProduct {
@@ -52,30 +40,17 @@ interface RawProduct {
   company_id: string;
   name: string;
   description: string;
-  category: string;
-  capabilities: string[];
-  confidence: number;
-  sources: string[];
-  use_cases: string[];
-  target_customers: string[];
-  deployment: string[];
-  maturity: string;
-  pricing_model: string;
+  product_url?: string;
 }
 
 interface TransformedCompany {
   company_id: string;
   name: string;
-  website: string;
+  company_url?: string | null;
+  linkedin_profile?: string;
   description: string;
   logo?: string;
-  derived_capabilities: string[];
-  domain_verticals: string[];
   hq_country?: string | null;
-  hq_region?: string;
-  ai_infrastructure: boolean;
-  ai_platform: boolean;
-  scrape_confidence?: number;
   products: TransformedProduct[];
 }
 
@@ -83,15 +58,7 @@ interface TransformedProduct {
   product_id: string;
   name: string;
   description: string;
-  category?: string;
-  capabilities: string[];
-  use_cases: string[];
-  target_customers: string[];
-  deployment: string[];
-  maturity?: string;
-  pricing_model?: string;
-  confidence?: number;
-  sources: string[];
+  product_url?: string;
 }
 
 function normalizeCountry(country: string | null): string | null {
@@ -125,16 +92,11 @@ function transformCompany(raw: RawCompany): TransformedCompany {
   return {
     company_id: raw.company_id,
     name: raw.name,
-    website: raw.website,
+    company_url: raw.company_url || raw.website || null,
+    linkedin_profile: raw.linkedin_profile || undefined,
     description: raw.description || '',
     logo: raw.logo || undefined,
-    derived_capabilities: raw.derived_capabilities || [],
-    domain_verticals: raw.domain_verticals || [],
     hq_country,
-    hq_region: raw.hq_region || undefined,
-    ai_infrastructure: raw.solution_layers?.ai_infrastructure || false,
-    ai_platform: raw.solution_layers?.ai_platform || false,
-    scrape_confidence: raw.metadata?.scrape_confidence,
     products: [],
   };
 }
@@ -144,15 +106,7 @@ function transformProduct(raw: RawProduct): TransformedProduct {
     product_id: raw.product_id,
     name: raw.name,
     description: raw.description || '',
-    category: raw.category,
-    capabilities: raw.capabilities || [],
-    use_cases: raw.use_cases || [],
-    target_customers: raw.target_customers || [],
-    deployment: raw.deployment || [],
-    maturity: raw.maturity,
-    pricing_model: raw.pricing_model,
-    confidence: raw.confidence,
-    sources: raw.sources || [],
+    product_url: raw.product_url,
   };
 }
 
@@ -216,13 +170,18 @@ async function main() {
   // Read JSON files
   console.log('Reading companies file...');
   const companiesRaw = JSON.parse(fs.readFileSync(COMPANIES_FILE, 'utf-8'));
-  const rawCompanies: RawCompany[] = companiesRaw.companies;
+  const rawCompanies: RawCompany[] = Array.isArray(companiesRaw) ? companiesRaw : companiesRaw.companies;
   console.log(`Found ${rawCompanies.length} companies`);
 
-  console.log('Reading products file...');
-  const productsRaw = JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf-8'));
-  const rawProducts: RawProduct[] = productsRaw.products;
-  console.log(`Found ${rawProducts.length} products`);
+  let rawProducts: RawProduct[] = [];
+  if (PRODUCTS_FILE) {
+    console.log('Reading products file...');
+    const productsRaw = JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf-8'));
+    rawProducts = Array.isArray(productsRaw) ? productsRaw : (productsRaw.products ?? []);
+    console.log(`Found ${rawProducts.length} products`);
+  } else {
+    console.log('No products file specified, skipping products.');
+  }
 
   // Transform companies (all companies are now imported, non-MENA countries set to null)
   console.log('\nTransforming data...');

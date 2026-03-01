@@ -5,10 +5,12 @@ import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
 import { generateCompanyEmbedding, generateProductEmbedding } from '@/lib/openai';
 import { MENA_COUNTRIES } from '@/constants';
 import { ProductInput } from '@/types';
-import { validateLogo, uploadLogo, deleteLogoByUrl, parseAndValidateProducts, getFormString, getFormStringOrNull, getFormFile, getFormStringArray } from '@/lib/company-service';
+import { validateLogo, uploadLogo, deleteLogoByUrl, parseAndValidateProducts, getFormString, getFormStringOrNull, getFormFile } from '@/lib/company-service';
 
 interface ProductWithId extends ProductInput {
   id?: string;
+  tech_category?: string | null;
+  industry?: string | null;
 }
 
 export async function GET(
@@ -24,7 +26,7 @@ export async function GET(
   const { id } = await params;
 
   // Select specific columns to exclude embedding vectors
-  const companyColumns = 'id, company_id, name, slug, website, description, logo, derived_capabilities, domain_verticals, hq_country, hq_region, ai_infrastructure, ai_platform, scrape_confidence, status, submitted_by, created_at, updated_at';
+  const companyColumns = 'id, company_id, name, slug, company_url, linkedin_profile, description, logo, logo_bg, hq_country, status, submitted_by, created_at, updated_at';
 
   const { data: company, error } = await supabaseAdmin
     .from('companies')
@@ -36,13 +38,27 @@ export async function GET(
     return NextResponse.json({ error: 'Company not found' }, { status: 404 });
   }
 
-  // Fetch products for this company
+  // Fetch products with classifications
   const { data: products } = await supabaseAdmin
     .from('products')
-    .select('id, name, description, category, capabilities, use_cases, target_customers, deployment, maturity, pricing_model')
+    .select('id, name, description, product_url, product_classification(tech_category, industry)')
     .eq('company_id', id);
 
-  return NextResponse.json({ ...company, products: products || [] });
+  const productsWithClassification = ((products || []) as Array<Record<string, unknown>>).map((p) => {
+    const cls = Array.isArray(p.product_classification)
+      ? (p.product_classification as Array<{ tech_category: string | null; industry: string | null }>)[0]
+      : null;
+    return {
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      product_url: p.product_url,
+      tech_category: cls?.tech_category ?? null,
+      industry: cls?.industry ?? null,
+    };
+  });
+
+  return NextResponse.json({ ...company, products: productsWithClassification });
 }
 
 export async function PUT(
@@ -69,7 +85,7 @@ export async function PUT(
     // Fetch existing company to compare fields
     const { data: existingCompany, error: fetchError } = await supabaseAdmin
       .from('companies')
-      .select('name, description, derived_capabilities, domain_verticals, ai_infrastructure, ai_platform, logo')
+      .select('name, description, logo')
       .eq('id', id)
       .single();
 
@@ -80,16 +96,14 @@ export async function PUT(
     const formData = await request.formData();
 
     const name = getFormString(formData, 'name');
-    const website = getFormStringOrNull(formData, 'website');
+    const company_url = getFormStringOrNull(formData, 'company_url');
+    const linkedin_profile = getFormStringOrNull(formData, 'linkedin_profile');
     const description = getFormString(formData, 'description');
-    const derived_capabilities = getFormStringArray(formData, 'derived_capabilities');
-    const domain_verticals = getFormStringArray(formData, 'domain_verticals');
     const hq_country = getFormString(formData, 'hq_country');
-    const hq_region = getFormStringOrNull(formData, 'hq_region');
-    const ai_infrastructure = getFormString(formData, 'ai_infrastructure') === 'true';
-    const ai_platform = getFormString(formData, 'ai_platform') === 'true';
     const logo = getFormFile(formData, 'logo');
     const removeLogo = getFormString(formData, 'remove_logo') === 'true';
+    const logoBgRaw = getFormStringOrNull(formData, 'logo_bg');
+    const logoBg = (logoBgRaw === 'white' || logoBgRaw === 'black') ? logoBgRaw : null;
     const productsJson = getFormStringOrNull(formData, 'products');
 
     // Parse products if provided
@@ -114,11 +128,7 @@ export async function PUT(
     // Detect text changes to trigger embedding regeneration
     const textFieldsChanged =
       existingCompany.name !== name ||
-      existingCompany.description !== description ||
-      JSON.stringify(existingCompany.derived_capabilities) !== JSON.stringify(derived_capabilities) ||
-      JSON.stringify(existingCompany.domain_verticals) !== JSON.stringify(domain_verticals) ||
-      existingCompany.ai_infrastructure !== ai_infrastructure ||
-      existingCompany.ai_platform !== ai_platform;
+      existingCompany.description !== description;
 
     // Handle logo
     let logoUrl: string | null | undefined = undefined; // undefined means no change
@@ -147,14 +157,11 @@ export async function PUT(
     // Build update object
     const updateData: Record<string, unknown> = {
       name,
-      website: website || null,
+      company_url: company_url || null,
+      linkedin_profile: linkedin_profile || null,
       description,
-      derived_capabilities,
-      domain_verticals,
       hq_country,
-      hq_region: hq_region || null,
-      ai_infrastructure,
-      ai_platform,
+      logo_bg: logoBg,
       status: 'approved', // Auto-approve admin changes
       updated_at: new Date().toISOString(),
     };
@@ -165,14 +172,7 @@ export async function PUT(
 
     // Regenerate embedding if text fields changed
     if (textFieldsChanged) {
-      const embedding = await generateCompanyEmbedding(
-        name,
-        description,
-        derived_capabilities,
-        domain_verticals,
-        ai_infrastructure,
-        ai_platform
-      );
+      const embedding = await generateCompanyEmbedding(name, description);
       updateData.embedding = JSON.stringify(embedding);
     }
 
@@ -212,6 +212,8 @@ export async function PUT(
 
       // Update existing and create new products
       for (const product of products) {
+        let productDbId: string | undefined = product.id;
+
         if (product.id && existingProductIds.has(product.id)) {
           // Check if product text changed
           const existingProduct = (existingProducts || []).find((p: ExistingProduct) => p.id === product.id);
@@ -221,13 +223,6 @@ export async function PUT(
           const productUpdate: Record<string, unknown> = {
             name: product.name,
             description: product.description,
-            category: product.category || null,
-            capabilities: product.capabilities || [],
-            use_cases: product.use_cases || [],
-            target_customers: product.target_customers || [],
-            deployment: product.deployment || [],
-            maturity: product.maturity || null,
-            pricing_model: product.pricing_model || null,
             updated_at: new Date().toISOString(),
           };
 
@@ -243,21 +238,32 @@ export async function PUT(
         } else {
           // Create new product
           const productEmbedding = await generateProductEmbedding(product.name, product.description, name);
-          await supabaseAdmin
+          const { data: newProduct } = await supabaseAdmin
             .from('products')
             .insert({
               company_id: id,
               name: product.name,
               description: product.description,
-              category: product.category || null,
-              capabilities: product.capabilities || [],
-              use_cases: product.use_cases || [],
-              target_customers: product.target_customers || [],
-              deployment: product.deployment || [],
-              maturity: product.maturity || null,
-              pricing_model: product.pricing_model || null,
               embedding: JSON.stringify(productEmbedding),
-            });
+            })
+            .select('id')
+            .single();
+          productDbId = newProduct?.id;
+        }
+
+        // Upsert classification only when at least one field is set
+        if (productDbId && (product.tech_category || product.industry)) {
+          await supabaseAdmin
+            .from('product_classification')
+            .upsert(
+              {
+                product_id: productDbId,
+                company_id: id,
+                tech_category: product.tech_category ?? null,
+                industry: product.industry ?? null,
+              },
+              { onConflict: 'product_id' }
+            );
         }
       }
     }

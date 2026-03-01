@@ -102,13 +102,6 @@ export async function insertProducts(
         company_id: companyId,
         name: product.name,
         description: product.description,
-        category: product.category || null,
-        capabilities: product.capabilities || [],
-        use_cases: product.use_cases || [],
-        target_customers: product.target_customers || [],
-        deployment: product.deployment || [],
-        maturity: product.maturity || null,
-        pricing_model: product.pricing_model || null,
         embedding: JSON.stringify(productEmbedding),
       };
     })

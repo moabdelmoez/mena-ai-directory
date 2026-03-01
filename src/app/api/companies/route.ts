@@ -7,7 +7,7 @@ import { generateUniqueSlug } from '@/lib/utils';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
 import { MENA_COUNTRIES } from '@/constants';
 import { ProductInput } from '@/types';
-import { validateLogo, uploadLogo, parseAndValidateProducts, insertProducts, getFormString, getFormStringOrNull, getFormFile, getFormStringArray } from '@/lib/company-service';
+import { validateLogo, uploadLogo, parseAndValidateProducts, insertProducts, getFormString, getFormStringOrNull, getFormFile } from '@/lib/company-service';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   const offset = (page - 1) * limit;
 
   // Select specific columns to exclude embedding vectors (1536-dim)
-  const companyColumns = 'id, company_id, name, slug, website, description, logo, derived_capabilities, domain_verticals, hq_country, hq_region, ai_infrastructure, ai_platform, scrape_confidence, status, submitted_by, created_at, updated_at';
+  const companyColumns = 'id, company_id, name, slug, company_url, linkedin_profile, description, logo, logo_bg, hq_country, status, submitted_by, created_at, updated_at';
 
   const { data, error, count } = await supabaseAdmin
     .from('companies')
@@ -63,14 +63,10 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
 
     const name = getFormString(formData, 'name');
-    const website = getFormString(formData, 'website');
+    const company_url = getFormStringOrNull(formData, 'company_url');
+    const linkedin_profile = getFormStringOrNull(formData, 'linkedin_profile');
     const description = getFormString(formData, 'description');
-    const derived_capabilities = getFormStringArray(formData, 'derived_capabilities');
-    const domain_verticals = getFormStringArray(formData, 'domain_verticals');
     const hq_country = getFormString(formData, 'hq_country');
-    const hq_region = getFormStringOrNull(formData, 'hq_region');
-    const ai_infrastructure = getFormString(formData, 'ai_infrastructure') === 'true';
-    const ai_platform = getFormString(formData, 'ai_platform') === 'true';
     const logo = getFormFile(formData, 'logo');
     const productsJson = getFormStringOrNull(formData, 'products');
 
@@ -85,7 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validation
-    if (!name || !website || !description || !hq_country) {
+    if (!name || !description || !hq_country) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -115,14 +111,7 @@ export async function POST(request: NextRequest) {
     const slug = generateUniqueSlug(name, (existingSlugs || []).map(s => s.slug));
 
     // Generate embedding
-    const embedding = await generateCompanyEmbedding(
-      name,
-      description,
-      derived_capabilities,
-      domain_verticals,
-      ai_infrastructure,
-      ai_platform
-    );
+    const embedding = await generateCompanyEmbedding(name, description);
 
     // Insert company
     const { data: company, error: insertError } = await supabaseAdmin
@@ -130,15 +119,11 @@ export async function POST(request: NextRequest) {
       .insert({
         name,
         slug,
-        website,
+        company_url: company_url || null,
+        linkedin_profile: linkedin_profile || null,
         description,
         logo: logoUrl,
-        derived_capabilities,
-        domain_verticals,
         hq_country,
-        hq_region: hq_region || null,
-        ai_infrastructure,
-        ai_platform,
         status: 'pending',
         embedding: JSON.stringify(embedding),
         submitted_by: session.user.id,

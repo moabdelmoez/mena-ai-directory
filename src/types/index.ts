@@ -10,11 +10,15 @@ export interface Product {
   embedding: number[] | null;
   created_at: string;
   updated_at: string;
+  tech_category?: string | null;
+  industry?: string | null;
 }
 
 export interface ProductInput {
   name: string;
   description: string;
+  tech_category?: string | null;
+  industry?: string | null;
 }
 
 export interface ProductClassification {
@@ -35,6 +39,7 @@ export interface Company {
   linkedin_profile: string | null;
   description: string;
   logo: string | null;
+  logo_bg: 'white' | 'black' | null;
   hq_country: Country;
   status: 'pending' | 'approved' | 'rejected';
   embedding: number[] | null;
@@ -99,6 +104,8 @@ export interface SearchResult {
 export interface SearchFilters {
   query?: string;
   hq_country?: Country;
+  tech_categories?: string[];
+  industries?: string[];
   page?: number;
   limit?: number;
 }

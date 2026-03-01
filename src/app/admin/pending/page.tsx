@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, Badge, Button } from '@/components/ui';
+import { Card, Button } from '@/components/ui';
 import { Pagination } from '@/components/Pagination';
 import { Company, PaginatedResponse } from '@/types';
 import { formatDate } from '@/lib/utils';
@@ -83,44 +83,22 @@ export default function PendingPage() {
                       <h3 className="text-lg font-semibold text-gray-900">
                         {company.name}
                       </h3>
-                      {company.ai_infrastructure && (
-                        <Badge variant="default">AI Infra</Badge>
-                      )}
-                      {company.ai_platform && (
-                        <Badge variant="primary">AI Platform</Badge>
-                      )}
                     </div>
                     <p className="text-gray-600 text-sm mb-3">{company.description}</p>
                     <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                       <span>{company.hq_country}</span>
-                      <a
-                        href={company.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        {company.website}
-                      </a>
+                      {company.company_url && (
+                        <a
+                          href={company.company_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          {company.company_url}
+                        </a>
+                      )}
                       <span>Submitted {formatDate(company.created_at)}</span>
                     </div>
-                    {company.derived_capabilities.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {company.derived_capabilities.map((cap) => (
-                          <Badge key={cap} variant="primary" size="sm">
-                            {cap}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                    {company.domain_verticals.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {company.domain_verticals.map((vertical) => (
-                          <Badge key={vertical} variant="default" size="sm">
-                            {vertical}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
                     <Button

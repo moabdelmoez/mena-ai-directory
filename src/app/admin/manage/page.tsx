@@ -3,27 +3,31 @@
 import { useState, useEffect, FormEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Input, Select, Textarea, Button, Card } from '@/components/ui';
-import { TAGS, INDUSTRIES, MENA_COUNTRIES } from '@/constants';
+import { MENA_COUNTRIES } from '@/constants';
 import { ProductInputList } from '@/components/ProductInputList';
 import { ProductInput, Product } from '@/types';
 
 interface ProductWithId extends ProductInput {
   id?: string;
+  tech_category?: string | null;
+  industry?: string | null;
+}
+
+interface ClassificationOptions {
+  tech_categories: string[];
+  industries: string[];
 }
 
 interface CompanyData {
   id: string;
   name: string;
-  website: string | null;
+  company_url: string | null;
+  linkedin_profile: string | null;
   description: string;
   logo: string | null;
-  derived_capabilities: string[];
-  domain_verticals: string[];
+  logo_bg: 'white' | 'black' | null;
   hq_country: string;
-  hq_region: string | null;
-  ai_infrastructure: boolean;
-  ai_platform: boolean;
-  products: Product[];
+  products: Array<Pick<Product, 'id' | 'name' | 'description'> & { tech_category?: string | null; industry?: string | null }>;
 }
 
 function ManageCompanyForm() {
@@ -33,25 +37,39 @@ function ManageCompanyForm() {
   const isEditMode = !!companyId;
 
   const [isLoading, setIsLoading] = useState(isEditMode);
+  const [classificationOptions, setClassificationOptions] = useState<ClassificationOptions>({
+    tech_categories: [],
+    industries: [],
+  });
   const [formData, setFormData] = useState({
     name: '',
-    website: '',
+    company_url: '',
+    linkedin_profile: '',
     description: '',
-    derived_capabilities: [] as string[],
-    domain_verticals: [] as string[],
     hq_country: '',
-    hq_region: '',
-    ai_infrastructure: false,
-    ai_platform: false,
   });
   const [products, setProducts] = useState<ProductWithId[]>([]);
   const [logo, setLogo] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [, setExistingLogo] = useState<string | null>(null);
   const [removeLogo, setRemoveLogo] = useState(false);
+  const [logoBg, setLogoBg] = useState<'white' | 'black' | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState('');
+
+  // Fetch classification options on mount
+  useEffect(() => {
+    fetch('/api/filter-options')
+      .then((r) => r.json())
+      .then((data) => {
+        setClassificationOptions({
+          tech_categories: data.tech_categories || [],
+          industries: data.industries || [],
+        });
+      })
+      .catch(() => {/* non-critical, leave empty */});
+  }, []);
 
   // Fetch company data in edit mode
   useEffect(() => {
@@ -71,31 +89,23 @@ function ManageCompanyForm() {
         const data: CompanyData = await response.json();
         setFormData({
           name: data.name,
-          website: data.website || '',
+          company_url: data.company_url || '',
+          linkedin_profile: data.linkedin_profile || '',
           description: data.description,
-          derived_capabilities: data.derived_capabilities || [],
-          domain_verticals: data.domain_verticals || [],
           hq_country: data.hq_country,
-          hq_region: data.hq_region || '',
-          ai_infrastructure: data.ai_infrastructure,
-          ai_platform: data.ai_platform,
         });
         setProducts(data.products.map((p) => ({
           id: p.id,
           name: p.name,
           description: p.description,
-          category: p.category || undefined,
-          capabilities: p.capabilities,
-          use_cases: p.use_cases,
-          target_customers: p.target_customers,
-          deployment: p.deployment,
-          maturity: p.maturity || undefined,
-          pricing_model: p.pricing_model || undefined,
+          tech_category: p.tech_category ?? null,
+          industry: p.industry ?? null,
         })));
         if (data.logo) {
           setExistingLogo(data.logo);
           setLogoPreview(data.logo);
         }
+        setLogoBg(data.logo_bg ?? null);
       } catch (err) {
         console.error('Error fetching company:', err);
         setError('Failed to load company data');
@@ -148,18 +158,14 @@ function ManageCompanyForm() {
     try {
       const data = new FormData();
       data.append('name', formData.name);
-      if (formData.website) {
-        data.append('website', formData.website);
+      if (formData.company_url) {
+        data.append('company_url', formData.company_url);
+      }
+      if (formData.linkedin_profile) {
+        data.append('linkedin_profile', formData.linkedin_profile);
       }
       data.append('description', formData.description);
       data.append('hq_country', formData.hq_country);
-      if (formData.hq_region) {
-        data.append('hq_region', formData.hq_region);
-      }
-      data.append('ai_infrastructure', formData.ai_infrastructure.toString());
-      data.append('ai_platform', formData.ai_platform.toString());
-      formData.derived_capabilities.forEach((cap) => data.append('derived_capabilities', cap));
-      formData.domain_verticals.forEach((vert) => data.append('domain_verticals', vert));
 
       if (logo) {
         data.append('logo', logo);
@@ -167,19 +173,15 @@ function ManageCompanyForm() {
       if (removeLogo) {
         data.append('remove_logo', 'true');
       }
+      data.append('logo_bg', logoBg ?? '');
 
       // Prepare products with IDs for edit mode
       const productsWithIds = products.map((p) => ({
         id: (p as ProductWithId).id,
         name: p.name,
         description: p.description,
-        category: p.category,
-        capabilities: p.capabilities,
-        use_cases: p.use_cases,
-        target_customers: p.target_customers,
-        deployment: p.deployment,
-        maturity: p.maturity,
-        pricing_model: p.pricing_model,
+        tech_category: (p as ProductWithId).tech_category ?? null,
+        industry: (p as ProductWithId).industry ?? null,
       }));
       data.append('products', JSON.stringify(productsWithIds));
 
@@ -278,7 +280,9 @@ function ManageCompanyForm() {
             </label>
             <div className="flex items-center gap-4">
               {logoPreview ? (
-                <div className="w-20 h-20 relative rounded-lg overflow-hidden bg-gray-100">
+                <div
+                  className={`w-20 h-20 relative rounded-lg overflow-hidden ${logoBg === 'black' ? 'bg-black' : logoBg === 'white' ? 'bg-white' : 'bg-gray-100'}`}
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={logoPreview}
@@ -339,6 +343,34 @@ function ManageCompanyForm() {
                 </p>
               </div>
             </div>
+            {logoPreview && (
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-xs text-gray-500 font-medium">Logo Background:</span>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setLogoBg(null)}
+                    className={`px-3 py-1 text-xs rounded border ${logoBg === null ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                  >
+                    Default
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLogoBg('white')}
+                    className={`px-3 py-1 text-xs rounded border ${logoBg === 'white' ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                  >
+                    White
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLogoBg('black')}
+                    className={`px-3 py-1 text-xs rounded border ${logoBg === 'black' ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                  >
+                    Black
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Basic Info Section */}
@@ -356,11 +388,20 @@ function ManageCompanyForm() {
 
               <Input
                 label="Website"
-                id="website"
+                id="company_url"
                 type="url"
-                value={formData.website}
-                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                value={formData.company_url}
+                onChange={(e) => setFormData({ ...formData, company_url: e.target.value })}
                 placeholder="https://example.com"
+              />
+
+              <Input
+                label="LinkedIn Profile"
+                id="linkedin_profile"
+                type="url"
+                value={formData.linkedin_profile}
+                onChange={(e) => setFormData({ ...formData, linkedin_profile: e.target.value })}
+                placeholder="https://linkedin.com/company/example"
               />
 
               <Textarea
@@ -375,101 +416,18 @@ function ManageCompanyForm() {
             </div>
           </div>
 
-          {/* Company Type Section */}
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Company Type</h3>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.ai_infrastructure}
-                  onChange={(e) => setFormData({ ...formData, ai_infrastructure: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">AI Infrastructure Provider</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.ai_platform}
-                  onChange={(e) => setFormData({ ...formData, ai_platform: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">AI Platform Provider</span>
-              </label>
-            </div>
-          </div>
-
           {/* Location Section */}
           <div className="border-t border-gray-200 pt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Location</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Select
-                label="Headquarters Country"
-                id="hq_country"
-                required
-                value={formData.hq_country}
-                onChange={(e) => setFormData({ ...formData, hq_country: e.target.value })}
-                placeholder="Select a country"
-                options={MENA_COUNTRIES.map((c) => ({ value: c, label: c }))}
-              />
-
-              <Input
-                label="Headquarters Region"
-                id="hq_region"
-                value={formData.hq_region}
-                onChange={(e) => setFormData({ ...formData, hq_region: e.target.value })}
-                placeholder="e.g., Dubai, Riyadh"
-              />
-            </div>
-          </div>
-
-          {/* Capabilities Section */}
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">AI Capabilities</h3>
-            <p className="text-sm text-gray-500 mb-3">Select all that apply</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {TAGS.map((tag) => (
-                <label key={tag} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.derived_capabilities.includes(tag)}
-                    onChange={(e) => {
-                      const newCaps = e.target.checked
-                        ? [...formData.derived_capabilities, tag]
-                        : formData.derived_capabilities.filter((t) => t !== tag);
-                      setFormData({ ...formData, derived_capabilities: newCaps });
-                    }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">{tag}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Industries Section */}
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Target Industries</h3>
-            <p className="text-sm text-gray-500 mb-3">Select all that apply</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {INDUSTRIES.map((industry) => (
-                <label key={industry} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.domain_verticals.includes(industry)}
-                    onChange={(e) => {
-                      const newVerticals = e.target.checked
-                        ? [...formData.domain_verticals, industry]
-                        : formData.domain_verticals.filter((i) => i !== industry);
-                      setFormData({ ...formData, domain_verticals: newVerticals });
-                    }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">{industry}</span>
-                </label>
-              ))}
-            </div>
+            <Select
+              label="Headquarters Country"
+              id="hq_country"
+              required
+              value={formData.hq_country}
+              onChange={(e) => setFormData({ ...formData, hq_country: e.target.value })}
+              placeholder="Select a country"
+              options={MENA_COUNTRIES.map((c) => ({ value: c, label: c }))}
+            />
           </div>
 
           {/* Products Section */}
@@ -479,6 +437,7 @@ function ManageCompanyForm() {
               products={products}
               onChange={setProducts}
               maxProducts={10}
+              classificationOptions={classificationOptions}
             />
           </div>
 

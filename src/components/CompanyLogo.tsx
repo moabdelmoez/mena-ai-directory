@@ -8,9 +8,10 @@ interface CompanyLogoProps {
   name: string;
   size?: 'sm' | 'lg';
   interactive?: boolean;
+  logo_bg?: 'white' | 'black' | null;
 }
 
-export function CompanyLogo({ logo, name, size = 'sm', interactive = false }: CompanyLogoProps) {
+export function CompanyLogo({ logo, name, size = 'sm', interactive = false, logo_bg }: CompanyLogoProps) {
   const [imageError, setImageError] = useState(false);
 
   const sizeClasses = size === 'lg'
@@ -24,9 +25,11 @@ export function CompanyLogo({ logo, name, size = 'sm', interactive = false }: Co
     ? 'hover:shadow-md hover:scale-[1.02] transition-all duration-200'
     : '';
 
+  const logoBgClass = logo_bg === 'black' ? 'bg-black' : logo_bg === 'white' ? 'bg-white' : 'bg-gray-100';
+
   if (logo && !imageError) {
     return (
-      <div className={`${baseContainerClasses} ${interactiveClasses} relative overflow-hidden bg-gray-100`}>
+      <div className={`${baseContainerClasses} ${interactiveClasses} relative overflow-hidden ${logoBgClass}`}>
         <Image
           src={logo}
           alt={`${name} logo`}

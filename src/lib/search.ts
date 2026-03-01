@@ -3,25 +3,21 @@ import { generateEmbedding } from './openai';
 import { Company, Product, SearchFilters, PaginatedResponse, MatchingProduct } from '@/types';
 
 // Explicit column lists to exclude embedding vectors (1536-dim, ~6KB per row)
-const COMPANY_COLUMNS = 'id, company_id, name, slug, website, description, logo, derived_capabilities, domain_verticals, hq_country, hq_region, ai_infrastructure, ai_platform, scrape_confidence, status, submitted_by, created_at, updated_at';
+const COMPANY_COLUMNS = 'id, company_id, name, slug, company_url, linkedin_profile, description, logo, logo_bg, hq_country, status, submitted_by, created_at, updated_at';
 const COMPANY_WITH_RATINGS_COLUMNS = `${COMPANY_COLUMNS}, average_rating, review_count`;
-const PRODUCT_COLUMNS = 'id, product_id, company_id, name, description, category, capabilities, use_cases, target_customers, deployment, maturity, pricing_model, confidence, sources, created_at, updated_at';
+const PRODUCT_COLUMNS = 'id, product_id, company_id, name, description, product_url, created_at, updated_at';
 
 interface SearchResultRow {
   id: string;
   company_id: string | null;
   name: string;
   slug: string;
-  website: string;
+  company_url: string | null;
+  linkedin_profile: string | null;
   description: string;
   logo: string | null;
-  derived_capabilities: string[];
-  domain_verticals: string[];
+  logo_bg: string | null;
   hq_country: string;
-  hq_region: string | null;
-  ai_infrastructure: boolean;
-  ai_platform: boolean;
-  scrape_confidence: number | null;
   status: string;
   submitted_by: string | null;
   created_at: string;
@@ -38,10 +34,40 @@ interface CompanyWithMatchingProduct extends Company {
   matchingProduct?: MatchingProduct;
 }
 
+async function getCompanyIdsByClassification(
+  tech_categories?: string[],
+  industries?: string[]
+): Promise<string[] | null> {
+  if ((!tech_categories || tech_categories.length === 0) && (!industries || industries.length === 0)) {
+    return null;
+  }
+
+  let query = supabaseAdmin
+    .from('product_classification')
+    .select('company_id');
+
+  if (tech_categories && tech_categories.length > 0 && industries && industries.length > 0) {
+    query = query.or(`tech_category.in.(${tech_categories.map(c => `"${c}"`).join(',')}),industry.in.(${industries.map(i => `"${i}"`).join(',')})`);
+  } else if (tech_categories && tech_categories.length > 0) {
+    query = query.in('tech_category', tech_categories);
+  } else if (industries && industries.length > 0) {
+    query = query.in('industry', industries);
+  }
+
+  const { data, error } = await query;
+
+  if (error || !data) {
+    console.error('Classification filter error:', error);
+    return null;
+  }
+
+  return [...new Set(data.map((r) => r.company_id).filter(Boolean) as string[])];
+}
+
 export async function hybridSearch(
   filters: SearchFilters
 ): Promise<PaginatedResponse<CompanyWithMatchingProduct>> {
-  const { query, derived_capabilities, domain_verticals, hq_country, page = 1, limit = 10 } = filters;
+  const { query, hq_country, tech_categories, industries, page = 1, limit = 10 } = filters;
   const offset = (page - 1) * limit;
 
   // Generate embedding for the query if provided
@@ -55,36 +81,38 @@ export async function hybridSearch(
     return getFilteredCompanies(filters);
   }
 
-  // Use the hybrid search function that includes products
+  // Get company IDs matching classification filters
+  const companyIds = await getCompanyIdsByClassification(tech_categories, industries);
+
   // Build count query for pagination
   let countQuery = supabaseAdmin
     .from('companies')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'approved');
 
-  if (derived_capabilities && derived_capabilities.length > 0) {
-    countQuery = countQuery.overlaps('derived_capabilities', derived_capabilities);
-  }
-
-  if (domain_verticals && domain_verticals.length > 0) {
-    countQuery = countQuery.overlaps('domain_verticals', domain_verticals);
-  }
-
   if (hq_country) {
     countQuery = countQuery.eq('hq_country', hq_country);
   }
 
+  if (companyIds !== null) {
+    countQuery = countQuery.in('id', companyIds);
+  }
+
   // Run search and count queries in parallel
+  const rpcParams: Record<string, unknown> = {
+    query_embedding: JSON.stringify(queryEmbedding),
+    search_query: query || null,
+    filter_hq_country: hq_country || null,
+    result_limit: limit,
+    result_offset: offset,
+  };
+
+  if (companyIds !== null) {
+    rpcParams.filter_company_ids = companyIds;
+  }
+
   const [searchResult, countResult] = await Promise.all([
-    supabaseAdmin.rpc('search_companies_with_products', {
-      query_embedding: JSON.stringify(queryEmbedding),
-      search_query: query || null,
-      filter_derived_capabilities: derived_capabilities && derived_capabilities.length > 0 ? derived_capabilities : null,
-      filter_domain_verticals: domain_verticals && domain_verticals.length > 0 ? domain_verticals : null,
-      filter_hq_country: hq_country || null,
-      result_limit: limit,
-      result_offset: offset,
-    }),
+    supabaseAdmin.rpc('search_companies_with_products', rpcParams),
     countQuery,
   ]);
 
@@ -112,16 +140,12 @@ export async function hybridSearch(
     company_id: row.company_id,
     name: row.name,
     slug: row.slug,
-    website: row.website,
+    company_url: row.company_url,
+    linkedin_profile: row.linkedin_profile,
     description: row.description,
     logo: row.logo,
-    derived_capabilities: row.derived_capabilities as Company['derived_capabilities'],
-    domain_verticals: row.domain_verticals as Company['domain_verticals'],
+    logo_bg: (row.logo_bg === 'white' || row.logo_bg === 'black') ? row.logo_bg : null,
     hq_country: row.hq_country as Company['hq_country'],
-    hq_region: row.hq_region,
-    ai_infrastructure: row.ai_infrastructure,
-    ai_platform: row.ai_platform,
-    scrape_confidence: row.scrape_confidence,
     status: row.status as Company['status'],
     embedding: null,
     submitted_by: row.submitted_by,
@@ -146,8 +170,11 @@ export async function hybridSearch(
 async function getFilteredCompanies(
   filters: SearchFilters
 ): Promise<PaginatedResponse<Company>> {
-  const { derived_capabilities, domain_verticals, hq_country, ai_infrastructure, ai_platform, page = 1, limit = 10 } = filters;
+  const { hq_country, tech_categories, industries, page = 1, limit = 10 } = filters;
   const offset = (page - 1) * limit;
+
+  // Get company IDs matching classification filters
+  const companyIds = await getCompanyIdsByClassification(tech_categories, industries);
 
   let query = supabaseAdmin
     .from('companies')
@@ -155,24 +182,12 @@ async function getFilteredCompanies(
     .eq('status', 'approved')
     .order('created_at', { ascending: false });
 
-  if (derived_capabilities && derived_capabilities.length > 0) {
-    query = query.overlaps('derived_capabilities', derived_capabilities);
-  }
-
-  if (domain_verticals && domain_verticals.length > 0) {
-    query = query.overlaps('domain_verticals', domain_verticals);
-  }
-
   if (hq_country) {
     query = query.eq('hq_country', hq_country);
   }
 
-  if (ai_infrastructure !== undefined) {
-    query = query.eq('ai_infrastructure', ai_infrastructure);
-  }
-
-  if (ai_platform !== undefined) {
-    query = query.eq('ai_platform', ai_platform);
+  if (companyIds !== null) {
+    query = query.in('id', companyIds);
   }
 
   const { data, error, count } = await query.range(offset, offset + limit - 1);
@@ -230,7 +245,7 @@ export async function getCompanyById(id: string): Promise<Company | null> {
 }
 
 export async function getCompanyProducts(companyId: string): Promise<Product[]> {
-  const { data, error } = await supabaseAdmin
+  const { data: products, error } = await supabaseAdmin
     .from('products')
     .select(PRODUCT_COLUMNS)
     .eq('company_id', companyId)
@@ -241,5 +256,27 @@ export async function getCompanyProducts(companyId: string): Promise<Product[]> 
     return [];
   }
 
-  return (data || []) as Product[];
+  if (!products || products.length === 0) return [];
+
+  const productIds = products.map((p) => p.id);
+
+  const { data: classifications } = await supabaseAdmin
+    .from('product_classification')
+    .select('product_id, tech_category, industry')
+    .in('product_id', productIds);
+
+  const classMap = new Map<string, { tech_category: string | null; industry: string | null }>();
+  for (const c of classifications ?? []) {
+    classMap.set(c.product_id, { tech_category: c.tech_category, industry: c.industry });
+  }
+
+  return products.map((p) => {
+    const cls = classMap.get(p.id) ?? null;
+    return {
+      ...p,
+      embedding: null,
+      tech_category: cls?.tech_category ?? null,
+      industry: cls?.industry ?? null,
+    } as Product;
+  });
 }

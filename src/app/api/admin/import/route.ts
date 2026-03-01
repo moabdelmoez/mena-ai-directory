@@ -8,16 +8,11 @@ import { MENA_COUNTRIES } from '@/constants';
 interface CompanyJsonRow {
   company_id?: string;
   name: string;
-  website: string;
+  company_url?: string;
+  linkedin_profile?: string;
   description?: string | null;
-  derived_capabilities?: string[];
-  domain_verticals?: string[];
   hq_country?: string | null;
-  hq_region?: string;
-  ai_infrastructure?: boolean;
-  ai_platform?: boolean;
   logo?: string;
-  scrape_confidence?: number;
   products?: ProductJsonRow[];
 }
 
@@ -25,27 +20,14 @@ interface ProductJsonRow {
   product_id?: string;
   name: string;
   description: string;
-  category?: string;
-  capabilities?: string[];
-  use_cases?: string[];
-  target_customers?: string[];
-  deployment?: string[];
-  maturity?: string;
-  pricing_model?: string;
-  confidence?: number;
-  sources?: string[];
+  product_url?: string;
 }
 
 interface CsvRow {
   name: string;
-  website: string;
+  company_url: string;
   description: string;
-  derived_capabilities: string;
-  domain_verticals: string;
   hq_country: string;
-  hq_region?: string;
-  ai_infrastructure?: string;
-  ai_platform?: string;
   logo?: string;
 }
 
@@ -88,14 +70,9 @@ function parseCsv(csvContent: string): CsvRow[] {
 
     rows.push({
       name: row.name || '',
-      website: row.website || '',
+      company_url: row.company_url || row.website || '',
       description: row.description || '',
-      derived_capabilities: row.derived_capabilities || row.tags || '',
-      domain_verticals: row.domain_verticals || row.industries || '',
       hq_country: row.hq_country || row.country || '',
-      hq_region: row.hq_region || '',
-      ai_infrastructure: row.ai_infrastructure || '',
-      ai_platform: row.ai_platform || '',
       logo: row.logo || row.logo_url || row.logourl || row['logo url'] || '',
     });
   }
@@ -166,9 +143,9 @@ async function handleJsonImport(companies: CompanyJsonRow[], autoApprove: boolea
   // Pre-validate and assign slugs (must be sequential for uniqueness)
   const validatedRows: { row: CompanyJsonRow; slug: string }[] = [];
   for (const row of companies) {
-    if (!row.name || !row.website) {
+    if (!row.name) {
       results.failed++;
-      results.errors.push(`Company "${row.name || 'unknown'}": Missing required fields (name, website)`);
+      results.errors.push(`Company "${row.name || 'unknown'}": Missing required field (name)`);
       continue;
     }
     if (row.hq_country && !MENA_COUNTRIES.includes(row.hq_country as typeof MENA_COUNTRIES[number])) {
@@ -187,25 +164,18 @@ async function handleJsonImport(companies: CompanyJsonRow[], autoApprove: boolea
     const batchResults = await Promise.allSettled(
       batch.map(async ({ row, slug }) => {
         const description = row.description || '';
-        const derived_capabilities = row.derived_capabilities || [];
-        const domain_verticals = row.domain_verticals || [];
-        const ai_infrastructure = row.ai_infrastructure || false;
-        const ai_platform = row.ai_platform || false;
 
-        const embedding = await generateCompanyEmbedding(
-          row.name, description, derived_capabilities, domain_verticals,
-          ai_infrastructure, ai_platform
-        );
+        const embedding = await generateCompanyEmbedding(row.name, description);
 
         const { data: company, error } = await supabaseAdmin
           .from('companies')
           .insert({
             company_id: row.company_id || null,
-            name: row.name, slug, website: row.website, description,
-            logo: row.logo || null, derived_capabilities, domain_verticals,
-            hq_country: row.hq_country, hq_region: row.hq_region || null,
-            ai_infrastructure, ai_platform,
-            scrape_confidence: row.scrape_confidence || null,
+            name: row.name, slug, company_url: row.company_url || null,
+            linkedin_profile: row.linkedin_profile || null,
+            description,
+            logo: row.logo || null,
+            hq_country: row.hq_country,
             status: autoApprove ? 'approved' : 'pending',
             embedding: JSON.stringify(embedding),
           })
@@ -225,15 +195,7 @@ async function handleJsonImport(companies: CompanyJsonRow[], autoApprove: boolea
                 product_id: product.product_id || null,
                 company_id: company.id,
                 name: product.name, description: product.description,
-                category: product.category || null,
-                capabilities: product.capabilities || [],
-                use_cases: product.use_cases || [],
-                target_customers: product.target_customers || [],
-                deployment: product.deployment || [],
-                maturity: product.maturity || null,
-                pricing_model: product.pricing_model || null,
-                confidence: product.confidence || null,
-                sources: product.sources || [],
+                product_url: product.product_url || null,
                 embedding: JSON.stringify(productEmbedding),
               };
             })
@@ -277,9 +239,9 @@ async function handleCsvImport(rows: CsvRow[], autoApprove: boolean) {
   // Pre-validate and assign slugs (must be sequential for uniqueness)
   const validatedRows: { row: CsvRow; slug: string }[] = [];
   for (const row of rows) {
-    if (!row.name || !row.website || !row.hq_country) {
+    if (!row.name || !row.hq_country) {
       results.failed++;
-      results.errors.push(`Row "${row.name || 'unknown'}": Missing required fields (name, website, hq_country)`);
+      results.errors.push(`Row "${row.name || 'unknown'}": Missing required fields (name, hq_country)`);
       continue;
     }
     if (!MENA_COUNTRIES.includes(row.hq_country as typeof MENA_COUNTRIES[number])) {
@@ -298,22 +260,12 @@ async function handleCsvImport(rows: CsvRow[], autoApprove: boolean) {
 
     const batchResults = await Promise.allSettled(
       batch.map(async ({ row, slug }) => {
-        const derived_capabilities = row.derived_capabilities.split(',').map(t => t.trim()).filter(t => t);
-        const domain_verticals = row.domain_verticals.split(',').map(t => t.trim()).filter(t => t);
-        const ai_infrastructure = row.ai_infrastructure?.toLowerCase() === 'true';
-        const ai_platform = row.ai_platform?.toLowerCase() === 'true';
-
-        const embedding = await generateCompanyEmbedding(
-          row.name, row.description, derived_capabilities, domain_verticals,
-          ai_infrastructure, ai_platform
-        );
+        const embedding = await generateCompanyEmbedding(row.name, row.description);
 
         const { error } = await supabaseAdmin.from('companies').insert({
-          name: row.name, slug, website: row.website,
+          name: row.name, slug, company_url: row.company_url || null,
           description: row.description, logo: row.logo || null,
-          derived_capabilities, domain_verticals,
-          hq_country: row.hq_country, hq_region: row.hq_region || null,
-          ai_infrastructure, ai_platform,
+          hq_country: row.hq_country,
           status: autoApprove ? 'approved' : 'pending',
           embedding: JSON.stringify(embedding),
         });

@@ -29,27 +29,9 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 
 export async function generateCompanyEmbedding(
   name: string,
-  description: string,
-  derived_capabilities: string[],
-  domain_verticals: string[],
-  ai_infrastructure: boolean,
-  ai_platform: boolean
+  description: string
 ): Promise<number[]> {
-  const parts = [
-    name,
-    description,
-    `Capabilities: ${derived_capabilities.join(', ')}`,
-    `Verticals: ${domain_verticals.join(', ')}`
-  ];
-
-  if (ai_infrastructure) {
-    parts.push('AI Infrastructure provider');
-  }
-  if (ai_platform) {
-    parts.push('AI Platform provider');
-  }
-
-  return generateEmbedding(parts.join('\n'));
+  return generateEmbedding(`${name}\n${description}`);
 }
 
 export async function generateProductEmbedding(

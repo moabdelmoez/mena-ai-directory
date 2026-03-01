@@ -5,29 +5,44 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { SearchBox } from '@/components/SearchBox';
 import { CompanyList } from '@/components/CompanyList';
 import { Pagination } from '@/components/Pagination';
-import { Select, Button } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { MENA_COUNTRIES } from '@/constants';
 import { Company, PaginatedResponse } from '@/types';
 
-// Format technical value for display (e.g., gpu_compute_management -> GPU Compute Management)
-const ACRONYMS = ['AI', 'GPU'];
-
-function formatLabel(value: string): string {
-  return value
-    .split('_')
-    .map(word => {
-      const upper = word.toUpperCase();
-      if (ACRONYMS.includes(upper)) {
-        return upper;
-      }
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(' ');
+interface FilterOptions {
+  tech_categories: string[];
+  industries: string[];
 }
 
-interface FilterOptions {
-  capabilities: string[];
-  verticals: string[];
+function CheckboxGroup({
+  label,
+  options,
+  selected,
+  onToggle,
+}: {
+  label: string;
+  options: string[];
+  selected: string[];
+  onToggle: (value: string) => void;
+}) {
+  return (
+    <div>
+      <p className="text-sm font-medium text-gray-700 mb-2">{label}</p>
+      <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+        {options.map((option) => (
+          <label key={option} className="flex items-center gap-2 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={selected.includes(option)}
+              onChange={() => onToggle(option)}
+              className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-600 group-hover:text-gray-900 leading-tight">{option}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function SearchContent() {
@@ -36,19 +51,37 @@ function SearchContent() {
 
   const [results, setResults] = useState<PaginatedResponse<Company> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({ capabilities: [], verticals: [] });
-  const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({ tech_categories: [], industries: [] });
 
   const query = searchParams.get('q') || '';
   const hq_country = searchParams.get('hq_country') || '';
-  const ai_infrastructure = searchParams.get('ai_infrastructure') === 'true';
-  const ai_platform = searchParams.get('ai_platform') === 'true';
+  const tech_categories_param = searchParams.get('tech_categories') || '';
+  const industries_param = searchParams.get('industries') || '';
   const page = parseInt(searchParams.get('page') || '1', 10);
-  const derived_capabilities = searchParams.getAll('derived_capabilities');
-  const domain_verticals = searchParams.getAll('domain_verticals');
-  // Serialize arrays for stable dependency comparison (arrays create new references each render)
-  const derivedCapabilitiesStr = derived_capabilities.join(',');
-  const domainVerticalsStr = domain_verticals.join(',');
+
+  const selectedCountries = useMemo(
+    () => hq_country ? hq_country.split(',').filter(Boolean) : [],
+    [hq_country]
+  );
+  const selectedTechCategories = useMemo(
+    () => tech_categories_param ? tech_categories_param.split(',').filter(Boolean) : [],
+    [tech_categories_param]
+  );
+  const selectedIndustries = useMemo(
+    () => industries_param ? industries_param.split(',').filter(Boolean) : [],
+    [industries_param]
+  );
+
+  // Fetch filter options once
+  useEffect(() => {
+    fetch('/api/filter-options')
+      .then((r) => r.json())
+      .then((data) => setFilterOptions({
+        tech_categories: data.tech_categories || [],
+        industries: data.industries || [],
+      }))
+      .catch(() => {});
+  }, []);
 
   const fetchResults = useCallback(async () => {
     setIsLoading(true);
@@ -56,16 +89,9 @@ function SearchContent() {
       const params = new URLSearchParams();
       if (query) params.set('q', query);
       if (hq_country) params.set('hq_country', hq_country);
-      if (ai_infrastructure) params.set('ai_infrastructure', 'true');
-      if (ai_platform) params.set('ai_platform', 'true');
+      if (tech_categories_param) params.set('tech_categories', tech_categories_param);
+      if (industries_param) params.set('industries', industries_param);
       if (page > 1) params.set('page', page.toString());
-      // Use the serialized strings to reconstruct arrays (avoids dependency array issues)
-      if (derivedCapabilitiesStr) {
-        derivedCapabilitiesStr.split(',').forEach((cap) => params.append('derived_capabilities', cap));
-      }
-      if (domainVerticalsStr) {
-        domainVerticalsStr.split(',').forEach((vert) => params.append('domain_verticals', vert));
-      }
 
       const response = await fetch(`/api/search?${params.toString()}`);
       const data = await response.json();
@@ -75,50 +101,25 @@ function SearchContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [query, hq_country, ai_infrastructure, ai_platform, page, derivedCapabilitiesStr, domainVerticalsStr]);
+  }, [query, hq_country, tech_categories_param, industries_param, page]);
 
   useEffect(() => {
     fetchResults();
   }, [fetchResults]);
 
-  // Fetch filter options on mount
-  useEffect(() => {
-    async function fetchFilterOptions() {
-      try {
-        const response = await fetch('/api/filter-options');
-        if (response.ok) {
-          const data = await response.json();
-          setFilterOptions(data);
-        }
-      } catch (error) {
-        console.error('Error fetching filter options:', error);
-      } finally {
-        setFilterOptionsLoading(false);
-      }
-    }
-    fetchFilterOptions();
-  }, []);
-
-  const updateFilters = useCallback(
-    (key: string, value: string | string[] | boolean) => {
+  const toggleArrayParam = useCallback(
+    (paramKey: string, currentValues: string[], value: string) => {
       const params = new URLSearchParams(searchParams.toString());
+      const next = currentValues.includes(value)
+        ? currentValues.filter((v) => v !== value)
+        : [...currentValues, value];
 
-      if (Array.isArray(value)) {
-        params.delete(key);
-        value.forEach((v) => params.append(key, v));
-      } else if (typeof value === 'boolean') {
-        if (value) {
-          params.set(key, 'true');
-        } else {
-          params.delete(key);
-        }
-      } else if (value) {
-        params.set(key, value);
+      if (next.length > 0) {
+        params.set(paramKey, next.join(','));
       } else {
-        params.delete(key);
+        params.delete(paramKey);
       }
-
-      params.delete('page'); // Reset page when filters change
+      params.delete('page');
       router.push(`/search?${params.toString()}`);
     },
     [searchParams, router]
@@ -136,36 +137,9 @@ function SearchContent() {
     router.push(`/search?${params.toString()}`);
   };
 
-  const hasFilters = hq_country || ai_infrastructure || ai_platform || derived_capabilities.length > 0 || domain_verticals.length > 0;
+  const hasFilters = !!(hq_country || tech_categories_param || industries_param);
 
-  // Memoize static options to avoid recreating arrays on each render
-  const countryOptions = useMemo(
-    () => MENA_COUNTRIES.map((c) => ({ value: c, label: c })),
-    []
-  );
-
-  // Memoized handlers for filter checkboxes
-  const handleCapabilityChange = useCallback(
-    (tag: string, checked: boolean) => {
-      const currentCaps = searchParams.getAll('derived_capabilities');
-      const newCaps = checked
-        ? [...currentCaps, tag]
-        : currentCaps.filter((t) => t !== tag);
-      updateFilters('derived_capabilities', newCaps);
-    },
-    [searchParams, updateFilters]
-  );
-
-  const handleVerticalChange = useCallback(
-    (industry: string, checked: boolean) => {
-      const currentVerticals = searchParams.getAll('domain_verticals');
-      const newVerticals = checked
-        ? [...currentVerticals, industry]
-        : currentVerticals.filter((i) => i !== industry);
-      updateFilters('domain_verticals', newVerticals);
-    },
-    [searchParams, updateFilters]
-  );
+  const countryOptions = useMemo(() => [...MENA_COUNTRIES], []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -188,94 +162,33 @@ function SearchContent() {
             </div>
 
             <div className="space-y-6">
-              {/* Company Type Filters */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Company Type
-                </label>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={ai_infrastructure}
-                      onChange={(e) => updateFilters('ai_infrastructure', e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">AI Infrastructure</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={ai_platform}
-                      onChange={(e) => updateFilters('ai_platform', e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">AI Platform</span>
-                  </label>
-                </div>
-              </div>
-
               {/* Country Filter */}
-              <Select
+              <CheckboxGroup
                 label="Country"
-                id="hq_country"
-                placeholder="All Countries"
-                value={hq_country}
-                onChange={(e) => updateFilters('hq_country', e.target.value)}
                 options={countryOptions}
+                selected={selectedCountries}
+                onToggle={(v) => toggleArrayParam('hq_country', selectedCountries, v)}
               />
 
-              {/* Capabilities Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Capabilities
-                </label>
-                <div className="space-y-2">
-                  {filterOptionsLoading ? (
-                    <div className="text-sm text-gray-500">Loading...</div>
-                  ) : filterOptions.capabilities.length === 0 ? (
-                    <div className="text-sm text-gray-500">No capabilities available</div>
-                  ) : (
-                    filterOptions.capabilities.map((cap) => (
-                      <label key={cap} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={derived_capabilities.includes(cap)}
-                          onChange={(e) => handleCapabilityChange(cap, e.target.checked)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-700">{formatLabel(cap)}</span>
-                      </label>
-                    ))
-                  )}
-                </div>
-              </div>
+              {/* Tech Category Filter */}
+              {filterOptions.tech_categories.length > 0 && (
+                <CheckboxGroup
+                  label="Tech Category"
+                  options={filterOptions.tech_categories}
+                  selected={selectedTechCategories}
+                  onToggle={(v) => toggleArrayParam('tech_categories', selectedTechCategories, v)}
+                />
+              )}
 
-              {/* Verticals Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Industries
-                </label>
-                <div className="space-y-2">
-                  {filterOptionsLoading ? (
-                    <div className="text-sm text-gray-500">Loading...</div>
-                  ) : filterOptions.verticals.length === 0 ? (
-                    <div className="text-sm text-gray-500">No industries available</div>
-                  ) : (
-                    filterOptions.verticals.map((vertical) => (
-                      <label key={vertical} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={domain_verticals.includes(vertical)}
-                          onChange={(e) => handleVerticalChange(vertical, e.target.checked)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-700">{formatLabel(vertical)}</span>
-                      </label>
-                    ))
-                  )}
-                </div>
-              </div>
+              {/* Industry Filter */}
+              {filterOptions.industries.length > 0 && (
+                <CheckboxGroup
+                  label="Industry"
+                  options={filterOptions.industries}
+                  selected={selectedIndustries}
+                  onToggle={(v) => toggleArrayParam('industries', selectedIndustries, v)}
+                />
+              )}
             </div>
           </div>
         </aside>

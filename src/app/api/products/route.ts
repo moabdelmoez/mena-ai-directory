@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Select specific columns to exclude embedding vectors (1536-dim)
-  const productColumns = 'id, product_id, company_id, name, description, category, capabilities, use_cases, target_customers, deployment, maturity, pricing_model, confidence, sources, created_at, updated_at';
+  const productColumns = 'id, product_id, company_id, name, description, product_url, created_at, updated_at';
 
   const { data, error } = await supabaseAdmin
     .from('products')
@@ -60,18 +60,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const {
-      company_id,
-      name,
-      description,
-      category,
-      capabilities,
-      use_cases,
-      target_customers,
-      deployment,
-      maturity,
-      pricing_model
-    } = body;
+    const { company_id, name, description, product_url } = body;
 
     if (!company_id || !name || !description) {
       return NextResponse.json({ error: 'company_id, name, and description are required' }, { status: 400 });
@@ -99,13 +88,7 @@ export async function POST(request: NextRequest) {
         company_id,
         name,
         description,
-        category: category || null,
-        capabilities: capabilities || [],
-        use_cases: use_cases || [],
-        target_customers: target_customers || [],
-        deployment: deployment || [],
-        maturity: maturity || null,
-        pricing_model: pricing_model || null,
+        product_url: product_url || null,
         embedding: JSON.stringify(embedding),
       })
       .select('*')

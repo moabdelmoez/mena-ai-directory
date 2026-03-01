@@ -6,17 +6,29 @@ import { ProductInput } from '@/types';
 
 interface ProductWithKey extends ProductInput {
   _key?: string;
+  id?: string;
+}
+
+interface ClassificationOptions {
+  tech_categories: string[];
+  industries: string[];
 }
 
 interface ProductInputListProps {
   products: ProductInput[];
   onChange: (products: ProductInput[]) => void;
   maxProducts?: number;
+  classificationOptions?: ClassificationOptions;
 }
 
-export function ProductInputList({ products, onChange, maxProducts = 10 }: ProductInputListProps) {
+export function ProductInputList({
+  products,
+  onChange,
+  maxProducts = 10,
+  classificationOptions,
+}: ProductInputListProps) {
   const [isAdding, setIsAdding] = useState(false);
-  const [newProduct, setNewProduct] = useState<ProductWithKey>({ name: '', description: '' });
+  const [newProduct, setNewProduct] = useState<ProductWithKey>({ name: '', description: '', tech_category: null, industry: null });
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const baseId = useId();
   const [keyCounter, setKeyCounter] = useState(0);
@@ -41,10 +53,12 @@ export function ProductInputList({ products, onChange, maxProducts = 10 }: Produ
     const productWithKey: ProductWithKey = {
       name: newProduct.name.trim(),
       description: newProduct.description.trim(),
+      tech_category: newProduct.tech_category ?? null,
+      industry: newProduct.industry ?? null,
       _key: generateKey(),
     };
     onChange([...products, productWithKey]);
-    setNewProduct({ name: '', description: '' });
+    setNewProduct({ name: '', description: '', tech_category: null, industry: null });
     setIsAdding(false);
   };
 
@@ -55,7 +69,13 @@ export function ProductInputList({ products, onChange, maxProducts = 10 }: Produ
     }
 
     const updated = [...products];
-    updated[index] = { name: product.name.trim(), description: product.description.trim() };
+    updated[index] = {
+      ...(product as ProductWithKey),
+      name: product.name.trim(),
+      description: product.description.trim(),
+      tech_category: product.tech_category ?? null,
+      industry: product.industry ?? null,
+    };
     onChange(updated);
     setEditIndex(null);
   };
@@ -64,11 +84,16 @@ export function ProductInputList({ products, onChange, maxProducts = 10 }: Produ
     onChange(products.filter((_, i) => i !== index));
   };
 
-  const handleProductChange = (index: number, field: keyof ProductInput, value: string) => {
+  const handleProductChange = (index: number, field: keyof ProductInput, value: string | null) => {
     const updated = [...products];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
   };
+
+  const showClassificationFields = !!(
+    classificationOptions &&
+    (classificationOptions.tech_categories.length > 0 || classificationOptions.industries.length > 0)
+  );
 
   return (
     <div className="space-y-4">
@@ -103,6 +128,36 @@ export function ProductInputList({ products, onChange, maxProducts = 10 }: Produ
                     placeholder="Product description"
                     rows={2}
                   />
+                  {showClassificationFields && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Tech Category</label>
+                        <select
+                          value={product.tech_category || ''}
+                          onChange={(e) => handleProductChange(index, 'tech_category', e.target.value || null)}
+                          className="w-full text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        >
+                          <option value="">None</option>
+                          {classificationOptions!.tech_categories.map((tc) => (
+                            <option key={tc} value={tc}>{tc}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Industry</label>
+                        <select
+                          value={product.industry || ''}
+                          onChange={(e) => handleProductChange(index, 'industry', e.target.value || null)}
+                          className="w-full text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        >
+                          <option value="">None</option>
+                          {classificationOptions!.industries.map((ind) => (
+                            <option key={ind} value={ind}>{ind}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex gap-2 justify-end">
                     <Button
                       type="button"
@@ -127,6 +182,20 @@ export function ProductInputList({ products, onChange, maxProducts = 10 }: Produ
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-gray-900 truncate">{product.name}</h4>
                     <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
+                    {(product.tech_category || product.industry) && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {product.tech_category && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
+                            {product.tech_category}
+                          </span>
+                        )}
+                        {product.industry && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-green-100 text-green-700">
+                            {product.industry}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
                     <button
@@ -165,6 +234,36 @@ export function ProductInputList({ products, onChange, maxProducts = 10 }: Produ
               placeholder="Product description"
               rows={2}
             />
+            {showClassificationFields && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Tech Category</label>
+                  <select
+                    value={newProduct.tech_category || ''}
+                    onChange={(e) => setNewProduct({ ...newProduct, tech_category: e.target.value || null })}
+                    className="w-full text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="">None</option>
+                    {classificationOptions!.tech_categories.map((tc) => (
+                      <option key={tc} value={tc}>{tc}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Industry</label>
+                  <select
+                    value={newProduct.industry || ''}
+                    onChange={(e) => setNewProduct({ ...newProduct, industry: e.target.value || null })}
+                    className="w-full text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="">None</option>
+                    {classificationOptions!.industries.map((ind) => (
+                      <option key={ind} value={ind}>{ind}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
             <div className="flex gap-2 justify-end">
               <Button
                 type="button"
@@ -172,7 +271,7 @@ export function ProductInputList({ products, onChange, maxProducts = 10 }: Produ
                 size="sm"
                 onClick={() => {
                   setIsAdding(false);
-                  setNewProduct({ name: '', description: '' });
+                  setNewProduct({ name: '', description: '', tech_category: null, industry: null });
                 }}
               >
                 Cancel

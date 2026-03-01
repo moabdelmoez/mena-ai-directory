@@ -20,13 +20,14 @@ export async function GET(request: NextRequest) {
 
   const searchParams = request.nextUrl.searchParams;
 
+  const techCategoriesParam = searchParams.get('tech_categories');
+  const industriesParam = searchParams.get('industries');
+
   const filters: SearchFilters = {
     query: searchParams.get('q') || undefined,
-    derived_capabilities: searchParams.getAll('derived_capabilities') || undefined,
-    domain_verticals: searchParams.getAll('domain_verticals') || undefined,
     hq_country: (searchParams.get('hq_country') as Country) || undefined,
-    ai_infrastructure: searchParams.get('ai_infrastructure') === 'true' ? true : undefined,
-    ai_platform: searchParams.get('ai_platform') === 'true' ? true : undefined,
+    tech_categories: techCategoriesParam ? techCategoriesParam.split(',').filter(Boolean) : undefined,
+    industries: industriesParam ? industriesParam.split(',').filter(Boolean) : undefined,
     page: parseInt(searchParams.get('page') || '1', 10),
     limit: Math.min(parseInt(searchParams.get('limit') || '10', 10), 50),
   };

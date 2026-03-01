@@ -3,8 +3,7 @@
 import { memo } from 'react';
 import Link from 'next/link';
 import { Company, MatchingProduct } from '@/types';
-import { Badge, Card } from '@/components/ui';
-import { TagBadges } from './TagBadges';
+import { Card } from '@/components/ui';
 import { truncateText } from '@/lib/utils';
 import { CompanyLogo } from './CompanyLogo';
 
@@ -18,24 +17,12 @@ export const CompanyCard = memo(function CompanyCard({ company, matchingProduct 
     <Link href={`/company/${company.slug}`}>
       <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
         <div className="flex gap-4">
-          <CompanyLogo logo={company.logo} name={company.name} size="sm" />
+          <CompanyLogo logo={company.logo} name={company.name} size="sm" logo_bg={company.logo_bg} />
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <h3 className="text-lg font-semibold text-gray-900 truncate">
                 {company.name}
               </h3>
-              <div className="flex gap-1 flex-shrink-0">
-                {company.ai_infrastructure && (
-                  <Badge variant="default" size="sm">
-                    AI Infra
-                  </Badge>
-                )}
-                {company.ai_platform && (
-                  <Badge variant="primary" size="sm">
-                    AI Platform
-                  </Badge>
-                )}
-              </div>
             </div>
             <p className="mt-1 text-sm text-gray-600 line-clamp-2">
               {truncateText(company.description, 150)}
@@ -52,9 +39,6 @@ export const CompanyCard = memo(function CompanyCard({ company, matchingProduct 
                 <p className="text-xs text-gray-600 line-clamp-1">{matchingProduct.description}</p>
               </div>
             )}
-            <div className="mt-2 flex items-center gap-2">
-              <TagBadges tags={company.derived_capabilities} />
-            </div>
             <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
               <span>{company.hq_country}</span>
               {company.average_rating !== undefined && company.average_rating > 0 && (

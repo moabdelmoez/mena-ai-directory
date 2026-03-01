@@ -72,10 +72,10 @@ export default function ImportPage() {
                 Your CSV file should have the following columns:
               </p>
               <code className="text-xs bg-blue-100 px-2 py-1 rounded block overflow-x-auto">
-                name,website,description,category,tags,industries,country,logo_url
+                name,company_url,description,hq_country,logo_url
               </code>
               <p className="text-sm text-blue-700 mt-2">
-                For multiple tags/industries, separate them with commas within quotes.
+                The <strong>hq_country</strong> must be a valid MENA country name. The <strong>company_url</strong> column also accepts <code>website</code> as an alias.
               </p>
             </div>
 

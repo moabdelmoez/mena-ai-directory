@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error, count } = await supabaseAdmin
     .from('companies')
-    .select('id, company_id, name, slug, website, description, logo, derived_capabilities, domain_verticals, hq_country, hq_region, ai_infrastructure, ai_platform, status, submitted_by, created_at, updated_at', { count: 'exact' })
+    .select('id, company_id, name, slug, company_url, linkedin_profile, description, logo, logo_bg, hq_country, status, submitted_by, created_at, updated_at', { count: 'exact' })
     .eq('submitted_by', session.user.id)
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
