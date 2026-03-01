@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getCompanyProducts } from '@/lib/search';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
 import { generateCompanyEmbedding, generateProductEmbedding } from '@/lib/openai';
 import { MENA_COUNTRIES } from '@/constants';
@@ -38,25 +39,16 @@ export async function GET(
     return NextResponse.json({ error: 'Company not found' }, { status: 404 });
   }
 
-  // Fetch products with classifications
-  const { data: products } = await supabaseAdmin
-    .from('products')
-    .select('id, name, description, product_url, product_classification(tech_category, industry)')
-    .eq('company_id', id);
-
-  const productsWithClassification = ((products || []) as Array<Record<string, unknown>>).map((p) => {
-    const cls = Array.isArray(p.product_classification)
-      ? (p.product_classification as Array<{ tech_category: string | null; industry: string | null }>)[0]
-      : null;
-    return {
-      id: p.id,
-      name: p.name,
-      description: p.description,
-      product_url: p.product_url,
-      tech_category: cls?.tech_category ?? null,
-      industry: cls?.industry ?? null,
-    };
-  });
+  // Fetch products with classifications (two-step: products then product_classification)
+  const companyProducts = await getCompanyProducts(id);
+  const productsWithClassification = companyProducts.map((p) => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    product_url: p.product_url,
+    tech_category: p.tech_category ?? null,
+    industry: p.industry ?? null,
+  }));
 
   return NextResponse.json({ ...company, products: productsWithClassification });
 }
