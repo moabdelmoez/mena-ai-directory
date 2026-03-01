@@ -43,22 +43,16 @@ npm run test:e2e          # Run Playwright E2E tests
 
 - **users**: Google OAuth users (id, google_id, email, name, avatar_url)
 - **admins**: Admin accounts with bcrypt password hashes
-- **companies**: Listings with 1536-dim vector embeddings, status (pending/approved/rejected), ai_infrastructure, ai_platform, derived_capabilities[], domain_verticals[], hq_country, hq_region
+- **companies**: Listings with 1536-dim vector embeddings, status (pending/approved/rejected)
   - `company_id`: Optional external identifier for imports
+  - `company_url` / `linkedin_profile`: Website and LinkedIn links
   - `logo`: Company logo URL
-  - `ai_infrastructure` / `ai_platform`: Boolean flags for company type
-  - `derived_capabilities`: Array of AI capabilities (replaces tags)
-  - `domain_verticals`: Array of target industries (replaces industries)
-  - `hq_country` / `hq_region`: Headquarters location
-  - `scrape_confidence`: Data quality score from imports
+  - `logo_bg`: Logo background hint (`'white'` | `'black'` | null)
+  - `hq_country`: Headquarters country
 - **products**: Company products with 1536-dim vector embeddings
-  - `product_id`: Optional external identifier for imports
+  - `product_id`: Optional external identifier for imports (namespaced as `{company_id}--{original_id}`)
   - `name`, `description`: Basic product info
-  - `category`: Product category
-  - `capabilities`, `use_cases`, `target_customers`, `deployment`: Array fields
-  - `maturity`, `pricing_model`: Product metadata
-  - `confidence`: Data quality score
-  - `sources`: Array of data source URLs
+  - `product_url`: Link to the product page
 - **reviews**: User reviews with rating (1-5), one per user per company constraint
 - **company_edits**: Edit requests (id, company_id, proposed_data JSONB, submitted_by, status pending/approved/rejected)
 - **product_classification**: AI-generated classifications for products
@@ -94,9 +88,8 @@ In-memory rate limiter in `/lib/rate-limit.ts` with max store size of 10,000 ent
 
 ### Search Filters
 
-- `ai_infrastructure` / `ai_platform`: Boolean filters for company type
-- `derived_capabilities`: Filter by AI capabilities (array overlap)
-- `domain_verticals`: Filter by target industries (array overlap)
+- `tech_categories`: Filter by AI/ML technology category (via `product_classification` table)
+- `industries`: Filter by target industry vertical (via `product_classification` table)
 - `hq_country`: Filter by headquarters country
 
 ### Import Feature
@@ -109,7 +102,7 @@ The admin import API (`/api/admin/import`) supports:
 
 1. **`import:json`** — imports companies (with any nested products) from a JSON file
 2. **`import:products`** — imports products from a separate JSON file; looks up companies by external `company_id`, generates OpenAI embeddings, namespaces `product_id` as `{company_id}--{original_id}` to prevent cross-company collisions
-3. **`import:classifications`** — imports `tech_category` / `industry` classifications from a JSON file; strips namespace prefix to match original `product_id`, inserts into `product_classification` with both `product_id` and `company_id`
+3. **`import:classifications`** — imports `tech_category` / `industry` classifications from a JSON file; keys by `{company_id}--{product_id}` (matching the DB namespace) to avoid collisions when two companies share the same short product_id; inserts into `product_classification` with both `product_id` (UUID) and `company_id` (UUID)
 
 All three scripts are idempotent: they delete existing rows for the target records before re-inserting.
 
