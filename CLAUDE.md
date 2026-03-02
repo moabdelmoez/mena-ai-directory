@@ -26,7 +26,7 @@ npm run test:e2e          # Run Playwright E2E tests
 - **Framework**: Next.js 14 (App Router) with TypeScript
 - **Database**: Supabase (PostgreSQL + pgvector extension)
 - **Auth**: NextAuth (Google OAuth for users) + custom email/password for admins
-- **Search**: Hybrid search combining OpenAI embeddings (text-embedding-3-small) with PostgreSQL full-text search using Reciprocal Rank Fusion
+- **Search**: Hybrid search combining OpenAI embeddings (text-embedding-3-small) with PostgreSQL full-text search using Reciprocal Rank Fusion (product matches boosted)
 - **Styling**: Tailwind CSS with Space Mono font
 
 ### Key Data Flow
@@ -85,6 +85,15 @@ In-memory rate limiter in `/lib/rate-limit.ts` with max store size of 10,000 ent
 - Reviews: 10/hour per user
 - Admin: 100/min per admin
 - Admin login: 5/15min per IP
+
+### Search Ranking
+
+The `search_companies_with_products` SQL function uses RRF (Reciprocal Rank Fusion) to combine semantic and keyword scores. Key tuning parameters:
+- **Semantic distance threshold**: `0.42` cosine distance — rejects vague matches (lower = stricter)
+- **Company RRF k**: `60` (standard) — `1/(60+rank)`
+- **Product RRF k**: `45` (lower = top ranks more impactful) with **1.5× boost** — `(1/(45+rank)) * 1.5`
+- Product-level matches outscore equivalent company-level matches, so a company with a matching product ranks above a company with only a vague description match
+- Pagination uses `COUNT(*) OVER()` in the SQL function (returned as `total_count`); no separate count query needed in the TS client
 
 ### Search Filters
 
