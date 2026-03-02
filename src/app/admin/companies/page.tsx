@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Card, Button, Select, Input } from '@/components/ui';
+import { Card, Button, Select, Input, ConfirmDialog } from '@/components/ui';
 import { Pagination } from '@/components/Pagination';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Company, PaginatedResponse } from '@/types';
@@ -20,6 +20,7 @@ export default function CompaniesPage() {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const fetchCompanies = useCallback(async () => {
     setIsLoading(true);
@@ -58,8 +59,6 @@ export default function CompaniesPage() {
   }, [searchInput]);
 
   const handleDelete = async (companyId: string) => {
-    if (!confirm('Are you sure you want to delete this company?')) return;
-
     setDeletingId(companyId);
     try {
       const response = await fetch(`/api/admin/companies?companyId=${companyId}`, {
@@ -73,6 +72,7 @@ export default function CompaniesPage() {
       console.error('Error deleting company:', error);
     } finally {
       setDeletingId(null);
+      setConfirmDeleteId(null);
     }
   };
 
@@ -156,6 +156,7 @@ export default function CompaniesPage() {
       ) : companies && companies.data.length > 0 ? (
         <>
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50/80">
                 <tr>
@@ -226,7 +227,7 @@ export default function CompaniesPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDelete(company.id)}
+                          onClick={() => setConfirmDeleteId(company.id)}
                           disabled={deletingId === company.id}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
@@ -238,6 +239,7 @@ export default function CompaniesPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           {companies.totalPages > 1 && (
@@ -267,6 +269,16 @@ export default function CompaniesPage() {
           )}
         </Card>
       )}
+
+      <ConfirmDialog
+        open={!!confirmDeleteId}
+        title="Delete Company"
+        message="Are you sure you want to delete this company?"
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => confirmDeleteId && handleDelete(confirmDeleteId)}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

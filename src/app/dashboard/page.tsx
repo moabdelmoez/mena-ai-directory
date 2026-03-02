@@ -85,7 +85,7 @@ export default function DashboardPage() {
         <>
           <div className="space-y-4">
             {companies.data.map((company) => (
-              <Card key={company.id} className="hover:shadow-md transition-shadow">
+              <Card key={company.id} interactive>
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">

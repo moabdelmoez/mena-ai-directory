@@ -55,6 +55,7 @@ export function SearchBox({ initialQuery = '', size = 'lg', className = '' }: Se
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search AI companies in MENA..."
+          aria-label="Search AI companies"
           className={`w-full ${sizes[size]} pl-12 pr-20 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow shadow-sm hover:shadow-md focus:shadow-lg`}
         />
         <button

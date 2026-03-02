@@ -6,9 +6,10 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  interactive?: boolean;
 }
 
-export function Card({ children, className, padding = 'md' }: CardProps) {
+export function Card({ children, className, padding = 'md', interactive = false }: CardProps) {
   const paddings = {
     none: '',
     sm: 'p-4',
@@ -19,7 +20,8 @@ export function Card({ children, className, padding = 'md' }: CardProps) {
   return (
     <div
       className={classNames(
-        'bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200',
+        'bg-white rounded-xl border border-gray-100 shadow-sm transition-shadow duration-200',
+        interactive && 'hover:shadow-md cursor-pointer',
         paddings[padding],
         className
       )}

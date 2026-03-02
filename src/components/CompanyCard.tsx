@@ -15,7 +15,7 @@ interface CompanyCardProps {
 export const CompanyCard = memo(function CompanyCard({ company, matchingProduct }: CompanyCardProps) {
   return (
     <Link href={`/company/${company.slug}`}>
-      <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
+      <Card className="h-full" interactive>
         <div className="flex gap-4">
           <CompanyLogo logo={company.logo} name={company.name} size="sm" logo_bg={company.logo_bg} />
           <div className="flex-1 min-w-0">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, FormEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Input, Select, Textarea, Button, Card } from '@/components/ui';
+import { Input, Select, Textarea, Button, Card, ConfirmDialog } from '@/components/ui';
 import { MENA_COUNTRIES } from '@/constants';
 import { ProductInputList } from '@/components/ProductInputList';
 import { ProductInput, Product } from '@/types';
@@ -56,6 +56,7 @@ function ManageCompanyForm() {
   const [logoBg, setLogoBg] = useState<'white' | 'black' | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState('');
 
   // Fetch classification options on mount
@@ -208,11 +209,8 @@ function ManageCompanyForm() {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to permanently delete this company? This action cannot be undone.')) {
-      return;
-    }
-
     setIsDeleting(true);
+    setShowDeleteConfirm(false);
 
     try {
       const response = await fetch(`/api/admin/companies/${companyId}`, {
@@ -262,7 +260,7 @@ function ManageCompanyForm() {
         {isEditMode && (
           <Button
             variant="ghost"
-            onClick={handleDelete}
+            onClick={() => setShowDeleteConfirm(true)}
             disabled={isDeleting}
             className="text-red-600 hover:text-red-700 hover:bg-red-50"
           >
@@ -467,6 +465,16 @@ function ManageCompanyForm() {
           </div>
         </form>
       </Card>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete Company"
+        message="Are you sure you want to permanently delete this company? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }

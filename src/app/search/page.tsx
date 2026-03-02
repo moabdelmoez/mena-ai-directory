@@ -51,6 +51,7 @@ function SearchContent() {
 
   const [results, setResults] = useState<PaginatedResponse<Company> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({ tech_categories: [], industries: [] });
 
   const query = searchParams.get('q') || '';
@@ -85,6 +86,7 @@ function SearchContent() {
 
   const fetchResults = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams();
       if (query) params.set('q', query);
@@ -96,8 +98,9 @@ function SearchContent() {
       const response = await fetch(`/api/search?${params.toString()}`);
       const data = await response.json();
       setResults(data);
-    } catch (error) {
-      console.error('Search error:', error);
+    } catch (err) {
+      console.error('Search error:', err);
+      setError('Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -237,8 +240,33 @@ function SearchContent() {
             </div>
           )}
 
+          {/* Error State */}
+          {!isLoading && error && (
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="bg-white rounded-xl border border-gray-200 p-8 text-center max-w-md">
+                <svg
+                  className="mx-auto h-12 w-12 text-red-400 mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                  />
+                </svg>
+                <p className="text-gray-700 mb-4">{error}</p>
+                <Button variant="primary" onClick={() => fetchResults()}>
+                  Try Again
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Results List */}
-          {!isLoading && results && (
+          {!isLoading && !error && results && (
             <>
               <CompanyList companies={results.data} />
 
@@ -261,7 +289,38 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+    <Suspense fallback={
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse">
+        <div className="mb-8">
+          <div className="h-12 bg-gray-200 rounded-xl max-w-2xl" />
+        </div>
+        <div className="flex flex-col lg:flex-row gap-8">
+          <aside className="w-full lg:w-64 flex-shrink-0">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+              <div className="h-5 bg-gray-200 rounded w-1/2" />
+              <div className="h-4 bg-gray-200 rounded w-3/4" />
+              <div className="h-4 bg-gray-200 rounded w-2/3" />
+              <div className="h-4 bg-gray-200 rounded w-3/4" />
+              <div className="h-4 bg-gray-200 rounded w-1/2" />
+            </div>
+          </aside>
+          <div className="flex-1 space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="flex gap-4">
+                  <div className="w-16 h-16 bg-gray-200 rounded-lg" />
+                  <div className="flex-1">
+                    <div className="h-5 bg-gray-200 rounded w-1/3 mb-2" />
+                    <div className="h-4 bg-gray-200 rounded w-2/3 mb-2" />
+                    <div className="h-4 bg-gray-200 rounded w-1/2" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    }>
       <SearchContent />
     </Suspense>
   );

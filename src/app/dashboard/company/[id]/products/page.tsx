@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Card, Button } from '@/components/ui';
+import { Card, Button, ConfirmDialog } from '@/components/ui';
 import { ProductList } from '@/components/ProductList';
 import { ProductForm } from '@/components/ProductForm';
 import { Product, ProductInput, Company } from '@/types';
@@ -25,6 +25,7 @@ export default function ProductManagementPage({ params }: Props) {
   const [isAdding, setIsAdding] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -106,10 +107,7 @@ export default function ProductManagementPage({ params }: Props) {
   };
 
   const handleDeleteProduct = async (product: Product) => {
-    if (!confirm(`Are you sure you want to delete "${product.name}"?`)) {
-      return;
-    }
-
+    setProductToDelete(null);
     try {
       const res = await fetch(`/api/products/${product.id}`, {
         method: 'DELETE',
@@ -222,12 +220,22 @@ export default function ProductManagementPage({ params }: Props) {
           <ProductList
             products={products}
             onEdit={setEditingProduct}
-            onDelete={handleDeleteProduct}
+            onDelete={setProductToDelete}
             showActions
             emptyMessage="No products yet. Add your first product to make it searchable in the directory."
           />
         </Card>
       )}
+
+      <ConfirmDialog
+        open={!!productToDelete}
+        title="Delete Product"
+        message={`Are you sure you want to delete "${productToDelete?.name}"?`}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => productToDelete && handleDeleteProduct(productToDelete)}
+        onCancel={() => setProductToDelete(null)}
+      />
     </div>
   );
 }
