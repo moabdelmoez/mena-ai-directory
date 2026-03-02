@@ -28,6 +28,7 @@ interface SearchResultRow {
   matching_product_id: string | null;
   matching_product_name: string | null;
   matching_product_description: string | null;
+  total_count: number;
 }
 
 interface CompanyWithMatchingProduct extends Company {
@@ -46,12 +47,15 @@ async function getCompanyIdsByClassification(
     .from('product_classification')
     .select('company_id');
 
+  // Sanitize values before PostgREST interpolation to prevent injection
+  const sanitize = (v: string) => v.replace(/["(),\.]/g, '');
+
   if (tech_categories && tech_categories.length > 0 && industries && industries.length > 0) {
-    query = query.or(`tech_category.in.(${tech_categories.map(c => `"${c}"`).join(',')}),industry.in.(${industries.map(i => `"${i}"`).join(',')})`);
+    query = query.or(`tech_category.in.(${tech_categories.map(c => `"${sanitize(c)}"`).join(',')}),industry.in.(${industries.map(i => `"${sanitize(i)}"`).join(',')})`);
   } else if (tech_categories && tech_categories.length > 0) {
-    query = query.in('tech_category', tech_categories);
+    query = query.in('tech_category', tech_categories.map(sanitize));
   } else if (industries && industries.length > 0) {
-    query = query.in('industry', industries);
+    query = query.in('industry', industries.map(sanitize));
   }
 
   const { data, error } = await query;
@@ -84,21 +88,7 @@ export async function hybridSearch(
   // Get company IDs matching classification filters
   const companyIds = await getCompanyIdsByClassification(tech_categories, industries);
 
-  // Build count query for pagination
-  let countQuery = supabaseAdmin
-    .from('companies')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'approved');
-
-  if (hq_country) {
-    countQuery = countQuery.eq('hq_country', hq_country);
-  }
-
-  if (companyIds !== null) {
-    countQuery = countQuery.in('id', companyIds);
-  }
-
-  // Run search and count queries in parallel
+  // Run search RPC (total_count is included in each result row via COUNT(*) OVER())
   const rpcParams: Record<string, unknown> = {
     query_embedding: JSON.stringify(queryEmbedding),
     search_query: query || null,
@@ -111,13 +101,7 @@ export async function hybridSearch(
     rpcParams.filter_company_ids = companyIds;
   }
 
-  const [searchResult, countResult] = await Promise.all([
-    supabaseAdmin.rpc('search_companies_with_products', rpcParams),
-    countQuery,
-  ]);
-
-  const { data, error } = searchResult;
-  const { count } = countResult;
+  const { data, error } = await supabaseAdmin.rpc('search_companies_with_products', rpcParams);
 
   if (error) {
     console.error('Search error:', {
@@ -134,6 +118,7 @@ export async function hybridSearch(
   }
 
   const results = (data as SearchResultRow[]) || [];
+  const total = results.length > 0 ? results[0].total_count : 0;
 
   const companies: CompanyWithMatchingProduct[] = results.map((row) => ({
     id: row.id,
@@ -160,10 +145,10 @@ export async function hybridSearch(
 
   return {
     data: companies,
-    total: count || 0,
+    total,
     page,
     limit,
-    totalPages: Math.ceil((count || 0) / limit),
+    totalPages: Math.ceil(total / limit),
   };
 }
 

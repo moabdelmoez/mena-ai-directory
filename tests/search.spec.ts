@@ -164,6 +164,81 @@ test.describe('Search Functionality', () => {
     expect(hasBrowseHeading || hasResults).toBeTruthy();
   });
 
+  test('phrase search with quotes', async ({ page }) => {
+    await page.goto('/');
+
+    await page.fill('input[placeholder*="Search"]', '"machine learning"');
+    await page.click('button:has-text("Search")');
+
+    await page.waitForLoadState('networkidle');
+
+    // Page should load without error
+    const hasError = await page.locator('text=Unhandled Runtime Error').isVisible();
+    expect(hasError).toBeFalsy();
+
+    // Should show results count or no-results state
+    const hasResults = await page.locator('text=companies found').isVisible();
+    const hasNoResults = await page.locator('text=No companies found').isVisible();
+    expect(hasResults || hasNoResults).toBeTruthy();
+  });
+
+  test('boolean OR search', async ({ page }) => {
+    await page.goto('/');
+
+    await page.fill('input[placeholder*="Search"]', 'chatbot OR NLP');
+    await page.click('button:has-text("Search")');
+
+    await page.waitForLoadState('networkidle');
+
+    const hasError = await page.locator('text=Unhandled Runtime Error').isVisible();
+    expect(hasError).toBeFalsy();
+
+    const hasResults = await page.locator('text=companies found').isVisible();
+    const hasNoResults = await page.locator('text=No companies found').isVisible();
+    expect(hasResults || hasNoResults).toBeTruthy();
+  });
+
+  test('stop-word-only query does not crash', async ({ page }) => {
+    await page.goto('/');
+
+    await page.fill('input[placeholder*="Search"]', 'the');
+    await page.click('button:has-text("Search")');
+
+    await page.waitForLoadState('networkidle');
+
+    // Should not crash — semantic search still works even when FTS yields nothing
+    const hasError = await page.locator('text=Unhandled Runtime Error').isVisible();
+    expect(hasError).toBeFalsy();
+
+    const hasResults = await page.locator('text=companies found').isVisible();
+    const hasNoResults = await page.locator('text=No companies found').isVisible();
+    expect(hasResults || hasNoResults).toBeTruthy();
+  });
+
+  test('search result count reflects actual matches, not all companies', async ({ page }) => {
+    // First get total approved companies count from browse page
+    await page.goto('/search');
+    await page.waitForSelector('text=companies found', { timeout: 15000 });
+    const browseText = await page.locator('text=/\\d+ compan(y|ies) found/').textContent();
+    const totalMatch = browseText?.match(/(\d+)/);
+    const totalCompanies = totalMatch ? parseInt(totalMatch[1], 10) : 0;
+
+    // Now search for a specific term that shouldn't match everything
+    await page.goto('/');
+    await page.fill('input[placeholder*="Search"]', 'Core42');
+    await page.click('button:has-text("Search")');
+
+    await page.waitForSelector('text=companies found', { timeout: 15000 });
+    const searchText = await page.locator('text=/\\d+ compan(y|ies) found/').textContent();
+    const searchMatch = searchText?.match(/(\d+)/);
+    const searchCount = searchMatch ? parseInt(searchMatch[1], 10) : 0;
+
+    // Search count should be less than total (unless dataset is very small)
+    if (totalCompanies > 5) {
+      expect(searchCount).toBeLessThan(totalCompanies);
+    }
+  });
+
   test('browse companies page loads', async ({ page }) => {
     // Navigate to search browse page (no filters)
     await page.goto('/search');
