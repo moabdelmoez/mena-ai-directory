@@ -132,13 +132,20 @@ Key endpoints:
 - `/src/app/api/` - API routes (companies, products, search, reviews, admin operations)
 - `/src/app/admin/` - Admin panel pages (dashboard, pending, companies, import)
 - `/src/components/` - React components (SearchBox, CompanyCard, ReviewForm, ProductCard, ProductList, ProductForm, ProductInputList, etc.)
-- `/src/components/ui/` - Base UI components (Button, Card, Input, etc.)
+- `/src/components/ui/` - Base UI components (Button, Card, Input, ConfirmDialog, etc.)
 - `/src/lib/` - Utilities (supabase client, auth configs, openai, search logic)
 - `/src/constants/` - Static data (tags, industries, MENA countries)
 - `/src/types/` - TypeScript type definitions
 - `/supabase/migrations/` - Database migration files
 - `/tests/` - Playwright E2E test files
 - `/playwright.config.ts` - Playwright configuration
+
+### UI Patterns
+
+- **Card `interactive` prop**: Base `Card` has no hover effect. Pass `interactive` to enable `hover:shadow-md` on clickable cards (e.g., CompanyCard). Non-interactive cards (reviews, stats) omit it.
+- **ConfirmDialog**: Use `<ConfirmDialog>` (native `<dialog>`) instead of `window.confirm()` for destructive actions. Supports `variant="danger"` for delete confirmations.
+- **Mobile navigation**: Header uses a hamburger menu on `md:` breakpoint. Admin sidebar uses an overlay drawer on `lg:` breakpoint.
+- **Form accessibility**: Input, Textarea, and Select link errors via `aria-describedby` and `aria-invalid` automatically when `id` and `error` props are provided.
 
 ### Environment Variables
 
