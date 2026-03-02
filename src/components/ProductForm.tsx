@@ -14,6 +14,7 @@ interface ProductFormProps {
 export function ProductForm({ product, onSubmit, onCancel, isSubmitting = false }: ProductFormProps) {
   const [name, setName] = useState(product?.name || '');
   const [description, setDescription] = useState(product?.description || '');
+  const [productUrl, setProductUrl] = useState(product?.product_url || '');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: FormEvent) => {
@@ -26,7 +27,7 @@ export function ProductForm({ product, onSubmit, onCancel, isSubmitting = false 
     }
 
     try {
-      await onSubmit({ name: name.trim(), description: description.trim() });
+      await onSubmit({ name: name.trim(), description: description.trim(), product_url: productUrl.trim() || null });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save product');
     }
@@ -51,6 +52,15 @@ export function ProductForm({ product, onSubmit, onCancel, isSubmitting = false 
         placeholder="Describe what this product does..."
         rows={3}
         required
+      />
+
+      <Input
+        label="Product URL (optional)"
+        id="product-url"
+        type="url"
+        value={productUrl}
+        onChange={(e) => setProductUrl(e.target.value)}
+        placeholder="https://..."
       />
 
       {error && (

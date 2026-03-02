@@ -28,7 +28,7 @@ export function ProductInputList({
   classificationOptions,
 }: ProductInputListProps) {
   const [isAdding, setIsAdding] = useState(false);
-  const [newProduct, setNewProduct] = useState<ProductWithKey>({ name: '', description: '', tech_category: null, industry: null });
+  const [newProduct, setNewProduct] = useState<ProductWithKey>({ name: '', description: '', product_url: null, tech_category: null, industry: null });
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const baseId = useId();
   const [keyCounter, setKeyCounter] = useState(0);
@@ -53,12 +53,13 @@ export function ProductInputList({
     const productWithKey: ProductWithKey = {
       name: newProduct.name.trim(),
       description: newProduct.description.trim(),
+      product_url: newProduct.product_url?.trim() || null,
       tech_category: newProduct.tech_category ?? null,
       industry: newProduct.industry ?? null,
       _key: generateKey(),
     };
     onChange([...products, productWithKey]);
-    setNewProduct({ name: '', description: '', tech_category: null, industry: null });
+    setNewProduct({ name: '', description: '', product_url: null, tech_category: null, industry: null });
     setIsAdding(false);
   };
 
@@ -73,6 +74,7 @@ export function ProductInputList({
       ...(product as ProductWithKey),
       name: product.name.trim(),
       description: product.description.trim(),
+      product_url: product.product_url?.trim() || null,
       tech_category: product.tech_category ?? null,
       industry: product.industry ?? null,
     };
@@ -128,6 +130,12 @@ export function ProductInputList({
                     placeholder="Product description"
                     rows={2}
                   />
+                  <Input
+                    value={product.product_url || ''}
+                    onChange={(e) => handleProductChange(index, 'product_url', e.target.value || null)}
+                    placeholder="https://..."
+                    type="url"
+                  />
                   {showClassificationFields && (
                     <div className="grid grid-cols-2 gap-3">
                       <div>
@@ -182,6 +190,16 @@ export function ProductInputList({
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-gray-900 truncate">{product.name}</h4>
                     <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
+                    {product.product_url && (
+                      <a
+                        href={product.product_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-blue-600 hover:text-blue-700 truncate block mt-0.5"
+                      >
+                        {product.product_url}
+                      </a>
+                    )}
                     {(product.tech_category || product.industry) && (
                       <div className="flex flex-wrap gap-1 mt-1">
                         {product.tech_category && (
@@ -234,6 +252,12 @@ export function ProductInputList({
               placeholder="Product description"
               rows={2}
             />
+            <Input
+              value={newProduct.product_url || ''}
+              onChange={(e) => setNewProduct({ ...newProduct, product_url: e.target.value || null })}
+              placeholder="https://..."
+              type="url"
+            />
             {showClassificationFields && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -271,7 +295,7 @@ export function ProductInputList({
                 size="sm"
                 onClick={() => {
                   setIsAdding(false);
-                  setNewProduct({ name: '', description: '', tech_category: null, industry: null });
+                  setNewProduct({ name: '', description: '', product_url: null, tech_category: null, industry: null });
                 }}
               >
                 Cancel

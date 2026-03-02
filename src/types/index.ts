@@ -17,6 +17,7 @@ export interface Product {
 export interface ProductInput {
   name: string;
   description: string;
+  product_url?: string | null;
   tech_category?: string | null;
   industry?: string | null;
 }

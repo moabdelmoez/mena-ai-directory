@@ -9,7 +9,7 @@ import { getCompanyById } from '@/lib/search';
 async function getProductById(id: string) {
   const { data, error } = await supabaseAdmin
     .from('products')
-    .select('id, company_id, name, description, created_at, updated_at')
+    .select('id, company_id, name, description, product_url, created_at, updated_at')
     .eq('id', id)
     .single();
 
@@ -69,7 +69,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, description } = body;
+    const { name, description, product_url } = body;
 
     if (!name || !description) {
       return NextResponse.json({ error: 'name and description are required' }, { status: 400 });
@@ -83,10 +83,11 @@ export async function PUT(
       .update({
         name,
         description,
+        product_url: product_url || null,
         embedding: JSON.stringify(embedding),
       })
       .eq('id', params.id)
-      .select('id, company_id, name, description, created_at, updated_at')
+      .select('id, company_id, name, description, product_url, created_at, updated_at')
       .single();
 
     if (error) {
