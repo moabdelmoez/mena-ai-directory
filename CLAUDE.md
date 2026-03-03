@@ -17,6 +17,8 @@ npm run import:json       # Import companies from JSON file
 npm run import:products   # Import products from JSON file (generates embeddings, namespaces product_id)
 npm run import:classifications  # Import product tech_category/industry classifications from JSON file
 npm run remove-broken-logos  # Remove broken logo URLs from database
+npm run test              # Run Vitest unit tests
+npm run test:watch        # Run Vitest in watch mode
 npm run test:e2e          # Run Playwright E2E tests
 ```
 
@@ -66,7 +68,8 @@ npm run test:e2e          # Run Playwright E2E tests
 
 - **User auth**: NextAuth with Google provider, JWT strategy, session includes user.id
 - **Admin auth**: Custom email/password, bcrypt hashing, HMAC-signed httpOnly cookie (signed with `NEXTAUTH_SECRET`) with 24h expiry
-- Use `requireAdmin()` from `/lib/admin-auth.ts` in admin API routes
+- Use `requireAdmin()` from `/lib/admin-auth.ts` in admin-only API routes
+- Use `requireAuth()` from `/lib/auth-helpers.ts` in routes that accept either admin or user sessions (e.g., product CRUD)
 - Admin layout (`/src/app/admin/layout.tsx`) includes `AdminAuthGuard` that verifies session before rendering child pages
 
 ### Security
@@ -76,11 +79,13 @@ npm run test:e2e          # Run Playwright E2E tests
 - **JSON-LD**: Output is escaped with `\u003c` to prevent script injection
 - **Admin search**: `.or()` filter input is sanitized to strip PostgREST special characters
 - **Public company API**: Hardcoded to `status=approved` only (admin endpoints have their own routes)
+- **Company edits whitelist**: `PUT /api/companies/[id]` filters `proposed_data` to allowed fields only (`name`, `description`, `company_url`, `linkedin_profile`, `hq_country`, `logo`)
+- **Products API**: `GET /api/products` verifies parent company is approved before returning products
 
 ### Rate Limiting
 
-In-memory rate limiter in `/lib/rate-limit.ts` with max store size of 10,000 entries:
-- Search: 30/min per IP
+In-memory rate limiter in `/lib/rate-limit.ts` with max store size of 10,000 entries (on-demand eviction when full). Only works for single-process deployments; use `@upstash/ratelimit` for serverless.
+- Search + Products GET: 30/min per IP
 - Registration: 5/hour per user
 - Reviews: 10/hour per user
 - Admin: 100/min per admin
@@ -124,18 +129,21 @@ All three scripts are idempotent: they delete existing rows for the target recor
 
 ### Testing
 
-- **Framework**: Playwright for E2E testing
-- **Configuration**: `playwright.config.ts` in project root
-- **Test files**: `/tests/` directory (search.spec.ts, company-detail.spec.ts)
-- **Run tests**: `npm run test:e2e`
+- **Unit tests**: Vitest (`vitest.config.ts`), tests in `/src/lib/__tests__/`. Run with `npm run test`.
+  - Covers: `utils.ts`, `rate-limit.ts`, `admin-auth.ts` (session signing), `company-service.ts` (validation, FormData helpers)
+- **E2E tests**: Playwright (`playwright.config.ts`), tests in `/tests/`. Run with `npm run test:e2e`.
+  - `company-detail.spec.ts` creates its own test company via admin API in `beforeAll` and cleans up in `afterAll`
+  - Prefer `waitForResponse`/`waitForSelector` over `waitForTimeout` for debounced inputs
 
 ### API Routes
 
 Key endpoints:
 - `GET /api/user/companies` - Get user's submitted companies
-- `PUT /api/companies/[id]` - Submit edit request for owned company
+- `PUT /api/companies/[id]` - Submit edit request for owned company (fields whitelisted)
+- `GET /api/products?company_id=X` - Get products for an approved company (rate limited)
 - `PUT/DELETE /api/products/[id]` - Update/delete products (owner or admin)
 - `PUT/DELETE /api/reviews` - Update/delete own reviews
+- `GET /api/admin/stats` - Dashboard counts (single request, replaces 3 calls)
 
 ### Directory Structure
 
@@ -143,12 +151,22 @@ Key endpoints:
 - `/src/app/admin/` - Admin panel pages (dashboard, pending, companies, import)
 - `/src/components/` - React components (SearchBox, CompanyCard, ReviewForm, ProductCard, ProductList, ProductForm, ProductInputList, etc.)
 - `/src/components/ui/` - Base UI components (Button, Card, Input, ConfirmDialog, etc.)
-- `/src/lib/` - Utilities (supabase client, auth configs, openai, search logic)
+- `/src/lib/` - Utilities (supabase client, auth configs, openai, search logic, company-repository, auth-helpers, company-service)
+- `/src/lib/__tests__/` - Vitest unit tests
 - `/src/constants/` - Static data (tags, industries, MENA countries)
 - `/src/types/` - TypeScript type definitions
 - `/supabase/migrations/` - Database migration files
 - `/tests/` - Playwright E2E test files
 - `/playwright.config.ts` - Playwright configuration
+- `/vitest.config.ts` - Vitest configuration
+
+### Key Lib Modules
+
+- **`/src/lib/supabase.ts`** — Exports `supabaseAdmin` (service role client with retry logic). No other clients exported.
+- **`/src/lib/company-repository.ts`** — Shared column constants (`COMPANY_COLUMNS`, `PRODUCT_COLUMNS`) and query functions (`getCompanyById`, `getCompanyBySlug`, `getCompanyProducts`). `getCompanyProducts()` uses a single join query for products + classifications.
+- **`/src/lib/company-service.ts`** — FormData helpers, logo validation/upload, `parseAndValidateProducts`, `insertProducts` (max 20 per batch), `createCompany()` (shared by public and admin routes, handles slug generation with prefix filtering).
+- **`/src/lib/auth-helpers.ts`** — `requireAuth()` checks admin session first, falls back to user session. Used in product CRUD routes.
+- **`/src/lib/search.ts`** — `hybridSearch()` and filtered company listing. Re-exports repository functions for backward compatibility.
 
 ### UI Patterns
 
