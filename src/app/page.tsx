@@ -5,7 +5,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-white to-zinc-50/50 py-24 lg:py-40">
+      <section className="relative bg-gradient-to-b from-white to-zinc-50/50 py-16 lg:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-fluid-hero tracking-tight text-zinc-800 font-semibold">
             Discover AI Companies in MENA
