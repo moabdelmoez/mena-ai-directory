@@ -3,8 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --background: #FFFFFF;
-  --foreground: #1F2937;
+  --background: #FAFAFA;
+  --foreground: #18181B;
+  --border: #E4E4E7;
+  --muted: #71717A;
+  --surface: #FFFFFF;
+  --accent: #2563EB;
 }
 
 body {
@@ -15,6 +19,21 @@ body {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* Fluid type utilities */
+@layer utilities {
+  .text-fluid-hero {
+    font-size: clamp(2.25rem, 5vw, 3.75rem);
+  }
+
+  .text-fluid-title {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .text-fluid-body {
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
   }
 }
 
@@ -32,5 +51,18 @@ body {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+}
+
+/* Global micro-interactions for interactive elements */
+@layer base {
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 }

@@ -19,41 +19,41 @@ export function Header() {
   }, [pathname]);
 
   return (
-    <header className="bg-black">
+    <header className="bg-zinc-950 border-b border-zinc-800/50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
               <span className="text-black font-bold text-lg">M</span>
             </div>
-            <span className="text-xl font-bold text-white">MENA AI</span>
+            <span className="text-xl font-semibold text-white">MENA AI</span>
           </Link>
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-6">
             <Link
               href="/search"
-              className="text-gray-300 hover:text-white transition-colors"
+              className="text-zinc-400 hover:text-white transition-colors"
             >
               Browse
             </Link>
             <Link
               href="/register"
-              className="text-gray-300 hover:text-white transition-colors"
+              className="text-zinc-400 hover:text-white transition-colors"
             >
               Register Company
             </Link>
 
             {status === 'loading' ? (
               <div className="flex items-center gap-4">
-                <div className="w-20 h-4 bg-gray-700 rounded animate-pulse" />
-                <div className="w-8 h-8 rounded-full bg-gray-700 animate-pulse" />
+                <div className="w-20 h-4 bg-zinc-700 rounded animate-pulse" />
+                <div className="w-8 h-8 rounded-full bg-zinc-700 animate-pulse" />
               </div>
             ) : session ? (
               <div className="flex items-center gap-4">
                 <Link
                   href="/dashboard"
-                  className="text-gray-300 hover:text-white transition-colors"
+                  className="text-zinc-400 hover:text-white transition-colors"
                 >
                   Dashboard
                 </Link>
@@ -71,7 +71,7 @@ export function Header() {
                     variant="ghost"
                     size="sm"
                     onClick={() => signOut()}
-                    className="text-gray-300 hover:text-white hover:bg-gray-800"
+                    className="text-zinc-400 hover:text-white hover:bg-zinc-800"
                   >
                     Sign Out
                   </Button>
@@ -90,7 +90,7 @@ export function Header() {
 
           {/* Hamburger button */}
           <button
-            className="md:hidden text-gray-300 hover:text-white p-2"
+            className="md:hidden text-zinc-400 hover:text-white p-2"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-expanded={menuOpen}
             aria-label="Main navigation"
@@ -123,29 +123,29 @@ export function Header() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <nav className="md:hidden border-t border-gray-800 px-6 py-4 flex flex-col gap-4">
+        <nav className="md:hidden border-t border-zinc-800 px-6 py-4 flex flex-col gap-4">
           <Link
             href="/search"
-            className="text-gray-300 hover:text-white transition-colors"
+            className="text-zinc-400 hover:text-white transition-colors"
             onClick={() => setMenuOpen(false)}
           >
             Browse
           </Link>
           <Link
             href="/register"
-            className="text-gray-300 hover:text-white transition-colors"
+            className="text-zinc-400 hover:text-white transition-colors"
             onClick={() => setMenuOpen(false)}
           >
             Register Company
           </Link>
 
           {status === 'loading' ? (
-            <div className="w-20 h-4 bg-gray-700 rounded animate-pulse" />
+            <div className="w-20 h-4 bg-zinc-700 rounded animate-pulse" />
           ) : session ? (
             <>
               <Link
                 href="/dashboard"
-                className="text-gray-300 hover:text-white transition-colors"
+                className="text-zinc-400 hover:text-white transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 Dashboard
@@ -167,7 +167,7 @@ export function Header() {
                     setMenuOpen(false);
                     signOut();
                   }}
-                  className="text-gray-300 hover:text-white hover:bg-gray-800"
+                  className="text-zinc-400 hover:text-white hover:bg-zinc-800"
                 >
                   Sign Out
                 </Button>

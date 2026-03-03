@@ -27,7 +27,7 @@ npm run test:e2e          # Run Playwright E2E tests
 - **Database**: Supabase (PostgreSQL + pgvector extension)
 - **Auth**: NextAuth (Google OAuth for users) + custom email/password for admins
 - **Search**: Hybrid search combining OpenAI embeddings (text-embedding-3-small) with PostgreSQL full-text search using Reciprocal Rank Fusion (product matches boosted)
-- **Styling**: Tailwind CSS with Space Mono font
+- **Styling**: Tailwind CSS with SF Pro / system font stack, zinc palette, semantic CSS variables
 
 ### Key Data Flow
 
@@ -89,9 +89,10 @@ In-memory rate limiter in `/lib/rate-limit.ts` with max store size of 10,000 ent
 ### Search Ranking
 
 The `search_companies_with_products` SQL function uses RRF (Reciprocal Rank Fusion) to combine semantic and keyword scores. Key tuning parameters:
-- **Semantic distance threshold**: `0.42` cosine distance — rejects vague matches (lower = stricter)
+- **Semantic distance threshold**: `0.46` cosine distance — rejects vague matches (lower = stricter)
 - **Company RRF k**: `60` (standard) — `1/(60+rank)`
 - **Product RRF k**: `45` (lower = top ranks more impactful) with **1.5× boost** — `(1/(45+rank)) * 1.5`
+- **OR keyword fallback**: `safe_tsquery_or()` splits multi-word queries into OR terms; matches not already found by AND keywords get dampened score (k=80, 0.5× weight). Single-word queries are unaffected (OR CTE returns empty due to NOT IN exclusion).
 - Product-level matches outscore equivalent company-level matches, so a company with a matching product ranks above a company with only a vague description match
 - Pagination uses `COUNT(*) OVER()` in the SQL function (returned as `total_count`); no separate count query needed in the TS client
 
@@ -151,7 +152,16 @@ Key endpoints:
 
 ### UI Patterns
 
-- **Card `interactive` prop**: Base `Card` has no hover effect. Pass `interactive` to enable `hover:shadow-md` on clickable cards (e.g., CompanyCard). Non-interactive cards (reviews, stats) omit it.
+- **Design system**: Zinc palette (not gray), `rounded-2xl` cards, `rounded-xl` buttons/inputs, off-white background (`#FAFAFA`), custom subtle shadows (`shadow-[0_1px_3px_rgba(0,0,0,0.04)]`)
+- **CSS variables** (`globals.css`): `--background`, `--foreground`, `--border`, `--muted`, `--surface`, `--accent` — used for semantic theming
+- **Fluid typography**: Use `.text-fluid-hero`, `.text-fluid-title`, `.text-fluid-body` (clamp-based) for responsive headings
+- **Typography weight**: Prefer `font-semibold` over `font-bold` for headings; use `tracking-tight` on large headings
+- **Card `interactive` prop**: Base `Card` has no hover effect. Pass `interactive` to enable `hover:-translate-y-0.5` lift + deeper shadow on clickable cards (e.g., CompanyCard). Non-interactive cards (reviews, stats) omit it.
+- **Button press feedback**: All buttons have `active:scale-[0.98]` for tactile press feel
+- **Focus rings**: Use `focus:ring-blue-600/20 focus:border-blue-600` (tinted, not opaque) on inputs/search
+- **Micro-interactions**: Global base transition on `a, button, input, select, textarea` (150ms cubic-bezier) defined in `globals.css`
+- **Header/Footer**: `bg-zinc-950` (not pure black), nav links `text-zinc-400`, header has `border-b border-zinc-800/50`
+- **Filter labels**: `text-xs font-semibold uppercase tracking-wider text-zinc-500` for structured sidebar feel
 - **ConfirmDialog**: Use `<ConfirmDialog>` (native `<dialog>`) instead of `window.confirm()` for destructive actions. Supports `variant="danger"` for delete confirmations.
 - **Mobile navigation**: Header uses a hamburger menu on `md:` breakpoint. Admin sidebar uses an overlay drawer on `lg:` breakpoint.
 - **Form accessibility**: Input, Textarea, and Select link errors via `aria-describedby` and `aria-invalid` automatically when `id` and `error` props are provided.

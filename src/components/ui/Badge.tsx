@@ -11,7 +11,7 @@ interface BadgeProps {
 
 export function Badge({ children, variant = 'default', size = 'sm', className }: BadgeProps) {
   const variants = {
-    default: 'bg-gray-100 text-gray-700 ring-1 ring-inset ring-gray-200',
+    default: 'bg-zinc-100 text-zinc-700 ring-1 ring-inset ring-zinc-200',
     primary: 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200',
     success: 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-200',
     warning: 'bg-yellow-50 text-yellow-800 ring-1 ring-inset ring-yellow-300',

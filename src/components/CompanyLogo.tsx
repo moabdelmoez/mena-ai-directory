@@ -20,12 +20,12 @@ export function CompanyLogo({ logo, name, size = 'sm', interactive = false, logo
 
   const textSizeClass = size === 'lg' ? 'text-3xl' : 'text-xl';
 
-  const baseContainerClasses = `flex-shrink-0 ${sizeClasses} rounded-xl border border-gray-200 shadow-sm`;
+  const baseContainerClasses = `flex-shrink-0 ${sizeClasses} rounded-xl border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)]`;
   const interactiveClasses = interactive
     ? 'hover:shadow-md hover:scale-[1.02] transition-all duration-200'
     : '';
 
-  const logoBgClass = logo_bg === 'black' ? 'bg-black' : logo_bg === 'white' ? 'bg-white' : 'bg-gray-100';
+  const logoBgClass = logo_bg === 'black' ? 'bg-black' : logo_bg === 'white' ? 'bg-white' : 'bg-zinc-100';
 
   if (logo && !imageError) {
     return (
@@ -43,8 +43,8 @@ export function CompanyLogo({ logo, name, size = 'sm', interactive = false, logo
   }
 
   return (
-    <div className={`${baseContainerClasses} ${interactiveClasses} bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center`}>
-      <span className={`text-white font-bold ${textSizeClass}`}>
+    <div className={`${baseContainerClasses} ${interactiveClasses} bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center`}>
+      <span className={`text-white font-semibold ${textSizeClass}`}>
         {name.charAt(0).toUpperCase()}
       </span>
     </div>

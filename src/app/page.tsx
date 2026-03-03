@@ -5,12 +5,12 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative bg-white py-20 lg:py-32">
+      <section className="relative bg-gradient-to-b from-white to-zinc-50/50 py-24 lg:py-40">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl tracking-tight text-gray-800 font-bold">
+          <h1 className="text-fluid-hero tracking-tight text-zinc-800 font-semibold">
             Discover AI Companies in MENA
           </h1>
-          <p className="mt-6 text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto">
+          <p className="mt-6 text-fluid-body text-zinc-500 max-w-2xl mx-auto">
             Your gateway to the Middle East and North Africa AI ecosystem.
             Browse and connect with innovative AI companies across the region.
           </p>
@@ -26,16 +26,16 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-[var(--background)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl text-center text-gray-800 font-bold mb-12">
+          <h2 className="text-fluid-title text-center text-zinc-800 font-semibold tracking-tight mb-12">
             Why Use MENA AI Directory?
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center mb-4">
+            <div className="bg-white border border-zinc-200/60 rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+              <div className="w-12 h-12 rounded-xl bg-blue-600/10 flex items-center justify-center mb-4">
                 <svg
-                  className="w-6 h-6 text-blue-500"
+                  className="w-6 h-6 text-blue-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -48,19 +48,19 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-2">
+              <h3 className="text-lg font-semibold text-zinc-800 mb-2">
                 Smart Search
               </h3>
-              <p className="text-gray-500">
+              <p className="text-zinc-500">
                 Find relevant AI companies using our AI-powered semantic search.
                 Search by capabilities, industries, or use cases.
               </p>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mb-4">
+            <div className="bg-white border border-zinc-200/60 rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+              <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center mb-4">
                 <svg
-                  className="w-6 h-6 text-gray-800"
+                  className="w-6 h-6 text-zinc-800"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -73,19 +73,19 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-2">
+              <h3 className="text-lg font-semibold text-zinc-800 mb-2">
                 Curated Listings
               </h3>
-              <p className="text-gray-500">
+              <p className="text-zinc-500">
                 Every company is reviewed before listing. Browse verified AI
                 companies with detailed profiles and user reviews.
               </p>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mb-4">
+            <div className="bg-white border border-zinc-200/60 rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+              <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center mb-4">
                 <svg
-                  className="w-6 h-6 text-gray-800"
+                  className="w-6 h-6 text-zinc-800"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -98,10 +98,10 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-2">
+              <h3 className="text-lg font-semibold text-zinc-800 mb-2">
                 Community Reviews
               </h3>
-              <p className="text-gray-500">
+              <p className="text-zinc-500">
                 Read authentic reviews from users who have worked with these
                 companies. Share your own experiences.
               </p>
@@ -111,18 +111,18 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[var(--background)] border-t border-zinc-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl text-gray-800 font-bold mb-4">
+          <h2 className="text-fluid-title text-zinc-800 font-semibold tracking-tight mb-4">
             List Your AI Company
           </h2>
-          <p className="text-gray-500 text-lg mb-8">
+          <p className="text-zinc-500 text-lg mb-8">
             Join the MENA AI directory and get discovered by potential clients
             and partners across the region.
           </p>
           <a
             href="/register"
-            className="inline-flex items-center px-6 py-3 rounded-lg bg-black text-white font-bold hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center px-6 py-3 rounded-xl bg-zinc-900 text-white font-semibold hover:bg-zinc-800 transition-colors"
           >
             Register Your Company
             <svg

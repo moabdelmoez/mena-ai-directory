@@ -27,7 +27,7 @@ function CheckboxGroup({
 }) {
   return (
     <div>
-      <p className="text-sm font-medium text-gray-700 mb-2">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">{label}</p>
       <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
         {options.map((option) => (
           <label key={option} className="flex items-center gap-2 cursor-pointer group">
@@ -35,9 +35,9 @@ function CheckboxGroup({
               type="checkbox"
               checked={selected.includes(option)}
               onChange={() => onToggle(option)}
-              className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="h-3.5 w-3.5 rounded border-zinc-300 text-blue-600 focus:ring-blue-600"
             />
-            <span className="text-sm text-gray-600 group-hover:text-gray-900 leading-tight">{option}</span>
+            <span className="text-sm text-zinc-600 group-hover:text-zinc-900 leading-tight">{option}</span>
           </label>
         ))}
       </div>
@@ -154,9 +154,9 @@ function SearchContent() {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Filters Sidebar */}
         <aside className="w-full lg:w-64 flex-shrink-0">
-          <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-24">
+          <div className="bg-white rounded-2xl border border-zinc-200/60 p-6 sticky top-24 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-gray-900">Filters</h2>
+              <h2 className="font-semibold text-zinc-900">Filters</h2>
               {hasFilters && (
                 <Button variant="ghost" size="sm" onClick={clearFilters}>
                   Clear all
@@ -164,33 +164,39 @@ function SearchContent() {
               )}
             </div>
 
-            <div className="space-y-6">
+            <div className="divide-y divide-zinc-100">
               {/* Country Filter */}
-              <CheckboxGroup
-                label="Country"
-                options={countryOptions}
-                selected={selectedCountries}
-                onToggle={(v) => toggleArrayParam('hq_country', selectedCountries, v)}
-              />
+              <div className="py-4 first:pt-0">
+                <CheckboxGroup
+                  label="Country"
+                  options={countryOptions}
+                  selected={selectedCountries}
+                  onToggle={(v) => toggleArrayParam('hq_country', selectedCountries, v)}
+                />
+              </div>
 
               {/* Tech Category Filter */}
               {filterOptions.tech_categories.length > 0 && (
-                <CheckboxGroup
-                  label="Tech Category"
-                  options={filterOptions.tech_categories}
-                  selected={selectedTechCategories}
-                  onToggle={(v) => toggleArrayParam('tech_categories', selectedTechCategories, v)}
-                />
+                <div className="py-4">
+                  <CheckboxGroup
+                    label="Tech Category"
+                    options={filterOptions.tech_categories}
+                    selected={selectedTechCategories}
+                    onToggle={(v) => toggleArrayParam('tech_categories', selectedTechCategories, v)}
+                  />
+                </div>
               )}
 
               {/* Industry Filter */}
               {filterOptions.industries.length > 0 && (
-                <CheckboxGroup
-                  label="Industry"
-                  options={filterOptions.industries}
-                  selected={selectedIndustries}
-                  onToggle={(v) => toggleArrayParam('industries', selectedIndustries, v)}
-                />
+                <div className="py-4 last:pb-0">
+                  <CheckboxGroup
+                    label="Industry"
+                    options={filterOptions.industries}
+                    selected={selectedIndustries}
+                    onToggle={(v) => toggleArrayParam('industries', selectedIndustries, v)}
+                  />
+                </div>
               )}
             </div>
           </div>
@@ -202,17 +208,17 @@ function SearchContent() {
           <div className="flex items-center justify-between mb-6">
             <div>
               {query && (
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-semibold text-zinc-900">
                   Results for &ldquo;{query}&rdquo;
                 </h1>
               )}
               {!query && (
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-semibold text-zinc-900">
                   Browse Companies
                 </h1>
               )}
               {results && !isLoading && (
-                <p className="text-gray-500 mt-1">
+                <p className="text-zinc-500 mt-1">
                   {results.total} {results.total === 1 ? 'company' : 'companies'} found
                 </p>
               )}
@@ -225,14 +231,14 @@ function SearchContent() {
               {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse"
+                  className="bg-white rounded-2xl border border-zinc-200/60 p-6 animate-pulse"
                 >
                   <div className="flex gap-4">
-                    <div className="w-16 h-16 bg-gray-200 rounded-lg" />
+                    <div className="w-16 h-16 bg-zinc-200/60 rounded-xl" />
                     <div className="flex-1">
-                      <div className="h-5 bg-gray-200 rounded w-1/3 mb-2" />
-                      <div className="h-4 bg-gray-200 rounded w-2/3 mb-2" />
-                      <div className="h-4 bg-gray-200 rounded w-1/2" />
+                      <div className="h-5 bg-zinc-200/60 rounded w-1/3 mb-2" />
+                      <div className="h-4 bg-zinc-200/60 rounded w-2/3 mb-2" />
+                      <div className="h-4 bg-zinc-200/60 rounded w-1/2" />
                     </div>
                   </div>
                 </div>
@@ -243,7 +249,7 @@ function SearchContent() {
           {/* Error State */}
           {!isLoading && error && (
             <div className="flex flex-col items-center justify-center py-16">
-              <div className="bg-white rounded-xl border border-gray-200 p-8 text-center max-w-md">
+              <div className="bg-white rounded-2xl border border-zinc-200/60 p-8 text-center max-w-md shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
                 <svg
                   className="mx-auto h-12 w-12 text-red-400 mb-4"
                   fill="none"
@@ -257,7 +263,7 @@ function SearchContent() {
                     d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
                   />
                 </svg>
-                <p className="text-gray-700 mb-4">{error}</p>
+                <p className="text-zinc-700 mb-4">{error}</p>
                 <Button variant="primary" onClick={() => fetchResults()}>
                   Try Again
                 </Button>
@@ -292,27 +298,27 @@ export default function SearchPage() {
     <Suspense fallback={
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse">
         <div className="mb-8">
-          <div className="h-12 bg-gray-200 rounded-xl max-w-2xl" />
+          <div className="h-12 bg-zinc-200/60 rounded-2xl max-w-2xl" />
         </div>
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="w-full lg:w-64 flex-shrink-0">
-            <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-              <div className="h-5 bg-gray-200 rounded w-1/2" />
-              <div className="h-4 bg-gray-200 rounded w-3/4" />
-              <div className="h-4 bg-gray-200 rounded w-2/3" />
-              <div className="h-4 bg-gray-200 rounded w-3/4" />
-              <div className="h-4 bg-gray-200 rounded w-1/2" />
+            <div className="bg-white rounded-2xl border border-zinc-200/60 p-6 space-y-4">
+              <div className="h-5 bg-zinc-200/60 rounded w-1/2" />
+              <div className="h-4 bg-zinc-200/60 rounded w-3/4" />
+              <div className="h-4 bg-zinc-200/60 rounded w-2/3" />
+              <div className="h-4 bg-zinc-200/60 rounded w-3/4" />
+              <div className="h-4 bg-zinc-200/60 rounded w-1/2" />
             </div>
           </aside>
           <div className="flex-1 space-y-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 p-6">
+              <div key={i} className="bg-white rounded-2xl border border-zinc-200/60 p-6">
                 <div className="flex gap-4">
-                  <div className="w-16 h-16 bg-gray-200 rounded-lg" />
+                  <div className="w-16 h-16 bg-zinc-200/60 rounded-xl" />
                   <div className="flex-1">
-                    <div className="h-5 bg-gray-200 rounded w-1/3 mb-2" />
-                    <div className="h-4 bg-gray-200 rounded w-2/3 mb-2" />
-                    <div className="h-4 bg-gray-200 rounded w-1/2" />
+                    <div className="h-5 bg-zinc-200/60 rounded w-1/3 mb-2" />
+                    <div className="h-4 bg-zinc-200/60 rounded w-2/3 mb-2" />
+                    <div className="h-4 bg-zinc-200/60 rounded w-1/2" />
                   </div>
                 </div>
               </div>

@@ -1,16 +1,8 @@
 import type { Metadata } from 'next';
-import { Space_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-
-const spaceMono = Space_Mono({
-  subsets: ['latin'],
-  variable: '--font-space-mono',
-  weight: ['400', '700'],
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: {
@@ -57,7 +49,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${spaceMono.variable} font-mono antialiased min-h-screen flex flex-col bg-white`}>
+      <body className="font-sans antialiased min-h-screen flex flex-col bg-[var(--background)]">
         <Providers>
           <Header />
           <main className="flex-1">{children}</main>

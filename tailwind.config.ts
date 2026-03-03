@@ -11,9 +11,13 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        accent: "var(--accent)",
+        muted: "var(--muted)",
+        surface: "var(--surface)",
+        "border-default": "var(--border)",
       },
       fontFamily: {
-        mono: ['var(--font-space-mono)', 'Space Mono', 'ui-monospace', 'monospace'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
       },
     },
   },

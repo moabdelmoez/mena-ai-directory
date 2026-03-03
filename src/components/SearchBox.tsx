@@ -37,7 +37,7 @@ export function SearchBox({ initialQuery = '', size = 'lg', className = '' }: Se
       <div className="relative">
         <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
           <svg
-            className={`${iconSizes[size]} text-gray-400`}
+            className={`${iconSizes[size]} text-zinc-400`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -56,11 +56,11 @@ export function SearchBox({ initialQuery = '', size = 'lg', className = '' }: Se
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search AI companies in MENA..."
           aria-label="Search AI companies"
-          className={`w-full ${sizes[size]} pl-12 pr-20 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow shadow-sm hover:shadow-md focus:shadow-lg`}
+          className={`w-full ${sizes[size]} pl-12 pr-20 rounded-2xl border border-zinc-300 bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] focus:shadow-[0_2px_12px_rgba(0,0,0,0.08)]`}
         />
         <button
           type="submit"
-          className={`absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600 hover:text-blue-700 font-medium ${size === 'lg' ? 'text-base' : 'text-sm'}`}
+          className={`absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600 hover:text-blue-700 font-semibold ${size === 'lg' ? 'text-base' : 'text-sm'}`}
         >
           Search
         </button>

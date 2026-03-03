@@ -20,11 +20,11 @@ export const CompanyCard = memo(function CompanyCard({ company, matchingProduct 
           <CompanyLogo logo={company.logo} name={company.name} size="sm" logo_bg={company.logo_bg} />
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
+              <h3 className="text-lg font-semibold text-zinc-900 truncate">
                 {company.name}
               </h3>
             </div>
-            <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+            <p className="mt-1 text-sm text-zinc-600 line-clamp-2">
               {truncateText(company.description, 150)}
             </p>
             {matchingProduct && (
@@ -35,11 +35,11 @@ export const CompanyCard = memo(function CompanyCard({ company, matchingProduct 
                   </svg>
                   Matching Product
                 </div>
-                <span className="text-sm text-gray-900 font-medium">{matchingProduct.name}</span>
-                <p className="text-xs text-gray-600 line-clamp-1">{matchingProduct.description}</p>
+                <span className="text-sm text-zinc-900 font-medium">{matchingProduct.name}</span>
+                <p className="text-xs text-zinc-600 line-clamp-1">{matchingProduct.description}</p>
               </div>
             )}
-            <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
+            <div className="mt-2 flex items-center justify-between text-sm text-zinc-500">
               <span>{company.hq_country}</span>
               {company.average_rating !== undefined && company.average_rating > 0 && (
                 <span className="flex items-center gap-1">
