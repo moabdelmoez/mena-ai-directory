@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase';
-import { getCompanyProducts } from '@/lib/search';
+import { COMPANY_COLUMNS, getCompanyProducts } from '@/lib/company-repository';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
 import { generateCompanyEmbedding, generateProductEmbedding } from '@/lib/openai';
 import { MENA_COUNTRIES } from '@/constants';
@@ -27,12 +27,9 @@ export async function GET(
 
   const { id } = await params;
 
-  // Select specific columns to exclude embedding vectors
-  const companyColumns = 'id, company_id, name, slug, company_url, linkedin_profile, description, logo, logo_bg, hq_country, status, submitted_by, created_at, updated_at';
-
   const { data: company, error } = await supabaseAdmin
     .from('companies')
-    .select(companyColumns)
+    .select(COMPANY_COLUMNS)
     .eq('id', id)
     .single();
 

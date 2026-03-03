@@ -1,11 +1,10 @@
 import { supabaseAdmin } from './supabase';
 import { generateEmbedding } from './openai';
-import { Company, Product, SearchFilters, PaginatedResponse, MatchingProduct } from '@/types';
+import { Company, SearchFilters, PaginatedResponse, MatchingProduct } from '@/types';
+import { COMPANY_COLUMNS, getCompanyBySlug, getCompanyById, getCompanyProducts } from './company-repository';
 
-// Explicit column lists to exclude embedding vectors (1536-dim, ~6KB per row)
-const COMPANY_COLUMNS = 'id, company_id, name, slug, company_url, linkedin_profile, description, logo, logo_bg, hq_country, status, submitted_by, created_at, updated_at';
-const COMPANY_WITH_RATINGS_COLUMNS = `${COMPANY_COLUMNS}, average_rating, review_count`;
-const PRODUCT_COLUMNS = 'id, product_id, company_id, name, description, product_url, created_at, updated_at';
+// Re-export repository functions for backward compatibility
+export { COMPANY_COLUMNS, getCompanyBySlug, getCompanyById, getCompanyProducts };
 
 interface SearchResultRow {
   id: string;
@@ -198,70 +197,4 @@ async function getFilteredCompanies(
     limit,
     totalPages: Math.ceil((count || 0) / limit),
   };
-}
-
-export async function getCompanyBySlug(slug: string): Promise<Company | null> {
-  const { data, error } = await supabaseAdmin
-    .from('companies_with_ratings')
-    .select(COMPANY_WITH_RATINGS_COLUMNS)
-    .eq('slug', slug)
-    .eq('status', 'approved')
-    .single();
-
-  if (error || !data) {
-    return null;
-  }
-
-  return data as Company;
-}
-
-export async function getCompanyById(id: string): Promise<Company | null> {
-  const { data, error } = await supabaseAdmin
-    .from('companies')
-    .select(COMPANY_COLUMNS)
-    .eq('id', id)
-    .single();
-
-  if (error || !data) {
-    return null;
-  }
-
-  return data as Company;
-}
-
-export async function getCompanyProducts(companyId: string): Promise<Product[]> {
-  const { data: products, error } = await supabaseAdmin
-    .from('products')
-    .select(PRODUCT_COLUMNS)
-    .eq('company_id', companyId)
-    .order('created_at', { ascending: true });
-
-  if (error) {
-    console.error('Error fetching products:', error);
-    return [];
-  }
-
-  if (!products || products.length === 0) return [];
-
-  const productIds = products.map((p) => p.id);
-
-  const { data: classifications } = await supabaseAdmin
-    .from('product_classification')
-    .select('product_id, tech_category, industry')
-    .in('product_id', productIds);
-
-  const classMap = new Map<string, { tech_category: string | null; industry: string | null }>();
-  for (const c of classifications ?? []) {
-    classMap.set(c.product_id, { tech_category: c.tech_category, industry: c.industry });
-  }
-
-  return products.map((p) => {
-    const cls = classMap.get(p.id) ?? null;
-    return {
-      ...p,
-      embedding: null,
-      tech_category: cls?.tech_category ?? null,
-      industry: cls?.industry ?? null,
-    } as Product;
-  });
 }

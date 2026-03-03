@@ -1,18 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { generateProductEmbedding } from '@/lib/openai';
-import { requireAdmin } from '@/lib/admin-auth';
+import { requireAuth } from '@/lib/auth-helpers';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
-import { getCompanyById } from '@/lib/search';
+import { getCompanyById } from '@/lib/company-repository';
 
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const rateLimitKey = getRateLimitKey('search', ip);
+  const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMITS.search);
+
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded', resetIn: rateLimit.resetIn },
+      { status: 429 }
+    );
+  }
+
   const searchParams = request.nextUrl.searchParams;
   const companyId = searchParams.get('company_id');
 
   if (!companyId) {
     return NextResponse.json({ error: 'company_id is required' }, { status: 400 });
+  }
+
+  // Verify parent company exists and is approved
+  const { data: company, error: companyError } = await supabaseAdmin
+    .from('companies')
+    .select('id, status')
+    .eq('id', companyId)
+    .single();
+
+  if (companyError || !company) {
+    return NextResponse.json({ error: 'Company not found' }, { status: 404 });
+  }
+
+  if (company.status !== 'approved') {
+    return NextResponse.json({ error: 'Company not found' }, { status: 404 });
   }
 
   // Select specific columns to exclude embedding vectors (1536-dim)
@@ -33,17 +58,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  // Check for admin session first
-  const adminSession = await requireAdmin(request);
+  const auth = await requireAuth(request);
 
-  // If not admin, check for user session
-  const session = !adminSession ? await getServerSession(authOptions) : null;
-
-  if (!adminSession && !session?.user?.id) {
+  if (!auth) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const userId = session?.user?.id;
+  const { admin: adminSession, userId } = auth;
 
   // Rate limiting for non-admin users
   if (!adminSession && userId) {

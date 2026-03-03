@@ -128,11 +128,9 @@ test.describe('Search Functionality', () => {
     // Wait for results count to appear
     await page.waitForSelector('text=companies found', { timeout: 20000 });
 
-    // Wait a bit for company cards to render
-    await page.waitForTimeout(1000);
-
-    // Click on the first company card link
+    // Wait for company card links to render
     const firstCompanyLink = page.locator('a[href^="/company/"]').first();
+    await firstCompanyLink.waitFor({ state: 'visible', timeout: 10000 });
     const count = await firstCompanyLink.count();
 
     if (count > 0) {

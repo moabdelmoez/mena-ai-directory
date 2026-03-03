@@ -13,6 +13,8 @@
     "import:classifications": "npx tsx scripts/import-classifications.ts",
     "remove-broken-logos": "npx tsx scripts/remove-broken-logos.ts",
     "remove-all-logos": "npx tsx scripts/remove-all-logos.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -36,6 +38,7 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.18"
   }
 }

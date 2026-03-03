@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
+import { COMPANY_COLUMNS } from '@/lib/company-repository';
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error, count } = await supabaseAdmin
     .from('companies')
-    .select('id, company_id, name, slug, company_url, linkedin_profile, description, logo, logo_bg, hq_country, status, submitted_by, created_at, updated_at', { count: 'exact' })
+    .select(COMPANY_COLUMNS, { count: 'exact' })
     .eq('submitted_by', session.user.id)
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);

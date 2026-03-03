@@ -1,7 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 // Custom fetch with retry logic for network resilience
@@ -40,47 +39,9 @@ const fetchWithRetry = async (url: RequestInfo | URL, options?: RequestInit): Pr
   throw new Error('Max retries exceeded');
 };
 
-// Lazy initialization for client
-let _supabase: SupabaseClient | null = null;
-let _supabaseAdmin: SupabaseClient | null = null;
-
-// Client for browser usage (uses anon key)
-export const getSupabaseClient = () => {
-  if (!_supabase && supabaseUrl && supabaseAnonKey) {
-    _supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { fetch: fetchWithRetry },
-    });
-  }
-  return _supabase;
-};
-
 // Admin client for server-side operations (uses service role key)
-export const getSupabaseAdmin = () => {
-  if (!_supabaseAdmin && supabaseUrl && supabaseServiceKey) {
-    _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      global: { fetch: fetchWithRetry },
-    });
-  }
-  if (!_supabaseAdmin) {
-    throw new Error('Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.');
-  }
-  return _supabaseAdmin;
-};
-
-// Legacy exports (will throw if not configured)
-export const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey, {
-      global: { fetch: fetchWithRetry },
-    })
-  : (null as unknown as SupabaseClient);
-
-export const supabaseAdmin = supabaseUrl && supabaseServiceKey
+export const supabaseAdmin: SupabaseClient = supabaseUrl && supabaseServiceKey
   ? createClient(supabaseUrl, supabaseServiceKey, {
       global: { fetch: fetchWithRetry },
     })
   : (null as unknown as SupabaseClient);
-
-// Helper to get a server-side client
-export function getSupabaseServerClient() {
-  return getSupabaseAdmin();
-}

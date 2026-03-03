@@ -2,7 +2,7 @@ import { cache } from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getCompanyBySlug, getCompanyProducts } from '@/lib/search';
+import { getCompanyBySlug, getCompanyProducts } from '@/lib/company-repository';
 import { Card } from '@/components/ui';
 import { StarRating } from '@/components/StarRating';
 import { CompanyReviews } from './CompanyReviews';

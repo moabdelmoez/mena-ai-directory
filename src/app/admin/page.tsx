@@ -18,31 +18,15 @@ export default function AdminDashboard() {
 
   const fetchStats = useCallback(async () => {
     try {
-      // Fetch counts for each status
-      const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
-        fetch('/api/admin/companies?status=pending&limit=1'),
-        fetch('/api/admin/companies?status=approved&limit=1'),
-        fetch('/api/admin/companies?status=rejected&limit=1'),
-      ]);
+      const res = await fetch('/api/admin/stats');
 
-      if (!pendingRes.ok || !approvedRes.ok || !rejectedRes.ok) {
-        // Redirect to login if unauthorized
+      if (!res.ok) {
         router.push('/admin/login');
         return;
       }
 
-      const [pending, approved, rejected] = await Promise.all([
-        pendingRes.json(),
-        approvedRes.json(),
-        rejectedRes.json(),
-      ]);
-
-      setStats({
-        pending: pending.total || 0,
-        approved: approved.total || 0,
-        rejected: rejected.total || 0,
-        total: (pending.total || 0) + (approved.total || 0) + (rejected.total || 0),
-      });
+      const data = await res.json();
+      setStats(data);
     } catch (error) {
       console.error('Error fetching stats:', error);
       router.push('/admin/login');

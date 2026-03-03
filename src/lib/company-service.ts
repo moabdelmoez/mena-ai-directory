@@ -1,6 +1,8 @@
 import { supabaseAdmin } from './supabase';
-import { generateProductEmbedding } from './openai';
+import { generateCompanyEmbedding, generateProductEmbedding } from './openai';
+import { generateSlug } from './utils';
 import { ProductInput } from '@/types';
+import { MENA_COUNTRIES } from '@/constants';
 
 // Safe FormData extraction — validates values are strings, not File objects
 export function getFormString(formData: FormData, key: string): string {
@@ -88,12 +90,18 @@ export function parseAndValidateProducts(productsJson: string): ProductInput[] {
   return parsed as ProductInput[];
 }
 
+const MAX_PRODUCTS_PER_BATCH = 20;
+
 export async function insertProducts(
   companyId: string,
   products: ProductInput[],
   companyName: string
 ): Promise<string[]> {
   const warnings: string[] = [];
+
+  if (products.length > MAX_PRODUCTS_PER_BATCH) {
+    throw new Error(`Too many products: ${products.length}. Maximum ${MAX_PRODUCTS_PER_BATCH} products per request.`);
+  }
 
   const productInserts = await Promise.all(
     products.map(async (product) => {
@@ -117,4 +125,133 @@ export async function insertProducts(
   }
 
   return warnings;
+}
+
+interface CreateCompanyOptions {
+  formData: FormData;
+  submittedBy?: string;
+  autoApprove: boolean;
+  allowLogoBg?: boolean;
+}
+
+interface CreateCompanyResult {
+  company: Record<string, unknown>;
+  warnings: string[];
+}
+
+export async function createCompany(opts: CreateCompanyOptions): Promise<CreateCompanyResult> {
+  const { formData, submittedBy, autoApprove, allowLogoBg } = opts;
+
+  const name = getFormString(formData, 'name');
+  const company_url = getFormStringOrNull(formData, 'company_url');
+  const linkedin_profile = getFormStringOrNull(formData, 'linkedin_profile');
+  const description = getFormString(formData, 'description');
+  const hq_country = getFormString(formData, 'hq_country');
+  const logo = getFormFile(formData, 'logo');
+  const productsJson = getFormStringOrNull(formData, 'products');
+
+  // Optional logo_bg (admin-only)
+  let logoBg: string | null = null;
+  if (allowLogoBg) {
+    const logoBgRaw = getFormStringOrNull(formData, 'logo_bg');
+    logoBg = (logoBgRaw === 'white' || logoBgRaw === 'black') ? logoBgRaw : null;
+  }
+
+  // Parse products if provided
+  let products: ProductInput[] = [];
+  if (productsJson) {
+    products = parseAndValidateProducts(productsJson);
+  }
+
+  // Validation
+  if (!name || !description || !hq_country) {
+    throw new CreateCompanyError('Name, description, and headquarters country are required', 400);
+  }
+
+  if (!MENA_COUNTRIES.includes(hq_country as typeof MENA_COUNTRIES[number])) {
+    throw new CreateCompanyError('Invalid country', 400);
+  }
+
+  // Handle logo upload
+  let logoUrl: string | null = null;
+  if (logo && logo.size > 0) {
+    const logoError = validateLogo(logo);
+    if (logoError) {
+      throw new CreateCompanyError(logoError, 400);
+    }
+    logoUrl = await uploadLogo(logo);
+  }
+
+  // Prefix-filtered slug generation (Phase 3.3)
+  const baseSlug = generateSlug(name);
+  const { data: matchingSlugs, error: slugError } = await supabaseAdmin
+    .from('companies')
+    .select('slug')
+    .ilike('slug', `${baseSlug}%`);
+
+  if (slugError) {
+    console.error('Slug query error:', slugError);
+    throw new CreateCompanyError('Failed to generate unique slug', 500);
+  }
+
+  const existingSlugs = (matchingSlugs || []).map(s => s.slug);
+  let slug = baseSlug;
+  let counter = 1;
+  while (existingSlugs.includes(slug)) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+
+  // Generate embedding
+  const embedding = await generateCompanyEmbedding(name, description);
+
+  // Build insert data
+  const insertData: Record<string, unknown> = {
+    name,
+    slug,
+    company_url: company_url || null,
+    linkedin_profile: linkedin_profile || null,
+    description,
+    logo: logoUrl,
+    hq_country,
+    status: autoApprove ? 'approved' : 'pending',
+    embedding: JSON.stringify(embedding),
+  };
+
+  if (submittedBy) {
+    insertData.submitted_by = submittedBy;
+  }
+
+  if (allowLogoBg) {
+    insertData.logo_bg = logoBg;
+  }
+
+  // Insert company
+  const { data: company, error: insertError } = await supabaseAdmin
+    .from('companies')
+    .insert(insertData)
+    .select()
+    .single();
+
+  if (insertError) {
+    console.error('Insert error:', insertError);
+    throw new CreateCompanyError('Failed to create company', 500);
+  }
+
+  // Insert products if provided
+  const warnings: string[] = [];
+  if (products.length > 0 && company) {
+    const productWarnings = await insertProducts(company.id, products, name);
+    warnings.push(...productWarnings);
+  }
+
+  return { company, warnings };
+}
+
+export class CreateCompanyError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
 }

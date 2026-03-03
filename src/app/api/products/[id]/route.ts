@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { generateProductEmbedding } from '@/lib/openai';
-import { requireAdmin } from '@/lib/admin-auth';
-import { getCompanyById } from '@/lib/search';
+import { requireAuth } from '@/lib/auth-helpers';
+import { getCompanyById } from '@/lib/company-repository';
 
 async function getProductById(id: string) {
   const { data, error } = await supabaseAdmin
@@ -37,17 +35,13 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Check for admin session first
-  const adminSession = await requireAdmin(request);
+  const auth = await requireAuth(request);
 
-  // If not admin, check for user session
-  const session = !adminSession ? await getServerSession(authOptions) : null;
-
-  if (!adminSession && !session?.user?.id) {
+  if (!auth) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const userId = session?.user?.id;
+  const { admin: adminSession, userId } = auth;
 
   try {
     const product = await getProductById(params.id);
@@ -106,17 +100,13 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Check for admin session first
-  const adminSession = await requireAdmin(request);
+  const auth = await requireAuth(request);
 
-  // If not admin, check for user session
-  const session = !adminSession ? await getServerSession(authOptions) : null;
-
-  if (!adminSession && !session?.user?.id) {
+  if (!auth) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const userId = session?.user?.id;
+  const { admin: adminSession, userId } = auth;
 
   try {
     const product = await getProductById(params.id);

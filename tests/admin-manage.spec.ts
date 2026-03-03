@@ -41,8 +41,7 @@ test.describe('Admin Company Management', () => {
 
     // Search for the test company
     await page.fill('input[placeholder="Search companies..."]', companyName);
-    await page.waitForTimeout(800); // Wait for debounce
-    await page.waitForLoadState('networkidle');
+    await page.waitForResponse(resp => resp.url().includes('/api/admin/companies') && resp.status() === 200);
 
     // Wait for table to appear
     await page.waitForSelector('table', { timeout: 10000 }).catch(() => null);
@@ -121,8 +120,7 @@ test.describe('Admin Company Management', () => {
 
     // Verify company appears in list
     await page.fill('input[placeholder="Search companies..."]', testCompanyName);
-    await page.waitForTimeout(500);
-    await page.waitForLoadState('networkidle');
+    await page.waitForResponse(resp => resp.url().includes('/api/admin/companies') && resp.status() === 200);
 
     // Verify company is visible with Approved status
     await expect(page.locator(`text=${testCompanyName}`)).toBeVisible();
@@ -195,8 +193,7 @@ test.describe('Admin Company Management', () => {
 
     // Verify updated company name appears
     await page.fill('input[placeholder="Search companies..."]', updatedName);
-    await page.waitForTimeout(500);
-    await page.waitForLoadState('networkidle');
+    await page.waitForResponse(resp => resp.url().includes('/api/admin/companies') && resp.status() === 200);
 
     await expect(page.locator(`text=${updatedName}`)).toBeVisible();
 
@@ -241,8 +238,7 @@ test.describe('Admin Company Management', () => {
 
     // Verify company no longer appears
     await page.fill('input[placeholder="Search companies..."]', testCompanyName);
-    await page.waitForTimeout(500);
-    await page.waitForLoadState('networkidle');
+    await page.waitForResponse(resp => resp.url().includes('/api/admin/companies') && resp.status() === 200);
 
     // Company should not be found
     await expect(page.locator(`td:has-text("${testCompanyName}")`)).not.toBeVisible();
@@ -278,16 +274,14 @@ test.describe('Admin Company Management', () => {
 
     // Search for the unique term
     await page.fill('input[placeholder="Search companies..."]', uniqueSearchTerm);
-    await page.waitForTimeout(500);
-    await page.waitForLoadState('networkidle');
+    await page.waitForResponse(resp => resp.url().includes('/api/admin/companies') && resp.status() === 200);
 
     // Verify our company appears
     await expect(page.locator(`text=${testCompanyName}`)).toBeVisible();
 
     // Search for a non-existent term
     await page.fill('input[placeholder="Search companies..."]', 'NONEXISTENTCOMPANYXYZ123');
-    await page.waitForTimeout(800);
-    await page.waitForLoadState('networkidle');
+    await page.waitForResponse(resp => resp.url().includes('/api/admin/companies') && resp.status() === 200);
 
     // Verify our company doesn't appear (the unique search term shouldn't match)
     await expect(page.locator(`td:has-text("${testCompanyName}")`)).not.toBeVisible();
@@ -317,7 +311,7 @@ test.describe('Admin Company Management', () => {
 
     // First clear any existing filters and search for our company
     await page.fill('input[placeholder="Search companies..."]', TEST_PREFIX);
-    await page.waitForTimeout(500);
+    await page.waitForResponse(resp => resp.url().includes('/api/admin/companies') && resp.status() === 200);
 
     // Filter by Qatar - get the second select element (country dropdown)
     const countrySelect = page.locator('select').nth(1);
@@ -360,7 +354,7 @@ test.describe('Admin Company Management', () => {
 
     // Search for our test company
     await page.fill('input[placeholder="Search companies..."]', testCompanyName);
-    await page.waitForTimeout(500);
+    await page.waitForResponse(resp => resp.url().includes('/api/admin/companies') && resp.status() === 200);
 
     // Check AI Infra filter (in the companies list page)
     await page.check('label:has-text("AI Infra") input[type="checkbox"]');
@@ -371,16 +365,14 @@ test.describe('Admin Company Management', () => {
 
     // Uncheck AI Infra and check AI Platform instead
     await page.uncheck('label:has-text("AI Infra") input[type="checkbox"]');
-    await page.waitForTimeout(300);
-    await page.check('label:has-text("AI Platform") input[type="checkbox"]');
-    await page.waitForTimeout(500);
     await page.waitForLoadState('networkidle');
+    await page.check('label:has-text("AI Platform") input[type="checkbox"]');
+    await page.waitForResponse(resp => resp.url().includes('/api/admin/companies') && resp.status() === 200);
 
     // Our company should not appear (it only has AI Infrastructure, not AI Platform)
     // Use a specific search for our company first to narrow down
     await page.fill('input[placeholder="Search companies..."]', testCompanyName);
-    await page.waitForTimeout(800);
-    await page.waitForLoadState('networkidle');
+    await page.waitForResponse(resp => resp.url().includes('/api/admin/companies') && resp.status() === 200);
 
     // The company should not be visible since it doesn't have AI Platform
     await expect(page.locator(`td:has-text("${testCompanyName}")`)).not.toBeVisible();

@@ -82,7 +82,6 @@ export function getRateLimitKey(type: keyof typeof RATE_LIMITS, identifier: stri
   return `${type}:${identifier}`;
 }
 
-// Clean up expired entries periodically
-if (typeof setInterval !== 'undefined') {
-  setInterval(evictExpiredEntries, 60 * 1000); // Clean up every minute
-}
+// Note: Expired entries are evicted on-demand when the store reaches MAX_STORE_SIZE (see checkRateLimit).
+// This in-memory rate limiter only works for single-process deployments.
+// For serverless/multi-instance deployments, use a distributed store like @upstash/ratelimit.
