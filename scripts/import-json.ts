@@ -6,7 +6,7 @@ import * as path from 'path';
 config({ path: path.join(__dirname, '..', '.env.local') });
 
 // Configuration - update these paths as needed
-const COMPANIES_FILE = '/Users/mostafa/Downloads/Coding_Projects/extracting-company-description/output/qatar-ai-companies_2026-03-02.json';
+const COMPANIES_FILE = '/Users/mostafa/Downloads/Coding_Projects/extracting-company-description/output/uae-ai-companies_2026-03-04.json';
 const PRODUCTS_FILE: string | null = null;
 const AUTO_APPROVE = true;
 

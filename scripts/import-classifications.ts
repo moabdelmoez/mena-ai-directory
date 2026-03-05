@@ -5,7 +5,7 @@ import * as path from 'path';
 // Load environment variables from .env.local
 config({ path: path.join(__dirname, '..', '.env.local') });
 
-const CLASSIFICATIONS_FILE = '/Users/mostafa/Downloads/Coding_Projects/classification-products/output/classified_2026-03-02.json';
+const CLASSIFICATIONS_FILE = '/Users/mostafa/Downloads/Coding_Projects/classification-products/output/classified_2026-03-05.json';
 
 async function getSupabaseAdmin() {
   const { supabaseAdmin } = await import('../src/lib/supabase');
