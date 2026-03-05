@@ -2,6 +2,7 @@
 
 import { memo } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Company, MatchingProduct } from '@/types';
 import { Card } from '@/components/ui';
 import { truncateText } from '@/lib/utils';
@@ -14,6 +15,7 @@ interface CompanyCardProps {
 
 export const CompanyCard = memo(function CompanyCard({ company, matchingProduct }: CompanyCardProps) {
   return (
+    <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
     <Link href={`/company/${company.slug}`}>
       <Card className="h-full" interactive>
         <div className="flex gap-4">
@@ -54,5 +56,6 @@ export const CompanyCard = memo(function CompanyCard({ company, matchingProduct 
         </div>
       </Card>
     </Link>
+    </motion.div>
   );
 });

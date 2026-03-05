@@ -54,6 +54,12 @@ body {
   }
 }
 
+/* Search bar glow pulse */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.5; }
+}
+
 /* Global micro-interactions for interactive elements */
 @layer base {
   a,

@@ -5,3 +5,4 @@ export { Textarea } from './Textarea';
 export { Badge } from './Badge';
 export { Card } from './Card';
 export { ConfirmDialog } from './ConfirmDialog';
+export { FadeIn, StaggerChildren, StaggerItem } from './MotionWrappers';

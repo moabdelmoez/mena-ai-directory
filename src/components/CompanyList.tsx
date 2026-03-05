@@ -3,6 +3,7 @@
 import { memo } from 'react';
 import { Company, MatchingProduct } from '@/types';
 import { CompanyCard } from './CompanyCard';
+import { StaggerChildren, StaggerItem } from '@/components/ui';
 
 interface CompanyWithMatchingProduct extends Company {
   matchingProduct?: MatchingProduct;
@@ -39,14 +40,15 @@ export const CompanyList = memo(function CompanyList({ companies, emptyMessage =
   }
 
   return (
-    <div className="grid gap-4 sm:gap-6">
+    <StaggerChildren className="grid gap-4 sm:gap-6">
       {companies.map((company) => (
-        <CompanyCard
-          key={company.id}
-          company={company}
-          matchingProduct={company.matchingProduct}
-        />
+        <StaggerItem key={company.id}>
+          <CompanyCard
+            company={company}
+            matchingProduct={company.matchingProduct}
+          />
+        </StaggerItem>
       ))}
-    </div>
+    </StaggerChildren>
   );
 });
