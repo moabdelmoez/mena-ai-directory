@@ -30,6 +30,7 @@ npm run test:e2e          # Run Playwright E2E tests
 - **Auth**: NextAuth (Google OAuth for users) + custom email/password for admins
 - **Search**: Hybrid search combining OpenAI embeddings (text-embedding-3-small) with PostgreSQL full-text search using Reciprocal Rank Fusion (product matches boosted)
 - **Styling**: Tailwind CSS with SF Pro / system font stack, zinc palette, semantic CSS variables
+- **Animations**: Framer Motion for entrance animations and interactive hover/tap states
 
 ### Key Data Flow
 
@@ -150,7 +151,7 @@ Key endpoints:
 - `/src/app/api/` - API routes (companies, products, search, reviews, admin operations)
 - `/src/app/admin/` - Admin panel pages (dashboard, pending, companies, import)
 - `/src/components/` - React components (SearchBox, CompanyCard, ReviewForm, ProductCard, ProductList, ProductForm, ProductInputList, etc.)
-- `/src/components/ui/` - Base UI components (Button, Card, Input, ConfirmDialog, etc.)
+- `/src/components/ui/` - Base UI components (Button, Card, Input, ConfirmDialog, MotionWrappers, etc.)
 - `/src/lib/` - Utilities (supabase client, auth configs, openai, search logic, company-repository, auth-helpers, company-service)
 - `/src/lib/__tests__/` - Vitest unit tests
 - `/src/constants/` - Static data (tags, industries, MENA countries)
@@ -174,11 +175,14 @@ Key endpoints:
 - **CSS variables** (`globals.css`): `--background`, `--foreground`, `--border`, `--muted`, `--surface`, `--accent` — used for semantic theming
 - **Fluid typography**: Use `.text-fluid-hero`, `.text-fluid-title`, `.text-fluid-body` (clamp-based) for responsive headings
 - **Typography weight**: Prefer `font-semibold` over `font-bold` for headings; use `tracking-tight` on large headings
+- **Framer Motion wrappers** (`MotionWrappers.tsx`): `FadeIn` (fade + slide-up on mount), `StaggerChildren` + `StaggerItem` (sequential entrance animations). Used on home page sections and search results list.
 - **Card `interactive` prop**: Base `Card` has no hover effect. Pass `interactive` to enable `hover:-translate-y-0.5` lift + deeper shadow on clickable cards (e.g., CompanyCard). Non-interactive cards (reviews, stats) omit it.
+- **CompanyCard motion**: Uses Framer Motion `whileHover={{ y: -2 }}` and `whileTap={{ scale: 0.98 }}` for interactive feedback.
 - **Button press feedback**: All buttons have `active:scale-[0.98]` for tactile press feel
 - **Focus rings**: Use `focus:ring-blue-600/20 focus:border-blue-600` (tinted, not opaque) on inputs/search
 - **Micro-interactions**: Global base transition on `a, button, input, select, textarea` (150ms cubic-bezier) defined in `globals.css`
-- **Header/Footer**: `bg-zinc-950` (not pure black), nav links `text-zinc-400`, header has `border-b border-zinc-800/50`
+- **Header/Footer**: Header is `sticky top-0 z-50` with `bg-zinc-950/80 backdrop-blur-xl backdrop-saturate-150` glass-morphism effect. Nav links `text-zinc-400`, header has `border-b border-zinc-800/50`
+- **Search bar glow**: Blue gradient glow layer behind input (`blur-xl`, `from-blue-600/20 via-blue-500/20 to-blue-400/20`) with `glow-pulse` CSS animation at rest, intensifies on focus (opacity 0.3 → 0.7)
 - **Filter labels**: `text-xs font-semibold uppercase tracking-wider text-zinc-500` for structured sidebar feel
 - **ConfirmDialog**: Use `<ConfirmDialog>` (native `<dialog>`) instead of `window.confirm()` for destructive actions. Supports `variant="danger"` for delete confirmations.
 - **Mobile navigation**: Header uses a hamburger menu on `md:` breakpoint. Admin sidebar uses an overlay drawer on `lg:` breakpoint.
