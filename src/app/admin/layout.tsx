@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { classNames } from '@/lib/utils';
@@ -57,6 +57,31 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  // Handle dialog open/close
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (sidebarOpen) {
+      dialog.showModal();
+    } else {
+      dialog.close();
+    }
+  }, [sidebarOpen]);
+
+  // Handle ESC key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [sidebarOpen]);
 
   // Close sidebar on navigation
   useEffect(() => {
@@ -124,19 +149,19 @@ export default function AdminLayout({
       </div>
 
       {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
+      <dialog
+        ref={dialogRef}
+        className="p-0 m-0 border-0 bg-transparent max-w-none max-h-none w-full h-full backdrop:bg-black/30"
+        onClose={() => setSidebarOpen(false)}
+        aria-label="Admin navigation"
+      >
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
             className="fixed inset-0 bg-black/30"
             onClick={() => setSidebarOpen(false)}
             aria-hidden="true"
           />
-          <aside
-            className="relative w-64 bg-white min-h-screen"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Admin navigation"
-          >
+          <div className="relative w-64 bg-white min-h-screen">
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
@@ -148,9 +173,9 @@ export default function AdminLayout({
               </svg>
             </button>
             {sidebarContent}
-          </aside>
+          </div>
         </div>
-      )}
+      </dialog>
 
       <div className="flex">
         {/* Desktop sidebar */}

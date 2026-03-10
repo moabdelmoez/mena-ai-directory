@@ -4,7 +4,7 @@ export function generateSlug(name: string): string {
     .trim()
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/(?:^-+)|(?:-+$)/g, ''); // Remove leading and trailing hyphens
 }
 
 export function generateUniqueSlug(name: string, existingSlugs: string[]): string {

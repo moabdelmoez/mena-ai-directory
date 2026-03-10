@@ -9,6 +9,34 @@ import { CompanyReviews } from './CompanyReviews';
 import { ProductList } from '@/components/ProductList';
 import { CompanyLogo } from '@/components/CompanyLogo';
 
+/**
+ * Safely serialize JSON-LD data for embedding in a <script> tag.
+ * Sanitizes all string values to strip HTML tags, then escapes
+ * characters that could break out of the script context.
+ */
+function safeJsonLdSerialize(data: unknown): string {
+  const sanitize = (obj: unknown): unknown => {
+    if (typeof obj === 'string') {
+      // Strip any HTML tags from string values
+      return obj.replace(/<[^>]*>/g, '');
+    }
+    if (Array.isArray(obj)) {
+      return obj.map(sanitize);
+    }
+    if (obj !== null && typeof obj === 'object') {
+      return Object.fromEntries(
+        Object.entries(obj).map(([k, v]) => [k, sanitize(v)])
+      );
+    }
+    return obj;
+  };
+
+  return JSON.stringify(sanitize(data))
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
+}
+
 // ISR: Revalidate company pages every hour
 export const revalidate = 3600;
 
@@ -76,7 +104,7 @@ export default async function CompanyPage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+          __html: safeJsonLdSerialize(jsonLd),
         }}
       />
 

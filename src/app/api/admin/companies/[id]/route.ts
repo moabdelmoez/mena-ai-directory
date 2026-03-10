@@ -15,6 +15,218 @@ interface ProductWithId extends ProductInput {
   industry?: string | null;
 }
 
+interface ParsedFormData {
+  name: string;
+  company_url: string | null;
+  linkedin_profile: string | null;
+  description: string;
+  hq_country: string;
+  logo: File | null;
+  removeLogo: boolean;
+  logoBg: 'white' | 'black' | null;
+  products: ProductWithId[];
+}
+
+type ExistingProduct = { id: string; name: string; description: string };
+
+function parseFormData(formData: FormData): { data?: ParsedFormData; error?: string } {
+  const name = getFormString(formData, 'name');
+  const description = getFormString(formData, 'description');
+  const hq_country = getFormString(formData, 'hq_country');
+
+  if (!name || !description || !hq_country) {
+    return { error: 'Name, description, and headquarters country are required' };
+  }
+
+  if (!MENA_COUNTRIES.includes(hq_country as typeof MENA_COUNTRIES[number])) {
+    return { error: 'Invalid country' };
+  }
+
+  const productsJson = getFormStringOrNull(formData, 'products');
+  let products: ProductWithId[] = [];
+  if (productsJson) {
+    try {
+      products = parseAndValidateProducts(productsJson) as ProductWithId[];
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : 'Invalid products JSON' };
+    }
+  }
+
+  const logoBgRaw = getFormStringOrNull(formData, 'logo_bg');
+
+  return {
+    data: {
+      name,
+      company_url: getFormStringOrNull(formData, 'company_url'),
+      linkedin_profile: getFormStringOrNull(formData, 'linkedin_profile'),
+      description,
+      hq_country,
+      logo: getFormFile(formData, 'logo'),
+      removeLogo: getFormString(formData, 'remove_logo') === 'true',
+      logoBg: (logoBgRaw === 'white' || logoBgRaw === 'black') ? logoBgRaw : null,
+      products,
+    },
+  };
+}
+
+async function resolveLogoUrl(
+  logo: File | null,
+  removeLogo: boolean,
+  existingLogoUrl: string | null
+): Promise<{ url?: string | null; error?: string }> {
+  if (removeLogo && existingLogoUrl) {
+    await deleteLogoByUrl(existingLogoUrl);
+    return { url: null };
+  }
+
+  if (!logo || logo.size === 0) {
+    return {}; // no change
+  }
+
+  const logoError = validateLogo(logo);
+  if (logoError) {
+    return { error: logoError };
+  }
+
+  if (existingLogoUrl) {
+    await deleteLogoByUrl(existingLogoUrl);
+  }
+
+  try {
+    return { url: await uploadLogo(logo) };
+  } catch {
+    return { error: 'Failed to upload logo' };
+  }
+}
+
+function buildCompanyUpdate(
+  fields: ParsedFormData,
+  logoUrl: string | null | undefined,
+): Record<string, unknown> {
+  const updateData: Record<string, unknown> = {
+    name: fields.name,
+    company_url: fields.company_url || null,
+    linkedin_profile: fields.linkedin_profile || null,
+    description: fields.description,
+    hq_country: fields.hq_country,
+    logo_bg: fields.logoBg,
+    status: 'approved',
+    updated_at: new Date().toISOString(),
+  };
+
+  if (logoUrl !== undefined) {
+    updateData.logo = logoUrl;
+  }
+
+  return updateData;
+}
+
+async function syncProducts(
+  companyId: string,
+  companyName: string,
+  products: ProductWithId[],
+): Promise<void> {
+  const { data: existingProducts } = await supabaseAdmin
+    .from('products')
+    .select('id, name, description')
+    .eq('company_id', companyId);
+
+  const existingMap = new Map<string, ExistingProduct>(
+    (existingProducts || []).map((p: ExistingProduct) => [p.id, p])
+  );
+  const newProductIds = new Set(products.filter(p => p.id).map(p => p.id));
+
+  // Delete removed products
+  const toDelete = Array.from(existingMap.keys()).filter((pid: string) => !newProductIds.has(pid));
+  if (toDelete.length > 0) {
+    await supabaseAdmin.from('products').delete().in('id', toDelete);
+  }
+
+  for (const product of products) {
+    const dbId = await upsertProduct(product, companyId, companyName, existingMap);
+    if (dbId) {
+      await syncClassification(dbId, companyId, product);
+    }
+  }
+}
+
+async function upsertProduct(
+  product: ProductWithId,
+  companyId: string,
+  companyName: string,
+  existingMap: Map<string, ExistingProduct>,
+): Promise<string | undefined> {
+  if (product.id && existingMap.has(product.id)) {
+    return updateExistingProduct(product, companyName, existingMap.get(product.id)!);
+  }
+  return createNewProduct(product, companyId, companyName);
+}
+
+async function updateExistingProduct(
+  product: ProductWithId,
+  companyName: string,
+  existing: ExistingProduct,
+): Promise<string> {
+  const textChanged = existing.name !== product.name || existing.description !== product.description;
+  const productUpdate: Record<string, unknown> = {
+    name: product.name,
+    description: product.description,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (textChanged) {
+    const embedding = await generateProductEmbedding(product.name, product.description, companyName);
+    productUpdate.embedding = JSON.stringify(embedding);
+  }
+
+  await supabaseAdmin.from('products').update(productUpdate).eq('id', product.id!);
+  return product.id!;
+}
+
+async function createNewProduct(
+  product: ProductWithId,
+  companyId: string,
+  companyName: string,
+): Promise<string | undefined> {
+  const embedding = await generateProductEmbedding(product.name, product.description, companyName);
+  const { data: newProduct } = await supabaseAdmin
+    .from('products')
+    .insert({
+      company_id: companyId,
+      name: product.name,
+      description: product.description,
+      embedding: JSON.stringify(embedding),
+    })
+    .select('id')
+    .single();
+  return newProduct?.id;
+}
+
+async function syncClassification(
+  productDbId: string,
+  companyId: string,
+  product: ProductWithId,
+): Promise<void> {
+  if (product.tech_category || product.industry) {
+    await supabaseAdmin
+      .from('product_classification')
+      .upsert(
+        {
+          product_id: productDbId,
+          company_id: companyId,
+          tech_category: product.tech_category ?? null,
+          industry: product.industry ?? null,
+        },
+        { onConflict: 'product_id' }
+      );
+  } else {
+    await supabaseAdmin
+      .from('product_classification')
+      .delete()
+      .eq('product_id', productDbId);
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -56,15 +268,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await requireAdmin(request);
-
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Rate limiting
-  const rateLimitKey = getRateLimitKey('admin', session.adminId);
-  const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMITS.admin);
-
+  const rateLimit = checkRateLimit(getRateLimitKey('admin', session.adminId), RATE_LIMITS.admin);
   if (!rateLimit.success) {
     return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
   }
@@ -72,7 +280,6 @@ export async function PUT(
   const { id } = await params;
 
   try {
-    // Fetch existing company to compare fields
     const { data: existingCompany, error: fetchError } = await supabaseAdmin
       .from('companies')
       .select('name, description, logo')
@@ -84,89 +291,23 @@ export async function PUT(
     }
 
     const formData = await request.formData();
+    const parsed = parseFormData(formData);
+    if (parsed.error) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
+    }
+    const fields = parsed.data!;
 
-    const name = getFormString(formData, 'name');
-    const company_url = getFormStringOrNull(formData, 'company_url');
-    const linkedin_profile = getFormStringOrNull(formData, 'linkedin_profile');
-    const description = getFormString(formData, 'description');
-    const hq_country = getFormString(formData, 'hq_country');
-    const logo = getFormFile(formData, 'logo');
-    const removeLogo = getFormString(formData, 'remove_logo') === 'true';
-    const logoBgRaw = getFormStringOrNull(formData, 'logo_bg');
-    const logoBg = (logoBgRaw === 'white' || logoBgRaw === 'black') ? logoBgRaw : null;
-    const productsJson = getFormStringOrNull(formData, 'products');
-
-    // Parse products if provided
-    let products: ProductWithId[] = [];
-    if (productsJson) {
-      try {
-        products = parseAndValidateProducts(productsJson) as ProductWithId[];
-      } catch (e) {
-        return NextResponse.json({ error: e instanceof Error ? e.message : 'Invalid products JSON' }, { status: 400 });
-      }
+    const logoResult = await resolveLogoUrl(fields.logo, fields.removeLogo, existingCompany.logo);
+    if (logoResult.error) {
+      return NextResponse.json({ error: logoResult.error }, { status: 400 });
     }
 
-    // Validation
-    if (!name || !description || !hq_country) {
-      return NextResponse.json({ error: 'Name, description, and headquarters country are required' }, { status: 400 });
-    }
-
-    if (!MENA_COUNTRIES.includes(hq_country as typeof MENA_COUNTRIES[number])) {
-      return NextResponse.json({ error: 'Invalid country' }, { status: 400 });
-    }
-
-    // Detect text changes to trigger embedding regeneration
-    const textFieldsChanged =
-      existingCompany.name !== name ||
-      existingCompany.description !== description;
-
-    // Handle logo
-    let logoUrl: string | null | undefined = undefined; // undefined means no change
-
-    if (removeLogo && existingCompany.logo) {
-      await deleteLogoByUrl(existingCompany.logo);
-      logoUrl = null;
-    } else if (logo && logo.size > 0) {
-      const logoError = validateLogo(logo);
-      if (logoError) {
-        return NextResponse.json({ error: logoError }, { status: 400 });
-      }
-
-      // Delete old logo if exists
-      if (existingCompany.logo) {
-        await deleteLogoByUrl(existingCompany.logo);
-      }
-
-      try {
-        logoUrl = await uploadLogo(logo);
-      } catch {
-        return NextResponse.json({ error: 'Failed to upload logo' }, { status: 500 });
-      }
-    }
-
-    // Build update object
-    const updateData: Record<string, unknown> = {
-      name,
-      company_url: company_url || null,
-      linkedin_profile: linkedin_profile || null,
-      description,
-      hq_country,
-      logo_bg: logoBg,
-      status: 'approved', // Auto-approve admin changes
-      updated_at: new Date().toISOString(),
-    };
-
-    if (logoUrl !== undefined) {
-      updateData.logo = logoUrl;
-    }
-
-    // Regenerate embedding if text fields changed
+    const updateData = buildCompanyUpdate(fields, logoResult.url);
+    const textFieldsChanged = existingCompany.name !== fields.name || existingCompany.description !== fields.description;
     if (textFieldsChanged) {
-      const embedding = await generateCompanyEmbedding(name, description);
-      updateData.embedding = JSON.stringify(embedding);
+      updateData.embedding = JSON.stringify(await generateCompanyEmbedding(fields.name, fields.description));
     }
 
-    // Update company
     const { data: company, error: updateError } = await supabaseAdmin
       .from('companies')
       .update(updateData)
@@ -179,96 +320,12 @@ export async function PUT(
       return NextResponse.json({ error: 'Failed to update company' }, { status: 500 });
     }
 
-    // Sync products
+    const productsJson = getFormStringOrNull(formData, 'products');
     if (productsJson !== null) {
-      // Get existing products
-      const { data: existingProducts } = await supabaseAdmin
-        .from('products')
-        .select('id, name, description')
-        .eq('company_id', id);
-
-      type ExistingProduct = { id: string; name: string; description: string };
-      const existingProductIds = new Set((existingProducts || []).map((p: ExistingProduct) => p.id));
-      const newProductIds = new Set(products.filter(p => p.id).map(p => p.id));
-
-      // Delete removed products
-      const toDelete = Array.from(existingProductIds).filter(pid => !newProductIds.has(pid));
-      if (toDelete.length > 0) {
-        await supabaseAdmin
-          .from('products')
-          .delete()
-          .in('id', toDelete);
-      }
-
-      // Update existing and create new products
-      for (const product of products) {
-        let productDbId: string | undefined = product.id;
-
-        if (product.id && existingProductIds.has(product.id)) {
-          // Check if product text changed
-          const existingProduct = (existingProducts || []).find((p: ExistingProduct) => p.id === product.id);
-          const productTextChanged = existingProduct &&
-            (existingProduct.name !== product.name || existingProduct.description !== product.description);
-
-          const productUpdate: Record<string, unknown> = {
-            name: product.name,
-            description: product.description,
-            updated_at: new Date().toISOString(),
-          };
-
-          if (productTextChanged) {
-            const productEmbedding = await generateProductEmbedding(product.name, product.description, name);
-            productUpdate.embedding = JSON.stringify(productEmbedding);
-          }
-
-          await supabaseAdmin
-            .from('products')
-            .update(productUpdate)
-            .eq('id', product.id);
-        } else {
-          // Create new product
-          const productEmbedding = await generateProductEmbedding(product.name, product.description, name);
-          const { data: newProduct } = await supabaseAdmin
-            .from('products')
-            .insert({
-              company_id: id,
-              name: product.name,
-              description: product.description,
-              embedding: JSON.stringify(productEmbedding),
-            })
-            .select('id')
-            .single();
-          productDbId = newProduct?.id;
-        }
-
-        // Upsert or delete classification
-        if (productDbId) {
-          if (product.tech_category || product.industry) {
-            await supabaseAdmin
-              .from('product_classification')
-              .upsert(
-                {
-                  product_id: productDbId,
-                  company_id: id,
-                  tech_category: product.tech_category ?? null,
-                  industry: product.industry ?? null,
-                },
-                { onConflict: 'product_id' }
-              );
-          } else {
-            // Both fields cleared — remove stale classification row
-            await supabaseAdmin
-              .from('product_classification')
-              .delete()
-              .eq('product_id', productDbId);
-          }
-        }
-      }
+      await syncProducts(id, fields.name, fields.products);
     }
 
-    // Invalidate ISR cache so public page reflects changes immediately
     revalidatePath('/company/' + company.slug);
-
     return NextResponse.json(company);
   } catch (error) {
     console.error('Update company error:', error);

@@ -11,11 +11,11 @@ export async function GET() {
 
   const tech_categories = [...new Set(
     (data || []).map((r) => r.tech_category).filter(Boolean) as string[]
-  )].sort();
+  )].sort((a, b) => a.localeCompare(b));
 
   const industries = [...new Set(
     (data || []).map((r) => r.industry).filter(Boolean) as string[]
-  )].sort();
+  )].sort((a, b) => a.localeCompare(b));
 
   return NextResponse.json(
     { tech_categories, industries, countries: MENA_COUNTRIES },

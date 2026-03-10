@@ -86,6 +86,139 @@ export default function CompaniesPage() {
 
   const hasActiveFilters = statusFilter || countryFilter || search;
 
+  const renderLoadingState = () => (
+    <div className="space-y-4">
+      {[...Array(5)].map((_, i) => (
+        <div key={`skeleton-loader-${i}`} className="h-20 bg-gray-200 rounded-lg animate-pulse" />
+      ))}
+    </div>
+  );
+
+  const renderCompaniesTable = () => (
+    <>
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50/80">
+            <tr>
+              <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Company
+              </th>
+              <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Country
+              </th>
+              <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Created
+              </th>
+              <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {companies!.data.map((company) => (
+              <tr key={company.id} className="hover:bg-gray-50/50 transition-colors duration-150">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center gap-3">
+                    {company.logo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={company.logo}
+                        alt=""
+                        className={`w-10 h-10 rounded-lg object-contain ${company.logo_bg === 'black' ? 'bg-black' : company.logo_bg === 'white' ? 'bg-white' : 'bg-gray-50'}`}
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                        <span className="text-gray-400 text-xs font-medium">
+                          {company.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {company.name}
+                      </div>
+                      {company.company_url && (
+                        <div className="text-sm text-gray-500 truncate max-w-xs">
+                          {company.company_url}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {company.hq_country}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <StatusBadge status={company.status} />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {formatDate(company.created_at)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                  <div className="flex items-center justify-end gap-2">
+                    <Link href={`/admin/manage?id=${company.id}`}>
+                      <Button variant="outline" size="sm">
+                        Edit
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setConfirmDeleteId(company.id)}
+                      disabled={deletingId === company.id}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      {deletingId === company.id ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      {companies!.totalPages > 1 && (
+        <div className="mt-8">
+          <Pagination
+            currentPage={companies!.page}
+            totalPages={companies!.totalPages}
+            onPageChange={setPage}
+          />
+        </div>
+      )}
+    </>
+  );
+
+  const renderEmptyState = () => (
+    <Card className="text-center py-12">
+      <h3 className="text-lg font-medium text-gray-900">No companies found</h3>
+      <p className="mt-2 text-gray-500">
+        {hasActiveFilters
+          ? 'No companies match your filters. Try adjusting your search criteria.'
+          : 'No companies have been registered yet.'}
+      </p>
+      {!hasActiveFilters && (
+        <div className="mt-4">
+          <Link href="/admin/manage">
+            <Button variant="primary">Create First Company</Button>
+          </Link>
+        </div>
+      )}
+    </Card>
+  );
+
+  const renderContent = () => {
+    if (isLoading && !companies) return renderLoadingState();
+    if (companies && companies.data.length > 0) return renderCompaniesTable();
+    return renderEmptyState();
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -147,128 +280,7 @@ export default function CompaniesPage() {
         )}
       </div>
 
-      {isLoading && !companies ? (
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-20 bg-gray-200 rounded-lg animate-pulse" />
-          ))}
-        </div>
-      ) : companies && companies.data.length > 0 ? (
-        <>
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50/80">
-                <tr>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Company
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Country
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Created
-                  </th>
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {companies.data.map((company) => (
-                  <tr key={company.id} className="hover:bg-gray-50/50 transition-colors duration-150">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        {company.logo ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={company.logo}
-                            alt=""
-                            className={`w-10 h-10 rounded-lg object-contain ${company.logo_bg === 'black' ? 'bg-black' : company.logo_bg === 'white' ? 'bg-white' : 'bg-gray-50'}`}
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                            <span className="text-gray-400 text-xs font-medium">
-                              {company.name.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                        )}
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {company.name}
-                          </div>
-                          {company.company_url && (
-                            <div className="text-sm text-gray-500 truncate max-w-xs">
-                              {company.company_url}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {company.hq_country}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={company.status} />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(company.created_at)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link href={`/admin/manage?id=${company.id}`}>
-                          <Button variant="outline" size="sm">
-                            Edit
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setConfirmDeleteId(company.id)}
-                          disabled={deletingId === company.id}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          {deletingId === company.id ? 'Deleting...' : 'Delete'}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-          </div>
-
-          {companies.totalPages > 1 && (
-            <div className="mt-8">
-              <Pagination
-                currentPage={companies.page}
-                totalPages={companies.totalPages}
-                onPageChange={setPage}
-              />
-            </div>
-          )}
-        </>
-      ) : (
-        <Card className="text-center py-12">
-          <h3 className="text-lg font-medium text-gray-900">No companies found</h3>
-          <p className="mt-2 text-gray-500">
-            {hasActiveFilters
-              ? 'No companies match your filters. Try adjusting your search criteria.'
-              : 'No companies have been registered yet.'}
-          </p>
-          {!hasActiveFilters && (
-            <div className="mt-4">
-              <Link href="/admin/manage">
-                <Button variant="primary">Create First Company</Button>
-              </Link>
-            </div>
-          )}
-        </Card>
-      )}
+      {renderContent()}
 
       <ConfirmDialog
         open={!!confirmDeleteId}

@@ -50,7 +50,14 @@ async function getCompanyIdsByClassification(
   const sanitize = (v: string) => v.replace(/["(),\.]/g, '');
 
   if (tech_categories && tech_categories.length > 0 && industries && industries.length > 0) {
-    query = query.or(`tech_category.in.(${tech_categories.map(c => `"${sanitize(c)}"`).join(',')}),industry.in.(${industries.map(i => `"${sanitize(i)}"`).join(',')})`);
+    const sanitizedTechCategories = tech_categories
+      .map(c => `"${sanitize(c)}"`)
+      .join(',');
+    const sanitizedIndustries = industries
+      .map(i => `"${sanitize(i)}"`)
+      .join(',');
+    const orFilter = `tech_category.in.(${sanitizedTechCategories}),industry.in.(${sanitizedIndustries})`;
+    query = query.or(orFilter);
   } else if (tech_categories && tech_categories.length > 0) {
     query = query.in('tech_category', tech_categories.map(sanitize));
   } else if (industries && industries.length > 0) {
@@ -75,7 +82,7 @@ export async function hybridSearch(
 
   // Generate embedding for the query if provided
   let queryEmbedding: number[] | null = null;
-  if (query && query.trim()) {
+  if (query?.trim()) {
     queryEmbedding = await generateEmbedding(query);
   }
 
