@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { SearchBox } from '@/components/SearchBox';
 import { CompanyList } from '@/components/CompanyList';
@@ -53,6 +53,7 @@ function SearchContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({ tech_categories: [], industries: [] });
+  const resultCache = useRef(new Map<string, PaginatedResponse<Company>>());
 
   const query = searchParams.get('q') || '';
   const hq_country = searchParams.get('hq_country') || '';
@@ -95,9 +96,18 @@ function SearchContent() {
       if (industries_param) params.set('industries', industries_param);
       if (page > 1) params.set('page', page.toString());
 
-      const response = await fetch(`/api/search?${params.toString()}`);
+      const cacheKey = params.toString();
+      const cached = resultCache.current.get(cacheKey);
+      if (cached) {
+        setResults(cached);
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch(`/api/search?${cacheKey}`);
       const data = await response.json();
       setResults(data);
+      resultCache.current.set(cacheKey, data);
     } catch (err) {
       console.error('Search error:', err);
       setError('Something went wrong. Please try again.');

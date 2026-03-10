@@ -5,16 +5,24 @@ import { MENA_COUNTRIES } from '@/constants';
 export const revalidate = 300; // Revalidate every 5 minutes
 
 export async function GET() {
-  const { data } = await supabaseAdmin
-    .from('product_classification')
-    .select('tech_category, industry');
+  // Two focused queries instead of fetching all rows
+  const [techResult, industryResult] = await Promise.all([
+    supabaseAdmin
+      .from('product_classification')
+      .select('tech_category')
+      .not('tech_category', 'is', null),
+    supabaseAdmin
+      .from('product_classification')
+      .select('industry')
+      .not('industry', 'is', null),
+  ]);
 
   const tech_categories = [...new Set(
-    (data || []).map((r) => r.tech_category).filter(Boolean) as string[]
+    (techResult.data || []).map((r) => r.tech_category) as string[]
   )].sort((a, b) => a.localeCompare(b));
 
   const industries = [...new Set(
-    (data || []).map((r) => r.industry).filter(Boolean) as string[]
+    (industryResult.data || []).map((r) => r.industry) as string[]
   )].sort((a, b) => a.localeCompare(b));
 
   return NextResponse.json(

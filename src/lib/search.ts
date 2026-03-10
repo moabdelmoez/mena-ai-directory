@@ -3,6 +3,7 @@ import { generateEmbedding } from './openai';
 import { Company, SearchFilters, PaginatedResponse, MatchingProduct } from '@/types';
 import { COMPANY_COLUMNS, getCompanyBySlug, getCompanyById, getCompanyProducts } from './company-repository';
 import { parseSearchQuery } from './query-parser';
+import { getCachedEmbedding, setCachedEmbedding } from './embedding-cache';
 
 // Re-export repository functions for backward compatibility
 export { COMPANY_COLUMNS, getCompanyBySlug, getCompanyById, getCompanyProducts };
@@ -96,10 +97,16 @@ export async function hybridSearch(
     if ((!effectiveIndustries?.length) && parsed.extractedIndustries.length > 0) effectiveIndustries = parsed.extractedIndustries;
   }
 
-  // Generate embedding for the cleaned query if provided
+  // Generate embedding for the cleaned query if provided (with cache)
   let queryEmbedding: number[] | null = null;
   if (effectiveQuery) {
-    queryEmbedding = await generateEmbedding(effectiveQuery);
+    queryEmbedding = getCachedEmbedding(effectiveQuery);
+    if (!queryEmbedding) {
+      queryEmbedding = await generateEmbedding(effectiveQuery);
+      if (queryEmbedding) {
+        setCachedEmbedding(effectiveQuery, queryEmbedding);
+      }
+    }
   }
 
   // If no query text remains, fall back to filtered listing with extracted filters

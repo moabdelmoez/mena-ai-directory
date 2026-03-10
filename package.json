@@ -28,6 +28,7 @@
     "react-dom": "^18"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.1.6",
     "@playwright/test": "^1.58.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",

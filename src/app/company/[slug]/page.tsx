@@ -1,13 +1,19 @@
 import { cache } from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
 import { getCompanyBySlug, getCompanyProducts } from '@/lib/company-repository';
+import { supabaseAdmin } from '@/lib/supabase';
 import { Card } from '@/components/ui';
 import { StarRating } from '@/components/StarRating';
-import { CompanyReviews } from './CompanyReviews';
 import { ProductList } from '@/components/ProductList';
 import { CompanyLogo } from '@/components/CompanyLogo';
+
+const CompanyReviews = dynamic(
+  () => import('./CompanyReviews').then(m => ({ default: m.CompanyReviews })),
+  { loading: () => <div className="animate-pulse h-32 bg-zinc-100 rounded-xl" /> }
+);
 
 /**
  * Safely serialize JSON-LD data for embedding in a <script> tag.
@@ -39,6 +45,17 @@ function safeJsonLdSerialize(data: unknown): string {
 
 // ISR: Revalidate company pages every hour
 export const revalidate = 3600;
+
+// Pre-build top company pages at build time
+export async function generateStaticParams() {
+  const { data } = await supabaseAdmin
+    .from('companies')
+    .select('slug')
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false })
+    .limit(50);
+  return (data || []).map(c => ({ slug: c.slug }));
+}
 
 // Cache the company fetch to deduplicate calls between generateMetadata and page
 const getCachedCompany = cache(async (slug: string) => {

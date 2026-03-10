@@ -34,7 +34,7 @@ npm run test:e2e          # Run Playwright E2E tests
 
 ### Key Data Flow
 
-**Search**: User query → query parser extracts structured filters → OpenAI embedding → PostgreSQL `search_companies_with_products()` function → RRF fusion of semantic + keyword rankings (searches both companies and products) → filtered/paginated results with matching product info. When cleaned query is empty (filter-only searches), falls back to `getFilteredCompanies()` which attaches matching products from `product_classification` when tech_category/industry filters are active.
+**Search**: User query → query parser extracts structured filters → LRU-cached OpenAI embedding (500 entries, 1hr TTL via `embedding-cache.ts`) → PostgreSQL `search_companies_with_products()` function → RRF fusion of semantic + keyword rankings (searches both companies and products) → filtered/paginated results with matching product info. Client-side result cache avoids re-fetching on filter toggle/back-navigation. When cleaned query is empty (filter-only searches), falls back to `getFilteredCompanies()` which attaches matching products from `product_classification` when tech_category/industry filters are active.
 
 **Company Registration**: Google OAuth → form submission → validation → embedding generation → DB insert (status: pending) → admin approval workflow
 
@@ -122,6 +122,17 @@ The admin import API (`/api/admin/import`) supports:
 
 All three scripts are idempotent: they delete existing rows for the target records before re-inserting.
 
+### Performance
+
+- **Embedding cache** (`embedding-cache.ts`): LRU cache for OpenAI embeddings, avoids redundant API calls for repeated searches
+- **Client search cache**: `useRef` Map in search page caches API responses by URL params; filter toggles and back-navigation are instant
+- **`optimizePackageImports`**: Tree-shakes `@supabase/supabase-js`, `framer-motion`, `next-auth`, `openai`
+- **Lazy-loaded CompanyReviews**: `next/dynamic` import on company detail page (below-the-fold)
+- **`generateStaticParams`**: Top 50 approved companies pre-built at build time (ISR 1hr revalidation)
+- **Image priority**: `CompanyLogo` sets `priority={true}` automatically for `size="lg"` (detail page hero)
+- **Preconnect hints**: `<link rel="preconnect">` for Supabase URL and Google CDN in root layout
+- **Bundle analyzer**: `ANALYZE=true npm run build` to inspect bundle sizes (`@next/bundle-analyzer`)
+
 ### SEO
 
 - `robots.ts` - Dynamic robots.txt generation
@@ -167,7 +178,8 @@ Key endpoints:
 - **`/src/lib/company-repository.ts`** — Shared column constants (`COMPANY_COLUMNS`, `PRODUCT_COLUMNS`) and query functions (`getCompanyById`, `getCompanyBySlug`, `getCompanyProducts`). `getCompanyProducts()` uses a single join query for products + classifications.
 - **`/src/lib/company-service.ts`** — FormData helpers, logo validation/upload, `parseAndValidateProducts`, `insertProducts` (max 20 per batch), `createCompany()` (shared by public and admin routes, handles slug generation with prefix filtering).
 - **`/src/lib/auth-helpers.ts`** — `requireAuth()` checks admin session first, falls back to user session. Used in product CRUD routes.
-- **`/src/lib/search.ts`** — `hybridSearch()` and filtered company listing. `getFilteredCompanies()` includes matching products when classification filters are active (queries `product_classification` joined with `products`). Re-exports repository functions for backward compatibility.
+- **`/src/lib/embedding-cache.ts`** — In-memory LRU cache for OpenAI query embeddings (max 500 entries, 1hr TTL). Single-process only (same caveat as rate-limit.ts). Saves ~200-500ms per repeated search query.
+- **`/src/lib/search.ts`** — `hybridSearch()` and filtered company listing. Uses `embedding-cache.ts` to skip redundant OpenAI calls. `getFilteredCompanies()` includes matching products when classification filters are active (queries `product_classification` joined with `products`). Re-exports repository functions for backward compatibility.
 
 ### UI Patterns
 

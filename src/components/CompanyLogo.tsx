@@ -9,9 +9,10 @@ interface CompanyLogoProps {
   size?: 'sm' | 'lg';
   interactive?: boolean;
   logo_bg?: 'white' | 'black' | null;
+  priority?: boolean;
 }
 
-export function CompanyLogo({ logo, name, size = 'sm', interactive = false, logo_bg }: CompanyLogoProps) {
+export function CompanyLogo({ logo, name, size = 'sm', interactive = false, logo_bg, priority = false }: CompanyLogoProps) {
   const [imageError, setImageError] = useState(false);
 
   const sizeClasses = size === 'lg'
@@ -36,6 +37,7 @@ export function CompanyLogo({ logo, name, size = 'sm', interactive = false, logo
           fill
           sizes={size === 'lg' ? '96px' : '64px'}
           className="object-contain"
+          priority={priority || size === 'lg'}
           onError={() => setImageError(true)}
         />
       </div>

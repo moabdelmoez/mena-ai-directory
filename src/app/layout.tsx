@@ -49,6 +49,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+        <link rel="preconnect" href="https://lh3.googleusercontent.com" />
+      </head>
       <body className="font-sans antialiased min-h-screen flex flex-col bg-[var(--background)]">
         <Providers>
           <Header />
