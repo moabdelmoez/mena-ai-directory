@@ -2,6 +2,7 @@ import { supabaseAdmin } from './supabase';
 import { generateEmbedding } from './openai';
 import { Company, SearchFilters, PaginatedResponse, MatchingProduct } from '@/types';
 import { COMPANY_COLUMNS, getCompanyBySlug, getCompanyById, getCompanyProducts } from './company-repository';
+import { parseSearchQuery } from './query-parser';
 
 // Re-export repository functions for backward compatibility
 export { COMPANY_COLUMNS, getCompanyBySlug, getCompanyById, getCompanyProducts };
@@ -34,6 +35,9 @@ interface CompanyWithMatchingProduct extends Company {
   matchingProduct?: MatchingProduct;
 }
 
+// Sanitize values before PostgREST interpolation to prevent injection
+const sanitize = (v: string) => v.replace(/["(),\.]/g, '');
+
 async function getCompanyIdsByClassification(
   tech_categories?: string[],
   industries?: string[]
@@ -45,9 +49,6 @@ async function getCompanyIdsByClassification(
   let query = supabaseAdmin
     .from('product_classification')
     .select('company_id');
-
-  // Sanitize values before PostgREST interpolation to prevent injection
-  const sanitize = (v: string) => v.replace(/["(),\.]/g, '');
 
   if (tech_categories && tech_categories.length > 0 && industries && industries.length > 0) {
     const sanitizedTechCategories = tech_categories
@@ -80,25 +81,46 @@ export async function hybridSearch(
   const { query, hq_country, tech_categories, industries, page = 1, limit = 10 } = filters;
   const offset = (page - 1) * limit;
 
-  // Generate embedding for the query if provided
-  let queryEmbedding: number[] | null = null;
-  if (query?.trim()) {
-    queryEmbedding = await generateEmbedding(query);
+  // Parse natural language query to extract structured filters
+  let effectiveQuery = query?.trim() || '';
+  let effectiveCountry = hq_country;
+  let effectiveTechCategories = tech_categories;
+  let effectiveIndustries = industries;
+
+  if (effectiveQuery) {
+    const parsed = parseSearchQuery(effectiveQuery);
+    effectiveQuery = parsed.cleanedQuery;
+    // Extracted filters only apply when user hasn't set explicit ones
+    if (!effectiveCountry && parsed.extractedCountry) effectiveCountry = parsed.extractedCountry;
+    if ((!effectiveTechCategories?.length) && parsed.extractedTechCategories.length > 0) effectiveTechCategories = parsed.extractedTechCategories;
+    if ((!effectiveIndustries?.length) && parsed.extractedIndustries.length > 0) effectiveIndustries = parsed.extractedIndustries;
   }
 
-  // If no query, fall back to filtered listing
+  // Generate embedding for the cleaned query if provided
+  let queryEmbedding: number[] | null = null;
+  if (effectiveQuery) {
+    queryEmbedding = await generateEmbedding(effectiveQuery);
+  }
+
+  // If no query text remains, fall back to filtered listing with extracted filters
   if (!queryEmbedding) {
-    return getFilteredCompanies(filters);
+    return getFilteredCompanies({
+      hq_country: effectiveCountry,
+      tech_categories: effectiveTechCategories,
+      industries: effectiveIndustries,
+      page,
+      limit,
+    });
   }
 
   // Get company IDs matching classification filters
-  const companyIds = await getCompanyIdsByClassification(tech_categories, industries);
+  const companyIds = await getCompanyIdsByClassification(effectiveTechCategories, effectiveIndustries);
 
   // Run search RPC (total_count is included in each result row via COUNT(*) OVER())
   const rpcParams: Record<string, unknown> = {
     query_embedding: JSON.stringify(queryEmbedding),
-    search_query: query || null,
-    filter_hq_country: hq_country || null,
+    search_query: effectiveQuery || null,
+    filter_hq_country: effectiveCountry || null,
     result_limit: limit,
     result_offset: offset,
   };
@@ -160,7 +182,7 @@ export async function hybridSearch(
 
 async function getFilteredCompanies(
   filters: SearchFilters
-): Promise<PaginatedResponse<Company>> {
+): Promise<PaginatedResponse<CompanyWithMatchingProduct>> {
   const { hq_country, tech_categories, industries, page = 1, limit = 10 } = filters;
   const offset = (page - 1) * limit;
 
@@ -197,11 +219,47 @@ async function getFilteredCompanies(
     throw new Error('Failed to fetch companies');
   }
 
-  return {
-    data: (data || []) as Company[],
-    total: count || 0,
-    page,
-    limit,
-    totalPages: Math.ceil((count || 0) / limit),
-  };
+  const companies = (data || []) as Company[];
+  const total = count || 0;
+  const totalPages = Math.ceil(total / limit);
+
+  // Fetch matching products when classification filters are active
+  if (companyIds !== null && companies.length > 0) {
+    const returnedIds = companies.map(c => c.id);
+
+    let prodQuery = supabaseAdmin
+      .from('product_classification')
+      .select('company_id, product_id, products!inner(id, name, description)')
+      .in('company_id', returnedIds);
+
+    if (tech_categories?.length && industries?.length) {
+      prodQuery = prodQuery.or(
+        `tech_category.in.(${tech_categories.map(sanitize).map(c => `"${c}"`).join(',')}),industry.in.(${industries.map(sanitize).map(i => `"${i}"`).join(',')})`
+      );
+    } else if (tech_categories?.length) {
+      prodQuery = prodQuery.in('tech_category', tech_categories.map(sanitize));
+    } else if (industries?.length) {
+      prodQuery = prodQuery.in('industry', industries.map(sanitize));
+    }
+
+    const { data: classData } = await prodQuery;
+
+    // Build map: company_id → first matching product
+    const productMap = new Map<string, MatchingProduct>();
+    for (const row of classData || []) {
+      if (!productMap.has(row.company_id) && row.products) {
+        const p = row.products as unknown as { id: string; name: string; description: string };
+        productMap.set(row.company_id, { id: p.id, name: p.name, description: p.description });
+      }
+    }
+
+    const companiesWithProducts: CompanyWithMatchingProduct[] = companies.map(c => ({
+      ...c,
+      matchingProduct: productMap.get(c.id),
+    }));
+
+    return { data: companiesWithProducts, total, page, limit, totalPages };
+  }
+
+  return { data: companies, total, page, limit, totalPages };
 }

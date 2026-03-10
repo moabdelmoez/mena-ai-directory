@@ -34,7 +34,7 @@ npm run test:e2e          # Run Playwright E2E tests
 
 ### Key Data Flow
 
-**Search**: User query → OpenAI embedding → PostgreSQL `search_companies_with_products()` function → RRF fusion of semantic + keyword rankings (searches both companies and products) → filtered/paginated results with matching product info
+**Search**: User query → query parser extracts structured filters → OpenAI embedding → PostgreSQL `search_companies_with_products()` function → RRF fusion of semantic + keyword rankings (searches both companies and products) → filtered/paginated results with matching product info. When cleaned query is empty (filter-only searches), falls back to `getFilteredCompanies()` which attaches matching products from `product_classification` when tech_category/industry filters are active.
 
 **Company Registration**: Google OAuth → form submission → validation → embedding generation → DB insert (status: pending) → admin approval workflow
 
@@ -167,7 +167,7 @@ Key endpoints:
 - **`/src/lib/company-repository.ts`** — Shared column constants (`COMPANY_COLUMNS`, `PRODUCT_COLUMNS`) and query functions (`getCompanyById`, `getCompanyBySlug`, `getCompanyProducts`). `getCompanyProducts()` uses a single join query for products + classifications.
 - **`/src/lib/company-service.ts`** — FormData helpers, logo validation/upload, `parseAndValidateProducts`, `insertProducts` (max 20 per batch), `createCompany()` (shared by public and admin routes, handles slug generation with prefix filtering).
 - **`/src/lib/auth-helpers.ts`** — `requireAuth()` checks admin session first, falls back to user session. Used in product CRUD routes.
-- **`/src/lib/search.ts`** — `hybridSearch()` and filtered company listing. Re-exports repository functions for backward compatibility.
+- **`/src/lib/search.ts`** — `hybridSearch()` and filtered company listing. `getFilteredCompanies()` includes matching products when classification filters are active (queries `product_classification` joined with `products`). Re-exports repository functions for backward compatibility.
 
 ### UI Patterns
 
