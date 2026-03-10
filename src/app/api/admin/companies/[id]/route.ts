@@ -27,7 +27,7 @@ interface ParsedFormData {
   products: ProductWithId[];
 }
 
-type ExistingProduct = { id: string; name: string; description: string };
+type ExistingProduct = { id: string; name: string; description: string; product_url: string | null };
 
 function parseFormData(formData: FormData): { data?: ParsedFormData; error?: string } {
   const name = getFormString(formData, 'name');
@@ -128,7 +128,7 @@ async function syncProducts(
 ): Promise<void> {
   const { data: existingProducts } = await supabaseAdmin
     .from('products')
-    .select('id, name, description')
+    .select('id, name, description, product_url')
     .eq('company_id', companyId);
 
   const existingMap = new Map<string, ExistingProduct>(
@@ -171,6 +171,7 @@ async function updateExistingProduct(
   const productUpdate: Record<string, unknown> = {
     name: product.name,
     description: product.description,
+    product_url: product.product_url || null,
     updated_at: new Date().toISOString(),
   };
 
@@ -195,6 +196,7 @@ async function createNewProduct(
       company_id: companyId,
       name: product.name,
       description: product.description,
+      product_url: product.product_url || null,
       embedding: JSON.stringify(embedding),
     })
     .select('id')

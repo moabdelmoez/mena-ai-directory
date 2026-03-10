@@ -27,7 +27,7 @@ interface CompanyData {
   logo: string | null;
   logo_bg: 'white' | 'black' | null;
   hq_country: string;
-  products: Array<Pick<Product, 'id' | 'name' | 'description'> & { tech_category?: string | null; industry?: string | null }>;
+  products: Array<Pick<Product, 'id' | 'name' | 'description' | 'product_url'> & { tech_category?: string | null; industry?: string | null }>;
 }
 
 function ManageCompanyForm() {
@@ -99,6 +99,7 @@ function ManageCompanyForm() {
           id: p.id,
           name: p.name,
           description: p.description,
+          product_url: p.product_url ?? null,
           tech_category: p.tech_category ?? null,
           industry: p.industry ?? null,
         })));
@@ -181,6 +182,7 @@ function ManageCompanyForm() {
         id: (p as ProductWithId).id,
         name: p.name,
         description: p.description,
+        product_url: p.product_url ?? null,
         tech_category: (p as ProductWithId).tech_category ?? null,
         industry: (p as ProductWithId).industry ?? null,
       }));

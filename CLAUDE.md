@@ -156,6 +156,7 @@ Key endpoints:
 - `PUT/DELETE /api/products/[id]` - Update/delete products (owner or admin)
 - `PUT/DELETE /api/reviews` - Update/delete own reviews
 - `GET /api/admin/stats` - Dashboard counts (single request, replaces 3 calls)
+- `PUT /api/admin/companies/[id]` - Admin update company with `syncProducts()` (upserts products with `product_url`, syncs `product_classification` rows)
 
 ### Directory Structure
 
@@ -176,7 +177,7 @@ Key endpoints:
 
 - **`/src/lib/supabase.ts`** — Exports `supabaseAdmin` (service role client with retry logic). No other clients exported.
 - **`/src/lib/company-repository.ts`** — Shared column constants (`COMPANY_COLUMNS`, `PRODUCT_COLUMNS`) and query functions (`getCompanyById`, `getCompanyBySlug`, `getCompanyProducts`). `getCompanyProducts()` uses a single join query for products + classifications.
-- **`/src/lib/company-service.ts`** — FormData helpers, logo validation/upload, `parseAndValidateProducts`, `insertProducts` (max 20 per batch), `createCompany()` (shared by public and admin routes, handles slug generation with prefix filtering).
+- **`/src/lib/company-service.ts`** — FormData helpers, logo validation/upload, `parseAndValidateProducts`, `insertProducts` (max 20 per batch, saves `product_url` and inserts `product_classification` rows for `tech_category`/`industry`), `createCompany()` (shared by public and admin routes, handles slug generation with prefix filtering).
 - **`/src/lib/auth-helpers.ts`** — `requireAuth()` checks admin session first, falls back to user session. Used in product CRUD routes.
 - **`/src/lib/embedding-cache.ts`** — In-memory LRU cache for OpenAI query embeddings (max 500 entries, 1hr TTL). Single-process only (same caveat as rate-limit.ts). Saves ~200-500ms per repeated search query.
 - **`/src/lib/search.ts`** — `hybridSearch()` and filtered company listing. Uses `embedding-cache.ts` to skip redundant OpenAI calls. `getFilteredCompanies()` includes matching products when classification filters are active (queries `product_classification` joined with `products`). Re-exports repository functions for backward compatibility.

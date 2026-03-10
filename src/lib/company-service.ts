@@ -110,18 +110,48 @@ export async function insertProducts(
         company_id: companyId,
         name: product.name,
         description: product.description,
+        product_url: product.product_url || null,
         embedding: JSON.stringify(productEmbedding),
       };
     })
   );
 
-  const { error: productsError } = await supabaseAdmin
+  const { data: insertedProducts, error: productsError } = await supabaseAdmin
     .from('products')
-    .insert(productInserts);
+    .insert(productInserts)
+    .select('id');
 
   if (productsError) {
     console.error('Products insert error:', productsError);
     warnings.push('Some products could not be saved');
+  }
+
+  // Insert classifications for products that have tech_category or industry
+  if (insertedProducts && insertedProducts.length > 0) {
+    const classificationInserts = products
+      .map((product, index) => {
+        if (!product.tech_category && !product.industry) return null;
+        const insertedId = insertedProducts[index]?.id;
+        if (!insertedId) return null;
+        return {
+          product_id: insertedId,
+          company_id: companyId,
+          tech_category: product.tech_category || null,
+          industry: product.industry || null,
+        };
+      })
+      .filter((c): c is NonNullable<typeof c> => c !== null);
+
+    if (classificationInserts.length > 0) {
+      const { error: classError } = await supabaseAdmin
+        .from('product_classification')
+        .insert(classificationInserts);
+
+      if (classError) {
+        console.error('Product classification insert error:', classError);
+        warnings.push('Some product classifications could not be saved');
+      }
+    }
   }
 
   return warnings;
