@@ -78,6 +78,16 @@ export interface Admin {
   created_at: string;
 }
 
+export interface ReviewReply {
+  id: string;
+  review_id: string;
+  company_id: string;
+  user_id: string;
+  comment: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Review {
   id: string;
   company_id: string;
@@ -86,6 +96,7 @@ export interface Review {
   comment: string | null;
   created_at: string;
   user?: Pick<User, 'name' | 'avatar_url'>;
+  reply?: ReviewReply | null;
 }
 
 export interface CompanyWithProducts extends Company {

@@ -4,18 +4,26 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@stackframe/stack';
 import { ReviewForm } from '@/components/ReviewForm';
 import { ReviewList } from '@/components/ReviewList';
-import { Review } from '@/types';
+import { Review, ReviewReply } from '@/types';
+import { isCompanyOwner } from '@/lib/company-permissions';
 
 interface CompanyReviewsProps {
   companyId: string;
+  companyName: string;
+  companySubmittedBy: string | null;
+  companyClaimedBy: string | null;
 }
 
-export function CompanyReviews({ companyId }: CompanyReviewsProps) {
+export function CompanyReviews({ companyId, companyName, companySubmittedBy, companyClaimedBy }: CompanyReviewsProps) {
   const user = useUser();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [dbUserId, setDbUserId] = useState<string | null>(null);
+
+  const isOwner = dbUserId
+    ? isCompanyOwner({ submitted_by: companySubmittedBy, claimed_by: companyClaimedBy }, dbUserId)
+    : false;
 
   // Sync Stack Auth user to get DB user ID
   useEffect(() => {
@@ -26,7 +34,6 @@ export function CompanyReviews({ companyId }: CompanyReviewsProps) {
 
     async function syncUser() {
       try {
-        // Call a lightweight endpoint to get the DB user ID
         const res = await fetch('/api/user/me');
         if (res.ok) {
           const data = await res.json();
@@ -64,7 +71,6 @@ export function CompanyReviews({ companyId }: CompanyReviewsProps) {
 
   const handleSubmitReview = async (rating: number, comment: string) => {
     if (userReview) {
-      // Update existing review
       const response = await fetch('/api/reviews', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -80,13 +86,11 @@ export function CompanyReviews({ companyId }: CompanyReviewsProps) {
         throw new Error(error.error || 'Failed to update review');
       }
 
-      // Optimistic update: update local state instead of refetching all
       setReviews((prev) =>
         prev.map((r) => (r.id === userReview.id ? { ...r, rating, comment } : r))
       );
       setUserReview((prev) => (prev ? { ...prev, rating, comment } : prev));
     } else {
-      // Create new review
       const response = await fetch('/api/reviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,8 +107,6 @@ export function CompanyReviews({ companyId }: CompanyReviewsProps) {
       }
 
       const newReview = await response.json();
-
-      // Optimistic update: add new review to local state
       setReviews((prev) => [newReview, ...prev]);
       setUserReview(newReview);
     }
@@ -120,11 +122,61 @@ export function CompanyReviews({ companyId }: CompanyReviewsProps) {
       throw new Error(error.error || 'Failed to delete review');
     }
 
-    // Optimistic update: remove from local state instead of refetching all
     setReviews((prev) => prev.filter((r) => r.id !== reviewId));
     if (userReview?.id === reviewId) {
       setUserReview(null);
     }
+  };
+
+  const handleReply = async (reviewId: string, comment: string) => {
+    const response = await fetch('/api/review-replies', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reviewId, comment }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create reply');
+    }
+
+    const reply: ReviewReply = await response.json();
+    setReviews((prev) =>
+      prev.map((r) => (r.id === reviewId ? { ...r, reply } : r))
+    );
+  };
+
+  const handleEditReply = async (replyId: string, comment: string) => {
+    const response = await fetch('/api/review-replies', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ replyId, comment }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update reply');
+    }
+
+    const updatedReply: ReviewReply = await response.json();
+    setReviews((prev) =>
+      prev.map((r) => (r.reply?.id === replyId ? { ...r, reply: updatedReply } : r))
+    );
+  };
+
+  const handleDeleteReply = async (replyId: string) => {
+    const response = await fetch(`/api/review-replies?replyId=${replyId}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to delete reply');
+    }
+
+    setReviews((prev) =>
+      prev.map((r) => (r.reply?.id === replyId ? { ...r, reply: null } : r))
+    );
   };
 
   if (isLoading) {
@@ -166,7 +218,12 @@ export function CompanyReviews({ companyId }: CompanyReviewsProps) {
         <ReviewList
           reviews={reviews}
           currentUserId={dbUserId || undefined}
+          companyName={companyName}
+          isCompanyOwner={isOwner}
           onDelete={handleDeleteReview}
+          onReply={handleReply}
+          onEditReply={handleEditReply}
+          onDeleteReply={handleDeleteReply}
         />
       </div>
     </div>

@@ -38,7 +38,7 @@ npm run test:e2e          # Run Playwright E2E tests
 
 **Company Registration**: Stack Auth sign-in → form submission → validation → embedding generation → DB insert (status: pending) → admin approval workflow
 
-**Reviews**: Authenticated users can leave one review per company → ratings aggregated in `companies_with_ratings` view
+**Reviews**: Authenticated users can leave one review per company → ratings aggregated in `companies_with_ratings` view. Company owners can post a single reply per review (stored in `review_replies` table, enforced by unique constraint on `review_id`).
 
 **Company Edits**: User submits edit → creates `company_edits` entry (status: pending) → admin approval workflow. **Exception**: claimed company owners (via `claimed_by`) can edit directly without approval.
 
@@ -62,6 +62,7 @@ npm run test:e2e          # Run Playwright E2E tests
 - **reviews**: User reviews with rating (1-5), one per user per company constraint
 - **company_edits**: Edit requests (id, company_id, proposed_data JSONB, submitted_by, status pending/approved/rejected)
 - **company_claims**: Audit trail for profile claims (id, company_id, user_id, verified_email, status verified/revoked). Unique on company_id.
+- **review_replies**: Owner replies to reviews (id, review_id, company_id, user_id, comment, created_at, updated_at). `UNIQUE(review_id)` enforces one reply per review. `ON DELETE CASCADE` on review_id.
 - **product_classification**: AI-generated classifications for products
   - `product_id`: FK → products(id) ON DELETE CASCADE
   - `company_id`: FK → companies(id) ON DELETE CASCADE (redundant but explicit; enables fast per-company queries)
@@ -162,6 +163,7 @@ Key endpoints:
 - `GET /api/products?company_id=X` - Get products for an approved company (rate limited)
 - `PUT/DELETE /api/products/[id]` - Update/delete products (owner or admin)
 - `PUT/DELETE /api/reviews` - Update/delete own reviews
+- `POST/PUT/DELETE /api/review-replies` - Create/edit/delete owner reply to a review (company owner only)
 - `GET /api/admin/stats` - Dashboard counts (single request, replaces 3 calls)
 - `PUT /api/admin/companies/[id]` - Admin update company with `syncProducts()` (upserts products with `product_url`, syncs `product_classification` rows)
 - `POST /api/claims/complete` - Complete a profile claim (verifies email domain matches company URL)

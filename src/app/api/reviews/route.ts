@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
     .from('reviews')
     .select(`
       *,
-      user:users(name, avatar_url)
+      user:users(name, avatar_url),
+      reply:review_replies(id, review_id, company_id, user_id, comment, created_at, updated_at)
     `)
     .eq('company_id', companyId)
     .order('created_at', { ascending: false });
@@ -26,7 +27,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch reviews' }, { status: 500 });
   }
 
-  return NextResponse.json(data);
+  // Flatten reply from array to single object (Supabase returns arrays for joins)
+  const reviews = (data || []).map((review: Record<string, unknown>) => ({
+    ...review,
+    reply: Array.isArray(review.reply) && review.reply.length > 0 ? review.reply[0] : null,
+  }));
+
+  return NextResponse.json(reviews);
 }
 
 async function getAuthUserId(): Promise<string | null> {

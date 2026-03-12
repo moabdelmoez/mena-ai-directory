@@ -1,19 +1,37 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import Image from 'next/image';
 import { Review } from '@/types';
 import { StarRating } from './StarRating';
+import { ReviewReplyDisplay } from './ReviewReplyDisplay';
+import { ReviewReplyForm } from './ReviewReplyForm';
 import { formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui';
 
 interface ReviewListProps {
   reviews: Review[];
   currentUserId?: string;
+  companyName?: string;
+  isCompanyOwner?: boolean;
   onDelete?: (reviewId: string) => Promise<void>;
+  onReply?: (reviewId: string, comment: string) => Promise<void>;
+  onEditReply?: (replyId: string, comment: string) => Promise<void>;
+  onDeleteReply?: (replyId: string) => Promise<void>;
 }
 
-export const ReviewList = memo(function ReviewList({ reviews, currentUserId, onDelete }: ReviewListProps) {
+export const ReviewList = memo(function ReviewList({
+  reviews,
+  currentUserId,
+  companyName,
+  isCompanyOwner: isOwner,
+  onDelete,
+  onReply,
+  onEditReply,
+  onDeleteReply,
+}: ReviewListProps) {
+  const [activeReplyReviewId, setActiveReplyReviewId] = useState<string | null>(null);
+
   if (reviews.length === 0) {
     return (
       <div className="text-center py-8">
@@ -21,6 +39,12 @@ export const ReviewList = memo(function ReviewList({ reviews, currentUserId, onD
       </div>
     );
   }
+
+  const handleReplySubmit = async (reviewId: string, comment: string) => {
+    if (!onReply) return;
+    await onReply(reviewId, comment);
+    setActiveReplyReviewId(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -71,6 +95,38 @@ export const ReviewList = memo(function ReviewList({ reviews, currentUserId, onD
               )}
             </div>
           </div>
+
+          {/* Reply display */}
+          {review.reply && companyName && (
+            <ReviewReplyDisplay
+              reply={review.reply}
+              companyName={companyName}
+              isOwner={!!isOwner}
+              onEdit={onEditReply}
+              onDelete={onDeleteReply}
+            />
+          )}
+
+          {/* Reply form (owner only, no existing reply) */}
+          {isOwner && !review.reply && onReply && (
+            activeReplyReviewId === review.id ? (
+              <ReviewReplyForm
+                onSubmit={(comment) => handleReplySubmit(review.id, comment)}
+                onCancel={() => setActiveReplyReviewId(null)}
+              />
+            ) : (
+              <div className="ml-[52px] mt-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setActiveReplyReviewId(review.id)}
+                  className="text-blue-600 hover:text-blue-700"
+                >
+                  Reply
+                </Button>
+              </div>
+            )
+          )}
         </div>
       ))}
     </div>

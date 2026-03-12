@@ -257,7 +257,12 @@ export default async function CompanyPage({ params }: Props) {
         {/* Reviews Section */}
         <Card>
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Reviews</h2>
-          <CompanyReviews companyId={company.id} />
+          <CompanyReviews
+            companyId={company.id}
+            companyName={company.name}
+            companySubmittedBy={company.submitted_by}
+            companyClaimedBy={company.claimed_by}
+          />
         </Card>
       </div>
     </>
