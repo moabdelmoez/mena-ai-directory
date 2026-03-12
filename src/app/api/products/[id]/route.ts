@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { generateProductEmbedding } from '@/lib/openai';
 import { requireAuth } from '@/lib/auth-helpers';
 import { getCompanyById } from '@/lib/company-repository';
+import { isCompanyOwner } from '@/lib/company-permissions';
 
 async function getProductById(id: string) {
   const { data, error } = await supabaseAdmin
@@ -58,7 +59,7 @@ export async function PUT(
     }
 
     // Only company owner or admin can update products
-    if (!adminSession && company.submitted_by !== userId) {
+    if (!adminSession && (!userId || !isCompanyOwner(company, userId))) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -123,7 +124,7 @@ export async function DELETE(
     }
 
     // Only company owner or admin can delete products
-    if (!adminSession && company.submitted_by !== userId) {
+    if (!adminSession && (!userId || !isCompanyOwner(company, userId))) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useEffect, FormEvent } from 'react';
+import { useUser } from '@stackframe/stack';
 import { useRouter } from 'next/navigation';
 import { Input, Select, Textarea, Button, Card } from '@/components/ui';
 import { MENA_COUNTRIES } from '@/constants';
@@ -9,8 +9,13 @@ import { ProductInputList } from '@/components/ProductInputList';
 import { ProductInput } from '@/types';
 
 export default function RegisterPage() {
-  const { data: session, status } = useSession();
+  const user = useUser();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -95,7 +100,7 @@ export default function RegisterPage() {
     }
   };
 
-  if (status === 'loading') {
+  if (!mounted) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12">
         <div className="animate-pulse">
@@ -111,18 +116,18 @@ export default function RegisterPage() {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h1>
         <p className="text-gray-600 mb-6">
-          You need to sign in with Google to register a company.
+          You need to sign in to register a company.
         </p>
         <Button
           variant="primary"
-          onClick={() => router.push('/auth/signin')}
+          onClick={() => router.push('/handler/sign-in')}
         >
-          Sign In with Google
+          Sign In
         </Button>
       </div>
     );

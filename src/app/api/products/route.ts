@@ -4,6 +4,7 @@ import { generateProductEmbedding } from '@/lib/openai';
 import { requireAuth } from '@/lib/auth-helpers';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
 import { getCompanyById } from '@/lib/company-repository';
+import { isCompanyOwner } from '@/lib/company-permissions';
 
 export async function GET(request: NextRequest) {
   // Rate limiting
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Only company owner or admin can add products
-    if (!adminSession && company.submitted_by !== userId) {
+    if (!adminSession && (!userId || !isCompanyOwner(company, userId))) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

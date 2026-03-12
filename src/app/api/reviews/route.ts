@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { stackServerApp } from '@/lib/auth';
+import { getOrCreateUser } from '@/lib/auth-helpers';
 import { supabaseAdmin } from '@/lib/supabase';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
 
@@ -29,15 +29,25 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(data);
 }
 
-export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+async function getAuthUserId(): Promise<string | null> {
+  const stackUser = await stackServerApp.getUser();
+  if (!stackUser) return null;
+  try {
+    return await getOrCreateUser(stackUser);
+  } catch {
+    return null;
+  }
+}
 
-  if (!session?.user?.id) {
+export async function POST(request: NextRequest) {
+  const userId = await getAuthUserId();
+
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   // Rate limiting
-  const rateLimitKey = getRateLimitKey('reviews', session.user.id);
+  const rateLimitKey = getRateLimitKey('reviews', userId);
   const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMITS.reviews);
 
   if (!rateLimit.success) {
@@ -76,7 +86,7 @@ export async function POST(request: NextRequest) {
       .from('reviews')
       .select('id')
       .eq('company_id', companyId)
-      .eq('user_id', session.user.id)
+      .eq('user_id', userId)
       .single();
 
     if (existingReview) {
@@ -90,7 +100,7 @@ export async function POST(request: NextRequest) {
       .from('reviews')
       .insert({
         company_id: companyId,
-        user_id: session.user.id,
+        user_id: userId,
         rating,
         comment: comment || null,
       })
@@ -113,9 +123,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const userId = await getAuthUserId();
 
-  if (!session?.user?.id) {
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -136,7 +146,7 @@ export async function PUT(request: NextRequest) {
       .from('reviews')
       .select('id')
       .eq('id', reviewId)
-      .eq('user_id', session.user.id)
+      .eq('user_id', userId)
       .single();
 
     if (!existingReview) {
@@ -170,9 +180,9 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const userId = await getAuthUserId();
 
-  if (!session?.user?.id) {
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -188,7 +198,7 @@ export async function DELETE(request: NextRequest) {
     .from('reviews')
     .select('id')
     .eq('id', reviewId)
-    .eq('user_id', session.user.id)
+    .eq('user_id', userId)
     .single();
 
   if (!existingReview) {

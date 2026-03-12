@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@stackframe/stack';
 import { ReviewForm } from '@/components/ReviewForm';
 import { ReviewList } from '@/components/ReviewList';
 import { Review } from '@/types';
@@ -11,10 +11,34 @@ interface CompanyReviewsProps {
 }
 
 export function CompanyReviews({ companyId }: CompanyReviewsProps) {
-  const { data: session } = useSession();
+  const user = useUser();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userReview, setUserReview] = useState<Review | null>(null);
+  const [dbUserId, setDbUserId] = useState<string | null>(null);
+
+  // Sync Stack Auth user to get DB user ID
+  useEffect(() => {
+    if (!user) {
+      setDbUserId(null);
+      return;
+    }
+
+    async function syncUser() {
+      try {
+        // Call a lightweight endpoint to get the DB user ID
+        const res = await fetch('/api/user/me');
+        if (res.ok) {
+          const data = await res.json();
+          setDbUserId(data.id);
+        }
+      } catch {
+        // Ignore - user may not be synced yet
+      }
+    }
+
+    syncUser();
+  }, [user]);
 
   const fetchReviews = useCallback(async () => {
     try {
@@ -23,8 +47,8 @@ export function CompanyReviews({ companyId }: CompanyReviewsProps) {
       setReviews(data);
 
       // Find user's review if logged in
-      if (session?.user?.id) {
-        const existing = data.find((r: Review) => r.user_id === session.user.id);
+      if (dbUserId) {
+        const existing = data.find((r: Review) => r.user_id === dbUserId);
         setUserReview(existing || null);
       }
     } catch (error) {
@@ -32,7 +56,7 @@ export function CompanyReviews({ companyId }: CompanyReviewsProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [companyId, session?.user?.id]);
+  }, [companyId, dbUserId]);
 
   useEffect(() => {
     fetchReviews();
@@ -141,7 +165,7 @@ export function CompanyReviews({ companyId }: CompanyReviewsProps) {
         </h3>
         <ReviewList
           reviews={reviews}
-          currentUserId={session?.user?.id}
+          currentUserId={dbUserId || undefined}
           onDelete={handleDeleteReview}
         />
       </div>

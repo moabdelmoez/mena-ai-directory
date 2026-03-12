@@ -2,7 +2,7 @@ import { supabaseAdmin } from './supabase';
 import { Company, Product } from '@/types';
 
 // Explicit column lists to exclude embedding vectors (1536-dim, ~6KB per row)
-export const COMPANY_COLUMNS = 'id, company_id, name, slug, company_url, linkedin_profile, description, logo, logo_bg, hq_country, status, submitted_by, created_at, updated_at';
+export const COMPANY_COLUMNS = 'id, company_id, name, slug, company_url, linkedin_profile, description, logo, logo_bg, hq_country, status, submitted_by, claimed_by, created_at, updated_at';
 export const COMPANY_WITH_RATINGS_COLUMNS = `${COMPANY_COLUMNS}, average_rating, review_count`;
 export const PRODUCT_COLUMNS = 'id, product_id, company_id, name, description, product_url, created_at, updated_at';
 

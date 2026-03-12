@@ -21,6 +21,7 @@ interface SearchResultRow {
   hq_country: string;
   status: string;
   submitted_by: string | null;
+  claimed_by: string | null;
   created_at: string;
   updated_at: string;
   semantic_rank: number;
@@ -169,6 +170,7 @@ export async function hybridSearch(
     status: row.status as Company['status'],
     embedding: null,
     submitted_by: row.submitted_by,
+    claimed_by: row.claimed_by ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
     matchingProduct: row.matching_product_id ? {

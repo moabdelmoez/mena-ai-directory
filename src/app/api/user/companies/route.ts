@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { stackServerApp } from '@/lib/auth';
+import { getOrCreateUser } from '@/lib/auth-helpers';
 import { supabaseAdmin } from '@/lib/supabase';
 import { COMPANY_COLUMNS } from '@/lib/company-repository';
 
 export async function GET(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const stackUser = await stackServerApp.getUser();
 
-  if (!session?.user?.id) {
+  if (!stackUser) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  let userId: string;
+  try {
+    userId = await getOrCreateUser(stackUser);
+  } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -16,10 +23,11 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(parseInt(searchParams.get('limit') || '10', 10), 50);
   const offset = (page - 1) * limit;
 
+  // Fetch companies the user submitted OR claimed
   const { data, error, count } = await supabaseAdmin
     .from('companies')
     .select(COMPANY_COLUMNS, { count: 'exact' })
-    .eq('submitted_by', session.user.id)
+    .or(`submitted_by.eq.${userId},claimed_by.eq.${userId}`)
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 

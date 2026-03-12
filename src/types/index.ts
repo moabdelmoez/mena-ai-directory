@@ -45,6 +45,7 @@ export interface Company {
   status: 'pending' | 'approved' | 'rejected';
   embedding: number[] | null;
   submitted_by: string | null;
+  claimed_by: string | null;
   created_at: string;
   updated_at: string;
   average_rating?: number;
@@ -62,7 +63,8 @@ export interface CompanyEdit {
 
 export interface User {
   id: string;
-  google_id: string;
+  google_id: string | null;
+  stack_auth_id: string | null;
   email: string;
   name: string | null;
   avatar_url: string | null;

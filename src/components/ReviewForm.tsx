@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@stackframe/stack';
 import { Button, Textarea } from '@/components/ui';
 import { StarRating } from './StarRating';
 
@@ -18,7 +18,7 @@ interface ReviewFormProps {
 
 export function ReviewForm({ onSubmit, existingReview }: ReviewFormProps) {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const user = useUser();
   const [rating, setRating] = useState(existingReview?.rating || 0);
   const [comment, setComment] = useState(existingReview?.comment || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,18 +47,14 @@ export function ReviewForm({ onSubmit, existingReview }: ReviewFormProps) {
     }
   };
 
-  if (status === 'loading') {
-    return <div className="text-gray-500">Loading...</div>;
-  }
-
-  if (!session) {
+  if (!user) {
     return (
       <div className="bg-gray-50 rounded-lg p-6 text-center">
         <p className="text-gray-600">Sign in to leave a review</p>
         <Button
           variant="primary"
           className="mt-3"
-          onClick={() => router.push('/auth/signin')}
+          onClick={() => router.push('/handler/sign-in')}
         >
           Sign In
         </Button>

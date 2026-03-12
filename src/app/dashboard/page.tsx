@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@stackframe/stack';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, Button } from '@/components/ui';
@@ -11,12 +11,17 @@ import { Company, PaginatedResponse } from '@/types';
 import { formatDate } from '@/lib/utils';
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
+  const user = useUser();
   const router = useRouter();
 
   const [companies, setCompanies] = useState<PaginatedResponse<Company> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchCompanies = useCallback(async () => {
     setIsLoading(true);
@@ -32,17 +37,17 @@ export default function DashboardPage() {
   }, [page]);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
+    if (!mounted) return;
+
+    if (!user) {
+      router.push('/handler/sign-in');
       return;
     }
 
-    if (status === 'authenticated') {
-      fetchCompanies();
-    }
-  }, [status, router, fetchCompanies]);
+    fetchCompanies();
+  }, [mounted, user, router, fetchCompanies]);
 
-  if (status === 'loading') {
+  if (!mounted || !user) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="animate-pulse">
@@ -54,10 +59,6 @@ export default function DashboardPage() {
         </div>
       </div>
     );
-  }
-
-  if (!session) {
-    return null;
   }
 
   return (
@@ -93,6 +94,14 @@ export default function DashboardPage() {
                         {company.name}
                       </h3>
                       <StatusBadge status={company.status} />
+                      {company.claimed_by && (
+                        <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-xs font-medium">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Claimed
+                        </span>
+                      )}
                     </div>
                     <p className="text-gray-600 text-sm line-clamp-2 mb-2">
                       {company.description}

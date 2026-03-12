@@ -27,7 +27,7 @@ export function middleware(_request: NextRequest) {
   const csp = [
     "default-src 'self'",
     // Scripts: self + Next.js inline scripts (unsafe-inline needed for Next.js)
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.stack-auth.com",
     // Styles: self + inline styles (Tailwind)
     "style-src 'self' 'unsafe-inline'",
     // Images: self + configured remote patterns
@@ -35,7 +35,7 @@ export function middleware(_request: NextRequest) {
     // Fonts: self + Google Fonts
     "font-src 'self' https://fonts.gstatic.com",
     // Connect: self + Supabase + OpenAI (server-side only but CSP applies to client)
-    "connect-src 'self' https://*.supabase.co",
+    "connect-src 'self' https://*.supabase.co https://*.stack-auth.com",
     // Frame ancestors: none (same as X-Frame-Options: DENY)
     "frame-ancestors 'none'",
     // Base URI

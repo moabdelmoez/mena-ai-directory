@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@stackframe/stack';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, Button, ConfirmDialog } from '@/components/ui';
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function ProductManagementPage({ params }: Props) {
-  const { data: session, status } = useSession();
+  const user = useUser();
   const router = useRouter();
   const companyId = params.id;
 
@@ -26,6 +26,11 @@ export default function ProductManagementPage({ params }: Props) {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -53,15 +58,15 @@ export default function ProductManagementPage({ params }: Props) {
   }, [companyId]);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
+    if (!mounted) return;
+
+    if (!user) {
+      router.push('/handler/sign-in');
       return;
     }
 
-    if (status === 'authenticated') {
-      fetchData();
-    }
-  }, [status, router, fetchData]);
+    fetchData();
+  }, [mounted, user, router, fetchData]);
 
   const handleAddProduct = async (data: ProductInput) => {
     setIsSubmitting(true);
@@ -124,7 +129,7 @@ export default function ProductManagementPage({ params }: Props) {
     }
   };
 
-  if (status === 'loading' || isLoading) {
+  if (!mounted || isLoading || !user) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="animate-pulse">
@@ -136,10 +141,6 @@ export default function ProductManagementPage({ params }: Props) {
         </div>
       </div>
     );
-  }
-
-  if (!session) {
-    return null;
   }
 
   if (error && !company) {

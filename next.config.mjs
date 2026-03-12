@@ -32,7 +32,7 @@ const nextConfig = {
   },
   // Enable experimental features for better performance
   experimental: {
-    optimizePackageImports: ['@supabase/supabase-js', 'framer-motion', 'next-auth', 'openai'],
+    optimizePackageImports: ['@supabase/supabase-js', 'framer-motion', '@stackframe/stack', 'openai'],
   },
   compress: true,
   poweredByHeader: false,

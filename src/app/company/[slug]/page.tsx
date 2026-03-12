@@ -9,6 +9,8 @@ import { Card } from '@/components/ui';
 import { StarRating } from '@/components/StarRating';
 import { ProductList } from '@/components/ProductList';
 import { CompanyLogo } from '@/components/CompanyLogo';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
+import { ClaimProfileButton } from '@/components/ClaimProfileModal';
 
 const CompanyReviews = dynamic(
   () => import('./CompanyReviews').then(m => ({ default: m.CompanyReviews })),
@@ -155,6 +157,11 @@ export default async function CompanyPage({ params }: Props) {
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   {company.name}
                 </h1>
+                {company.claimed_by ? (
+                  <VerifiedBadge />
+                ) : company.company_url ? (
+                  <ClaimProfileButton companyId={company.id} companySlug={company.slug} companyUrl={company.company_url} />
+                ) : null}
               </div>
 
               {company.average_rating !== undefined && company.average_rating > 0 && (

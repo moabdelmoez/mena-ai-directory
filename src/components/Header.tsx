@@ -3,20 +3,30 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
+import { useUser } from '@stackframe/stack';
 import { Button } from '@/components/ui';
 import Image from 'next/image';
 
 export function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: session, status } = useSession();
+  const user = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close menu on route change
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
+
+  const handleSignOut = async () => {
+    await user?.signOut();
+    router.push('/');
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-xl backdrop-saturate-150 border-b border-zinc-800/50">
@@ -44,12 +54,12 @@ export function Header() {
               Register Company
             </Link>
 
-            {status === 'loading' ? (
+            {!mounted ? (
               <div className="flex items-center gap-4">
                 <div className="w-20 h-4 bg-zinc-700 rounded animate-pulse" />
                 <div className="w-8 h-8 rounded-full bg-zinc-700 animate-pulse" />
               </div>
-            ) : session ? (
+            ) : user ? (
               <div className="flex items-center gap-4">
                 <Link
                   href="/dashboard"
@@ -58,10 +68,10 @@ export function Header() {
                   Dashboard
                 </Link>
                 <div className="flex items-center gap-2">
-                  {session.user.image && (
+                  {user.profileImageUrl && (
                     <Image
-                      src={session.user.image}
-                      alt={session.user.name || 'User'}
+                      src={user.profileImageUrl}
+                      alt={user.displayName || 'User'}
                       width={32}
                       height={32}
                       className="rounded-full"
@@ -70,7 +80,7 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => signOut()}
+                    onClick={handleSignOut}
                     className="text-zinc-400 hover:text-white hover:bg-zinc-800"
                   >
                     Sign Out
@@ -81,7 +91,7 @@ export function Header() {
               <Button
                 variant="primary"
                 size="sm"
-                onClick={() => router.push('/auth/signin')}
+                onClick={() => router.push('/handler/sign-in')}
               >
                 Sign In
               </Button>
@@ -139,9 +149,9 @@ export function Header() {
             Register Company
           </Link>
 
-          {status === 'loading' ? (
+          {!mounted ? (
             <div className="w-20 h-4 bg-zinc-700 rounded animate-pulse" />
-          ) : session ? (
+          ) : user ? (
             <>
               <Link
                 href="/dashboard"
@@ -151,10 +161,10 @@ export function Header() {
                 Dashboard
               </Link>
               <div className="flex items-center gap-2">
-                {session.user.image && (
+                {user.profileImageUrl && (
                   <Image
-                    src={session.user.image}
-                    alt={session.user.name || 'User'}
+                    src={user.profileImageUrl}
+                    alt={user.displayName || 'User'}
                     width={32}
                     height={32}
                     className="rounded-full"
@@ -165,7 +175,7 @@ export function Header() {
                   size="sm"
                   onClick={() => {
                     setMenuOpen(false);
-                    signOut();
+                    handleSignOut();
                   }}
                   className="text-zinc-400 hover:text-white hover:bg-zinc-800"
                 >
@@ -179,7 +189,7 @@ export function Header() {
               size="sm"
               onClick={() => {
                 setMenuOpen(false);
-                router.push('/auth/signin');
+                router.push('/handler/sign-in');
               }}
             >
               Sign In

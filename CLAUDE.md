@@ -27,7 +27,7 @@ npm run test:e2e          # Run Playwright E2E tests
 ### Tech Stack
 - **Framework**: Next.js 14 (App Router) with TypeScript
 - **Database**: Supabase (PostgreSQL + pgvector extension)
-- **Auth**: NextAuth (Google OAuth for users) + custom email/password for admins
+- **Auth**: Stack Auth (Google OAuth + email/password + magic link for users) + custom email/password for admins
 - **Search**: Hybrid search combining OpenAI embeddings (text-embedding-3-small) with PostgreSQL full-text search using Reciprocal Rank Fusion (product matches boosted)
 - **Styling**: Tailwind CSS with SF Pro / system font stack, zinc palette, semantic CSS variables
 - **Animations**: Framer Motion for entrance animations and interactive hover/tap states
@@ -36,15 +36,17 @@ npm run test:e2e          # Run Playwright E2E tests
 
 **Search**: User query → query parser extracts structured filters → LRU-cached OpenAI embedding (500 entries, 1hr TTL via `embedding-cache.ts`) → PostgreSQL `search_companies_with_products()` function → RRF fusion of semantic + keyword rankings (searches both companies and products) → filtered/paginated results with matching product info. Client-side result cache avoids re-fetching on filter toggle/back-navigation. When cleaned query is empty (filter-only searches), falls back to `getFilteredCompanies()` which attaches matching products from `product_classification` when tech_category/industry filters are active.
 
-**Company Registration**: Google OAuth → form submission → validation → embedding generation → DB insert (status: pending) → admin approval workflow
+**Company Registration**: Stack Auth sign-in → form submission → validation → embedding generation → DB insert (status: pending) → admin approval workflow
 
 **Reviews**: Authenticated users can leave one review per company → ratings aggregated in `companies_with_ratings` view
 
-**Company Edits**: User submits edit → creates `company_edits` entry (status: pending) → admin approval workflow
+**Company Edits**: User submits edit → creates `company_edits` entry (status: pending) → admin approval workflow. **Exception**: claimed company owners (via `claimed_by`) can edit directly without approval.
+
+**Claim Profile Flow**: User visits unclaimed company page → clicks "Claim this Profile" → signs in with work email matching company domain (Stack Auth handles email verification via magic link/OTP) → `POST /api/claims/complete` validates domain match → sets `companies.claimed_by`, inserts `company_claims` audit record → Verified badge displayed, user gets direct edit access
 
 ### Database Schema (Supabase)
 
-- **users**: Google OAuth users (id, google_id, email, name, avatar_url)
+- **users**: Users (id, google_id, stack_auth_id, email, name, avatar_url). `stack_auth_id` links to Stack Auth; `google_id` retained for legacy data.
 - **admins**: Admin accounts with bcrypt password hashes
 - **companies**: Listings with 1536-dim vector embeddings, status (pending/approved/rejected)
   - `company_id`: Optional external identifier for imports
@@ -52,12 +54,14 @@ npm run test:e2e          # Run Playwright E2E tests
   - `logo`: Company logo URL
   - `logo_bg`: Logo background hint (`'white'` | `'black'` | null)
   - `hq_country`: Headquarters country
+  - `claimed_by`: UUID FK → users(id), set when a company rep verifies their work email domain
 - **products**: Company products with 1536-dim vector embeddings
   - `product_id`: Optional external identifier for imports (namespaced as `{company_id}--{original_id}`)
   - `name`, `description`: Basic product info
   - `product_url`: Link to the product page
 - **reviews**: User reviews with rating (1-5), one per user per company constraint
 - **company_edits**: Edit requests (id, company_id, proposed_data JSONB, submitted_by, status pending/approved/rejected)
+- **company_claims**: Audit trail for profile claims (id, company_id, user_id, verified_email, status verified/revoked). Unique on company_id.
 - **product_classification**: AI-generated classifications for products
   - `product_id`: FK → products(id) ON DELETE CASCADE
   - `company_id`: FK → companies(id) ON DELETE CASCADE (redundant but explicit; enables fast per-company queries)
@@ -67,11 +71,12 @@ npm run test:e2e          # Run Playwright E2E tests
 
 ### Authentication Patterns
 
-- **User auth**: NextAuth with Google provider, JWT strategy, session includes user.id
+- **User auth**: Stack Auth with Google OAuth, email/password, and magic link. User session accessed via `stackServerApp.getUser()` (server) or `useUser()` (client). Users synced to local `users` table via `getOrCreateUser()` in `auth-helpers.ts`.
 - **Admin auth**: Custom email/password, bcrypt hashing, HMAC-signed httpOnly cookie (signed with `NEXTAUTH_SECRET`) with 24h expiry
 - Use `requireAdmin()` from `/lib/admin-auth.ts` in admin-only API routes
 - Use `requireAuth()` from `/lib/auth-helpers.ts` in routes that accept either admin or user sessions (e.g., product CRUD)
 - Admin layout (`/src/app/admin/layout.tsx`) includes `AdminAuthGuard` that verifies session before rendering child pages
+- Stack Auth handler at `/handler/[...stack]/page.tsx` handles sign-in/sign-up/sign-out flows
 
 ### Security
 
@@ -82,6 +87,8 @@ npm run test:e2e          # Run Playwright E2E tests
 - **Public company API**: Hardcoded to `status=approved` only (admin endpoints have their own routes)
 - **Company edits whitelist**: `PUT /api/companies/[id]` filters `proposed_data` to allowed fields only (`name`, `description`, `company_url`, `linkedin_profile`, `hq_country`, `logo`)
 - **Products API**: `GET /api/products` verifies parent company is approved before returning products
+- **Claim verification**: `POST /api/claims/complete` validates that the user's verified email domain matches the company's website domain; rejects public email domains (gmail, yahoo, etc. — blocklist in `domain-utils.ts`)
+- **Company ownership**: `isCompanyOwner()` in `company-permissions.ts` — `claimed_by` takes precedence over `submitted_by`. `canEditDirectly()` returns true only for claimed owners (bypasses approval workflow).
 
 ### Rate Limiting
 
@@ -126,7 +133,7 @@ All three scripts are idempotent: they delete existing rows for the target recor
 
 - **Embedding cache** (`embedding-cache.ts`): LRU cache for OpenAI embeddings, avoids redundant API calls for repeated searches
 - **Client search cache**: `useRef` Map in search page caches API responses by URL params; filter toggles and back-navigation are instant
-- **`optimizePackageImports`**: Tree-shakes `@supabase/supabase-js`, `framer-motion`, `next-auth`, `openai`
+- **`optimizePackageImports`**: Tree-shakes `@supabase/supabase-js`, `framer-motion`, `@stackframe/stack`, `openai`
 - **Lazy-loaded CompanyReviews**: `next/dynamic` import on company detail page (below-the-fold)
 - **`generateStaticParams`**: Top 50 approved companies pre-built at build time (ISR 1hr revalidation)
 - **Image priority**: `CompanyLogo` sets `priority={true}` automatically for `size="lg"` (detail page hero)
@@ -151,18 +158,22 @@ All three scripts are idempotent: they delete existing rows for the target recor
 
 Key endpoints:
 - `GET /api/user/companies` - Get user's submitted companies
-- `PUT /api/companies/[id]` - Submit edit request for owned company (fields whitelisted)
+- `PUT /api/companies/[id]` - Submit edit request for owned company (fields whitelisted). Claimed owners edit directly; submitters go through approval.
 - `GET /api/products?company_id=X` - Get products for an approved company (rate limited)
 - `PUT/DELETE /api/products/[id]` - Update/delete products (owner or admin)
 - `PUT/DELETE /api/reviews` - Update/delete own reviews
 - `GET /api/admin/stats` - Dashboard counts (single request, replaces 3 calls)
 - `PUT /api/admin/companies/[id]` - Admin update company with `syncProducts()` (upserts products with `product_url`, syncs `product_classification` rows)
+- `POST /api/claims/complete` - Complete a profile claim (verifies email domain matches company URL)
+- `DELETE /api/admin/claims/[id]` - Admin revoke a claim
+- `GET /api/user/me` - Get current user's DB record (used for user ID resolution)
 
 ### Directory Structure
 
-- `/src/app/api/` - API routes (companies, products, search, reviews, admin operations)
+- `/src/app/handler/[...stack]/` - Stack Auth handler (sign-in, sign-up, sign-out, email verification)
+- `/src/app/api/` - API routes (companies, products, search, reviews, claims, admin operations)
 - `/src/app/admin/` - Admin panel pages (dashboard, pending, companies, import)
-- `/src/components/` - React components (SearchBox, CompanyCard, ReviewForm, ProductCard, ProductList, ProductForm, ProductInputList, etc.)
+- `/src/components/` - React components (SearchBox, CompanyCard, ReviewForm, ProductCard, ProductList, ProductForm, ProductInputList, ClaimProfileModal, VerifiedBadge, etc.)
 - `/src/components/ui/` - Base UI components (Button, Card, Input, ConfirmDialog, MotionWrappers, etc.)
 - `/src/lib/` - Utilities (supabase client, auth configs, openai, search logic, company-repository, auth-helpers, company-service)
 - `/src/lib/__tests__/` - Vitest unit tests
@@ -178,8 +189,12 @@ Key endpoints:
 - **`/src/lib/supabase.ts`** — Exports `supabaseAdmin` (service role client with retry logic). No other clients exported.
 - **`/src/lib/company-repository.ts`** — Shared column constants (`COMPANY_COLUMNS`, `PRODUCT_COLUMNS`) and query functions (`getCompanyById`, `getCompanyBySlug`, `getCompanyProducts`). `getCompanyProducts()` uses a single join query for products + classifications.
 - **`/src/lib/company-service.ts`** — FormData helpers, logo validation/upload, `parseAndValidateProducts`, `insertProducts` (max 20 per batch, saves `product_url` and inserts `product_classification` rows for `tech_category`/`industry`), `createCompany()` (shared by public and admin routes, handles slug generation with prefix filtering).
-- **`/src/lib/auth-helpers.ts`** — `requireAuth()` checks admin session first, falls back to user session. Used in product CRUD routes.
+- **`/src/lib/auth.ts`** — Lazy-initialized `stackServerApp` (StackServerApp proxy) for server-side Stack Auth access. Defers init to avoid build-time errors.
+- **`/src/lib/auth-helpers.ts`** — `getOrCreateUser(stackUser)` syncs Stack Auth users to local `users` table (fast path: `stack_auth_id`, fallback: email match for lazy NextAuth migration). `requireAuth()` checks admin session first, falls back to Stack Auth user session. Used in product CRUD routes.
 - **`/src/lib/embedding-cache.ts`** — In-memory LRU cache for OpenAI query embeddings (max 500 entries, 1hr TTL). Single-process only (same caveat as rate-limit.ts). Saves ~200-500ms per repeated search query.
+- **`/src/lib/company-permissions.ts`** — `isCompanyOwner()` (claimed_by takes precedence over submitted_by) and `canEditDirectly()` (true only for claimed owners, bypasses approval workflow).
+- **`/src/lib/domain-utils.ts`** — `extractDomain()`, `isPublicEmailDomain()`, `emailMatchesCompanyDomain()` for claim verification.
+- **`/src/lib/stack-client.ts`** — Client-side Stack Auth app (lazy-initialized).
 - **`/src/lib/search.ts`** — `hybridSearch()` and filtered company listing. Uses `embedding-cache.ts` to skip redundant OpenAI calls. `getFilteredCompanies()` includes matching products when classification filters are active (queries `product_classification` joined with `products`). Re-exports repository functions for backward compatibility.
 
 ### UI Patterns
@@ -205,6 +220,8 @@ Key endpoints:
 
 Required in `.env.local` (see `.env.example`):
 - Supabase: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-- Auth: `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+- Stack Auth: `NEXT_PUBLIC_STACK_PROJECT_ID`, `NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY`, `STACK_SECRET_SERVER_KEY`
+- Admin HMAC: `NEXTAUTH_SECRET` (still used for admin cookie signing)
+- Google OAuth: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (configured in Stack Auth dashboard)
 - AI: `OPENAI_API_KEY`
 - Admin: `ADMIN_EMAIL`, `ADMIN_PASSWORD`

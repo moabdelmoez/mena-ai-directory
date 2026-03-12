@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { stackServerApp } from '@/lib/auth';
+import { getOrCreateUser } from '@/lib/auth-helpers';
 import { supabaseAdmin } from '@/lib/supabase';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
 import { createCompany, CreateCompanyError } from '@/lib/company-service';
@@ -36,14 +36,21 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const stackUser = await stackServerApp.getUser();
 
-  if (!session?.user?.id) {
+  if (!stackUser) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  let userId: string;
+  try {
+    userId = await getOrCreateUser(stackUser);
+  } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   // Rate limiting
-  const rateLimitKey = getRateLimitKey('registration', session.user.id);
+  const rateLimitKey = getRateLimitKey('registration', userId);
   const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMITS.registration);
 
   if (!rateLimit.success) {
@@ -58,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     const { company, warnings } = await createCompany({
       formData,
-      submittedBy: session.user.id,
+      submittedBy: userId,
       autoApprove: false,
     });
 
