@@ -14,33 +14,60 @@ interface FilterOptions {
   industries: string[];
 }
 
-function CheckboxGroup({
+function AccordionFilter({
   label,
   options,
   selected,
   onToggle,
+  isOpen,
+  onToggleOpen,
 }: {
   label: string;
   options: string[];
   selected: string[];
   onToggle: (value: string) => void;
+  isOpen: boolean;
+  onToggleOpen: () => void;
 }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">{label}</p>
-      <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-        {options.map((option) => (
-          <label key={option} className="flex items-center gap-2 cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={selected.includes(option)}
-              onChange={() => onToggle(option)}
-              className="h-3.5 w-3.5 rounded border-zinc-300 text-blue-600 focus:ring-blue-600"
-            />
-            <span className="text-sm text-zinc-600 group-hover:text-zinc-900 leading-tight">{option}</span>
-          </label>
-        ))}
-      </div>
+      <button
+        type="button"
+        onClick={onToggleOpen}
+        className="flex items-center justify-between w-full py-1 group"
+      >
+        <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 group-hover:text-zinc-700 flex items-center gap-2">
+          {label}
+          {selected.length > 0 && (
+            <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-blue-600 text-white text-[10px] font-medium normal-case tracking-normal">
+              {selected.length}
+            </span>
+          )}
+        </span>
+        <svg
+          className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {isOpen && (
+        <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 mt-2">
+          {options.map((option) => (
+            <label key={option} className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={selected.includes(option)}
+                onChange={() => onToggle(option)}
+                className="h-3.5 w-3.5 rounded border-zinc-300 text-blue-600 focus:ring-blue-600"
+              />
+              <span className="text-sm text-zinc-600 group-hover:text-zinc-900 leading-tight">{option}</span>
+            </label>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -53,6 +80,8 @@ function SearchContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({ tech_categories: [], industries: [] });
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [openFilter, setOpenFilter] = useState<string | null>(null);
   const resultCache = useRef(new Map<string, PaginatedResponse<Company>>());
 
   const query = searchParams.get('q') || '';
@@ -162,9 +191,30 @@ function SearchContent() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
+        {/* Mobile Filter Toggle */}
+        <div className="lg:hidden">
+          <button
+            onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+            className="flex items-center gap-2 w-full bg-white rounded-2xl border border-zinc-200/60 px-4 py-3 text-sm font-medium text-zinc-700 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+          >
+            <svg className="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            Filters
+            {hasFilters && (
+              <span className="ml-auto inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-medium">
+                {selectedCountries.length + selectedTechCategories.length + selectedIndustries.length}
+              </span>
+            )}
+            <svg className={`w-4 h-4 text-zinc-400 transition-transform ${mobileFiltersOpen ? 'rotate-180' : ''} ${hasFilters ? '' : 'ml-auto'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+
         {/* Filters Sidebar */}
-        <aside className="w-full lg:w-64 flex-shrink-0">
-          <div className="bg-white rounded-2xl border border-zinc-200/60 p-6 sticky top-24 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <aside className={`w-full lg:w-64 flex-shrink-0 ${mobileFiltersOpen ? 'block' : 'hidden'} lg:block`}>
+          <div className="bg-white rounded-2xl border border-zinc-200/60 p-6 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-zinc-900">Filters</h2>
               {hasFilters && (
@@ -177,22 +227,26 @@ function SearchContent() {
             <div className="divide-y divide-zinc-100">
               {/* Country Filter */}
               <div className="py-4 first:pt-0">
-                <CheckboxGroup
+                <AccordionFilter
                   label="Country"
                   options={countryOptions}
                   selected={selectedCountries}
                   onToggle={(v) => toggleArrayParam('hq_country', selectedCountries, v)}
+                  isOpen={openFilter === 'country'}
+                  onToggleOpen={() => setOpenFilter(openFilter === 'country' ? null : 'country')}
                 />
               </div>
 
               {/* Tech Category Filter */}
               {filterOptions.tech_categories.length > 0 && (
                 <div className="py-4">
-                  <CheckboxGroup
+                  <AccordionFilter
                     label="Tech Category"
                     options={filterOptions.tech_categories}
                     selected={selectedTechCategories}
                     onToggle={(v) => toggleArrayParam('tech_categories', selectedTechCategories, v)}
+                    isOpen={openFilter === 'tech_category'}
+                    onToggleOpen={() => setOpenFilter(openFilter === 'tech_category' ? null : 'tech_category')}
                   />
                 </div>
               )}
@@ -200,11 +254,13 @@ function SearchContent() {
               {/* Industry Filter */}
               {filterOptions.industries.length > 0 && (
                 <div className="py-4 last:pb-0">
-                  <CheckboxGroup
+                  <AccordionFilter
                     label="Industry"
                     options={filterOptions.industries}
                     selected={selectedIndustries}
                     onToggle={(v) => toggleArrayParam('industries', selectedIndustries, v)}
+                    isOpen={openFilter === 'industry'}
+                    onToggleOpen={() => setOpenFilter(openFilter === 'industry' ? null : 'industry')}
                   />
                 </div>
               )}
@@ -218,12 +274,12 @@ function SearchContent() {
           <div className="flex items-center justify-between mb-6">
             <div>
               {query && (
-                <h1 className="text-2xl font-semibold text-zinc-900">
+                <h1 className="text-xl sm:text-2xl font-semibold text-zinc-900">
                   Results for &ldquo;{query}&rdquo;
                 </h1>
               )}
               {!query && (
-                <h1 className="text-2xl font-semibold text-zinc-900">
+                <h1 className="text-xl sm:text-2xl font-semibold text-zinc-900">
                   Browse Companies
                 </h1>
               )}
@@ -311,7 +367,10 @@ export default function SearchPage() {
           <div className="h-12 bg-zinc-200/60 rounded-2xl max-w-2xl" />
         </div>
         <div className="flex flex-col lg:flex-row gap-8">
-          <aside className="w-full lg:w-64 flex-shrink-0">
+          <div className="lg:hidden">
+            <div className="bg-white rounded-2xl border border-zinc-200/60 h-12 animate-pulse" />
+          </div>
+          <aside className="w-full lg:w-64 flex-shrink-0 hidden lg:block">
             <div className="bg-white rounded-2xl border border-zinc-200/60 p-6 space-y-4">
               <div className="h-5 bg-zinc-200/60 rounded w-1/2" />
               <div className="h-4 bg-zinc-200/60 rounded w-3/4" />
