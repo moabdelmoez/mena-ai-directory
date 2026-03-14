@@ -133,10 +133,10 @@ export default function ProductManagementPage({ params }: Props) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-8" />
+          <div className="h-8 bg-zinc-200 rounded w-1/3 mb-8" />
           <div className="space-y-4">
-            <div className="h-24 bg-gray-200 rounded" />
-            <div className="h-24 bg-gray-200 rounded" />
+            <div className="h-24 bg-zinc-200 rounded" />
+            <div className="h-24 bg-zinc-200 rounded" />
           </div>
         </div>
       </div>
@@ -146,8 +146,8 @@ export default function ProductManagementPage({ params }: Props) {
   if (error && !company) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
-        <p className="text-gray-600 mb-6">{error}</p>
+        <h1 className="text-2xl font-bold text-zinc-900 mb-4">Error</h1>
+        <p className="text-zinc-600 mb-6">{error}</p>
         <Button variant="primary" onClick={() => router.push('/dashboard')}>
           Back to Dashboard
         </Button>
@@ -159,21 +159,21 @@ export default function ProductManagementPage({ params }: Props) {
     <div className="max-w-4xl mx-auto px-4 py-12">
       {/* Breadcrumb */}
       <nav className="mb-6">
-        <ol className="flex items-center gap-2 text-sm text-gray-500">
+        <ol className="flex items-center gap-2 text-sm text-zinc-500">
           <li>
-            <Link href="/dashboard" className="hover:text-gray-700">
+            <Link href="/dashboard" className="hover:text-zinc-700">
               Dashboard
             </Link>
           </li>
           <li>/</li>
-          <li className="text-gray-900 font-medium">{company?.name} Products</li>
+          <li className="text-zinc-900 font-medium">{company?.name} Products</li>
         </ol>
       </nav>
 
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Manage Products</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-zinc-900">Manage Products</h1>
+          <p className="text-zinc-600 mt-1">
             Add and manage products for {company?.name}
           </p>
         </div>
@@ -192,7 +192,7 @@ export default function ProductManagementPage({ params }: Props) {
 
       {isAdding && (
         <Card className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Add New Product</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 mb-4">Add New Product</h2>
           <ProductForm
             onSubmit={handleAddProduct}
             onCancel={() => setIsAdding(false)}
@@ -203,7 +203,7 @@ export default function ProductManagementPage({ params }: Props) {
 
       {editingProduct && (
         <Card className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Edit Product</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 mb-4">Edit Product</h2>
           <ProductForm
             product={editingProduct}
             onSubmit={handleUpdateProduct}
@@ -215,7 +215,7 @@ export default function ProductManagementPage({ params }: Props) {
 
       {!isAdding && !editingProduct && (
         <Card>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold text-zinc-900 mb-4">
             Products ({products.length})
           </h2>
           <ProductList

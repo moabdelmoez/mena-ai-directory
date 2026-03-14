@@ -100,11 +100,11 @@ export function ProductInputList({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-zinc-700">
           Products (optional)
         </label>
         {products.length > 0 && (
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-zinc-500">
             {products.length} of {maxProducts}
           </span>
         )}
@@ -115,7 +115,7 @@ export function ProductInputList({
           {productsWithKeys.map((product, index) => (
             <div
               key={product._key}
-              className="border border-gray-200 rounded-lg p-4 bg-gray-50"
+              className="border border-zinc-200 rounded-lg p-4 bg-zinc-50"
             >
               {editIndex === index ? (
                 <div className="space-y-3">
@@ -139,11 +139,11 @@ export function ProductInputList({
                   {showClassificationFields && (
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Tech Category</label>
+                        <label className="block text-xs font-medium text-zinc-600 mb-1">Tech Category</label>
                         <select
                           value={product.tech_category || ''}
                           onChange={(e) => handleProductChange(index, 'tech_category', e.target.value || null)}
-                          className="w-full text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                         >
                           <option value="">None</option>
                           {classificationOptions!.tech_categories.map((tc) => (
@@ -152,11 +152,11 @@ export function ProductInputList({
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Industry</label>
+                        <label className="block text-xs font-medium text-zinc-600 mb-1">Industry</label>
                         <select
                           value={product.industry || ''}
                           onChange={(e) => handleProductChange(index, 'industry', e.target.value || null)}
-                          className="w-full text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                         >
                           <option value="">None</option>
                           {classificationOptions!.industries.map((ind) => (
@@ -188,8 +188,8 @@ export function ProductInputList({
               ) : (
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-gray-900 truncate">{product.name}</h4>
-                    <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
+                    <h4 className="font-medium text-zinc-900 truncate">{product.name}</h4>
+                    <p className="text-sm text-zinc-600 line-clamp-2">{product.description}</p>
                     {product.product_url && (
                       <a
                         href={product.product_url}
@@ -261,11 +261,11 @@ export function ProductInputList({
             {showClassificationFields && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Tech Category</label>
+                  <label className="block text-xs font-medium text-zinc-600 mb-1">Tech Category</label>
                   <select
                     value={newProduct.tech_category || ''}
                     onChange={(e) => setNewProduct({ ...newProduct, tech_category: e.target.value || null })}
-                    className="w-full text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
                     <option value="">None</option>
                     {classificationOptions!.tech_categories.map((tc) => (
@@ -274,11 +274,11 @@ export function ProductInputList({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Industry</label>
+                  <label className="block text-xs font-medium text-zinc-600 mb-1">Industry</label>
                   <select
                     value={newProduct.industry || ''}
                     onChange={(e) => setNewProduct({ ...newProduct, industry: e.target.value || null })}
-                    className="w-full text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
                     <option value="">None</option>
                     {classificationOptions!.industries.map((ind) => (
@@ -329,7 +329,7 @@ export function ProductInputList({
         )
       )}
 
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-zinc-500">
         Add products or services offered by your company. These will be searchable in the directory.
       </p>
     </div>

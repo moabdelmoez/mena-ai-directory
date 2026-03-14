@@ -130,20 +130,20 @@ export default async function CompanyPage({ params }: Props) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <nav className="mb-6">
-          <ol className="flex items-center gap-2 text-sm text-gray-500">
+          <ol className="flex items-center gap-2 text-sm text-zinc-500">
             <li>
-              <Link href="/" className="hover:text-gray-700">
+              <Link href="/" className="hover:text-zinc-700">
                 Home
               </Link>
             </li>
             <li>/</li>
             <li>
-              <Link href="/search" className="hover:text-gray-700">
+              <Link href="/search" className="hover:text-zinc-700">
                 Companies
               </Link>
             </li>
             <li>/</li>
-            <li className="text-gray-900 font-medium">{company.name}</li>
+            <li className="text-zinc-900 font-medium">{company.name}</li>
           </ol>
         </nav>
 
@@ -154,7 +154,7 @@ export default async function CompanyPage({ params }: Props) {
 
             <div className="flex-1">
               <div className="flex flex-wrap items-start gap-3 mb-2">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900">
                   {company.name}
                 </h1>
                 {company.claimed_by ? (
@@ -167,14 +167,14 @@ export default async function CompanyPage({ params }: Props) {
               {company.average_rating !== undefined && company.average_rating > 0 && (
                 <div className="flex items-center gap-2 mb-3">
                   <StarRating rating={company.average_rating} size="md" />
-                  <span className="text-gray-600">
+                  <span className="text-zinc-600">
                     {company.average_rating.toFixed(1)} ({company.review_count}{' '}
                     {company.review_count === 1 ? 'review' : 'reviews'})
                   </span>
                 </div>
               )}
 
-              <p className="text-gray-600 mb-4">{company.description}</p>
+              <p className="text-zinc-600 mb-4">{company.description}</p>
 
               <div className="flex flex-wrap gap-4">
                 {company.company_url && (
@@ -219,7 +219,7 @@ export default async function CompanyPage({ params }: Props) {
                   </a>
                 )}
 
-                <span className="text-gray-500 flex items-center gap-2">
+                <span className="text-zinc-500 flex items-center gap-2">
                   <svg
                     className="w-5 h-5"
                     fill="none"
@@ -249,14 +249,14 @@ export default async function CompanyPage({ params }: Props) {
         {/* Products Section */}
         {products.length > 0 && (
           <Card className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Products & Services</h2>
+            <h2 className="text-xl font-semibold text-zinc-900 mb-4">Products & Services</h2>
             <ProductList products={products} />
           </Card>
         )}
 
         {/* Reviews Section */}
         <Card>
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Reviews</h2>
+          <h2 className="text-xl font-semibold text-zinc-900 mb-6">Reviews</h2>
           <CompanyReviews
             companyId={company.id}
             companyName={company.name}

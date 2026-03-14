@@ -234,12 +234,12 @@ function ManageCompanyForm() {
     return (
       <div className="max-w-3xl mx-auto">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
-          <div className="h-4 bg-gray-200 rounded w-2/3 mb-8" />
+          <div className="h-8 bg-zinc-200 rounded w-1/3 mb-4" />
+          <div className="h-4 bg-zinc-200 rounded w-2/3 mb-8" />
           <div className="space-y-4">
-            <div className="h-10 bg-gray-200 rounded" />
-            <div className="h-10 bg-gray-200 rounded" />
-            <div className="h-32 bg-gray-200 rounded" />
+            <div className="h-10 bg-zinc-200 rounded" />
+            <div className="h-10 bg-zinc-200 rounded" />
+            <div className="h-32 bg-zinc-200 rounded" />
           </div>
         </div>
       </div>
@@ -250,10 +250,10 @@ function ManageCompanyForm() {
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-zinc-900">
             {isEditMode ? 'Edit Company' : 'Create Company'}
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-zinc-600 mt-1">
             {isEditMode
               ? 'Update company information. Changes will be auto-approved.'
               : 'Add a new company to the directory. It will be automatically approved.'}
@@ -275,13 +275,13 @@ function ManageCompanyForm() {
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Logo Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
               Company Logo
             </label>
             <div className="flex items-center gap-4">
               {logoPreview ? (
                 <div
-                  className={`w-20 h-20 relative rounded-lg overflow-hidden ${logoBg === 'black' ? 'bg-black' : logoBg === 'white' ? 'bg-white' : 'bg-gray-100'}`}
+                  className={`w-20 h-20 relative rounded-lg overflow-hidden ${logoBg === 'black' ? 'bg-black' : logoBg === 'white' ? 'bg-white' : 'bg-zinc-100'}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -291,9 +291,9 @@ function ManageCompanyForm() {
                   />
                 </div>
               ) : (
-                <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-lg bg-zinc-100 flex items-center justify-center">
                   <svg
-                    className="w-8 h-8 text-gray-400"
+                    className="w-8 h-8 text-zinc-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -338,33 +338,33 @@ function ManageCompanyForm() {
                     </Button>
                   )}
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-zinc-500">
                   PNG, JPEG, or WebP. Max 2MB.
                 </p>
               </div>
             </div>
             {logoPreview && (
               <div className="mt-3 flex items-center gap-2">
-                <span className="text-xs text-gray-500 font-medium">Logo Background:</span>
+                <span className="text-xs text-zinc-500 font-medium">Logo Background:</span>
                 <div className="flex gap-1">
                   <button
                     type="button"
                     onClick={() => setLogoBg(null)}
-                    className={`px-3 py-1 text-xs rounded border ${logoBg === null ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                    className={`px-3 py-1 text-xs rounded border ${logoBg === null ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium' : 'border-zinc-200 text-zinc-600 hover:border-zinc-300'}`}
                   >
                     Default
                   </button>
                   <button
                     type="button"
                     onClick={() => setLogoBg('white')}
-                    className={`px-3 py-1 text-xs rounded border ${logoBg === 'white' ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                    className={`px-3 py-1 text-xs rounded border ${logoBg === 'white' ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium' : 'border-zinc-200 text-zinc-600 hover:border-zinc-300'}`}
                   >
                     White
                   </button>
                   <button
                     type="button"
                     onClick={() => setLogoBg('black')}
-                    className={`px-3 py-1 text-xs rounded border ${logoBg === 'black' ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                    className={`px-3 py-1 text-xs rounded border ${logoBg === 'black' ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium' : 'border-zinc-200 text-zinc-600 hover:border-zinc-300'}`}
                   >
                     Black
                   </button>
@@ -374,8 +374,8 @@ function ManageCompanyForm() {
           </div>
 
           {/* Basic Info Section */}
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+          <div className="border-t border-zinc-200 pt-6">
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">Basic Information</h3>
             <div className="space-y-4">
               <Input
                 label="Company Name"
@@ -417,8 +417,8 @@ function ManageCompanyForm() {
           </div>
 
           {/* Location Section */}
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Location</h3>
+          <div className="border-t border-zinc-200 pt-6">
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">Location</h3>
             <Select
               label="Headquarters Country"
               id="hq_country"
@@ -431,8 +431,8 @@ function ManageCompanyForm() {
           </div>
 
           {/* Products Section */}
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Products</h3>
+          <div className="border-t border-zinc-200 pt-6">
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">Products</h3>
             <ProductInputList
               products={products}
               onChange={setProducts}
@@ -449,7 +449,7 @@ function ManageCompanyForm() {
           )}
 
           {/* Actions */}
-          <div className="border-t border-gray-200 pt-6 flex items-center justify-between">
+          <div className="border-t border-zinc-200 pt-6 flex items-center justify-between">
             <Button
               type="button"
               variant="outline"
@@ -486,12 +486,12 @@ export default function ManagePage() {
     <Suspense fallback={
       <div className="max-w-3xl mx-auto">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
-          <div className="h-4 bg-gray-200 rounded w-2/3 mb-8" />
+          <div className="h-8 bg-zinc-200 rounded w-1/3 mb-4" />
+          <div className="h-4 bg-zinc-200 rounded w-2/3 mb-8" />
           <div className="space-y-4">
-            <div className="h-10 bg-gray-200 rounded" />
-            <div className="h-10 bg-gray-200 rounded" />
-            <div className="h-32 bg-gray-200 rounded" />
+            <div className="h-10 bg-zinc-200 rounded" />
+            <div className="h-10 bg-zinc-200 rounded" />
+            <div className="h-32 bg-zinc-200 rounded" />
           </div>
         </div>
       </div>

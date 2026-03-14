@@ -104,12 +104,12 @@ export default function RegisterPage() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
-          <div className="h-4 bg-gray-200 rounded w-2/3 mb-8" />
+          <div className="h-8 bg-zinc-200 rounded w-1/3 mb-4" />
+          <div className="h-4 bg-zinc-200 rounded w-2/3 mb-8" />
           <div className="space-y-4">
-            <div className="h-10 bg-gray-200 rounded" />
-            <div className="h-10 bg-gray-200 rounded" />
-            <div className="h-32 bg-gray-200 rounded" />
+            <div className="h-10 bg-zinc-200 rounded" />
+            <div className="h-10 bg-zinc-200 rounded" />
+            <div className="h-32 bg-zinc-200 rounded" />
           </div>
         </div>
       </div>
@@ -119,8 +119,8 @@ export default function RegisterPage() {
   if (!user) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h1>
-        <p className="text-gray-600 mb-6">
+        <h1 className="text-2xl font-bold text-zinc-900 mb-4">Sign In Required</h1>
+        <p className="text-zinc-600 mb-6">
           You need to sign in to register a company.
         </p>
         <Button
@@ -151,10 +151,10 @@ export default function RegisterPage() {
             />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+        <h1 className="text-2xl font-bold text-zinc-900 mb-4">
           Registration Submitted
         </h1>
-        <p className="text-gray-600 mb-6">
+        <p className="text-zinc-600 mb-6">
           Your company registration has been submitted for review.
           We&apos;ll notify you once it&apos;s approved.
         </p>
@@ -172,8 +172,8 @@ export default function RegisterPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Register Your Company</h1>
-      <p className="text-gray-600 mb-8">
+      <h1 className="text-2xl font-bold text-zinc-900 mb-2">Register Your Company</h1>
+      <p className="text-zinc-600 mb-8">
         Fill in the details below to list your AI company in the MENA directory.
         All submissions are reviewed before publication.
       </p>
@@ -182,12 +182,12 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Logo Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
               Company Logo (optional)
             </label>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               {logoPreview ? (
-                <div className="w-20 h-20 relative rounded-lg overflow-hidden bg-gray-100">
+                <div className="w-20 h-20 relative rounded-lg overflow-hidden bg-zinc-100">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={logoPreview}
@@ -196,9 +196,9 @@ export default function RegisterPage() {
                   />
                 </div>
               ) : (
-                <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-lg bg-zinc-100 flex items-center justify-center">
                   <svg
-                    className="w-8 h-8 text-gray-400"
+                    className="w-8 h-8 text-zinc-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -225,7 +225,7 @@ export default function RegisterPage() {
                     Upload Logo
                   </Button>
                 </label>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-zinc-500 mt-1">
                   PNG, JPEG, or WebP. Max 2MB.
                 </p>
               </div>

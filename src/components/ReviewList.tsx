@@ -35,7 +35,7 @@ export const ReviewList = memo(function ReviewList({
   if (reviews.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">No reviews yet. Be the first to review!</p>
+        <p className="text-zinc-500">No reviews yet. Be the first to review!</p>
       </div>
     );
   }
@@ -49,7 +49,7 @@ export const ReviewList = memo(function ReviewList({
   return (
     <div className="space-y-6">
       {reviews.map((review) => (
-        <div key={review.id} className="border-b border-gray-200 pb-6 last:border-0">
+        <div key={review.id} className="border-b border-zinc-200 pb-6 last:border-0">
           <div className="flex items-start gap-3">
             {review.user?.avatar_url ? (
               <Image
@@ -60,8 +60,8 @@ export const ReviewList = memo(function ReviewList({
                 className="rounded-full"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-600 font-medium">
+              <div className="w-10 h-10 rounded-full bg-zinc-200 flex items-center justify-center">
+                <span className="text-zinc-600 font-medium">
                   {review.user?.name?.charAt(0).toUpperCase() || '?'}
                 </span>
               </div>
@@ -69,12 +69,12 @@ export const ReviewList = memo(function ReviewList({
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium text-zinc-900">
                     {review.user?.name || 'Anonymous'}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <StarRating rating={review.rating} size="sm" />
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-zinc-500">
                       {formatDate(review.created_at)}
                     </span>
                   </div>
@@ -91,7 +91,7 @@ export const ReviewList = memo(function ReviewList({
                 )}
               </div>
               {review.comment && (
-                <p className="mt-2 text-gray-600">{review.comment}</p>
+                <p className="mt-2 text-zinc-600">{review.comment}</p>
               )}
             </div>
           </div>

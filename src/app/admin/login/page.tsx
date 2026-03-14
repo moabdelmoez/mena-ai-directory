@@ -37,11 +37,11 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-zinc-50 px-4">
       <Card className="w-full max-w-md">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Admin Login</h1>
-          <p className="text-gray-600 mt-2">Sign in to access the admin panel</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Admin Login</h1>
+          <p className="text-zinc-600 mt-2">Sign in to access the admin panel</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

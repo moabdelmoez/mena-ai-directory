@@ -30,7 +30,7 @@ export function StarRating({
   const starIcon = (filled: boolean, half: boolean) => (
     <svg
       className={`${sizes[size]} ${
-        filled ? 'text-yellow-400' : half ? 'text-yellow-400' : 'text-gray-300'
+        filled ? 'text-yellow-400' : half ? 'text-yellow-400' : 'text-zinc-300'
       }`}
       fill={filled || half ? 'currentColor' : 'none'}
       stroke="currentColor"

@@ -89,73 +89,117 @@ export default function CompaniesPage() {
   const renderLoadingState = () => (
     <div className="space-y-4">
       {[...Array(5)].map((_, i) => (
-        <div key={`skeleton-loader-${i}`} className="h-20 bg-gray-200 rounded-lg animate-pulse" />
+        <div key={`skeleton-loader-${i}`} className="h-20 bg-zinc-200 rounded-lg animate-pulse" />
       ))}
     </div>
   );
 
+  const renderCompanyLogo = (company: Company) => (
+    company.logo ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={company.logo}
+        alt=""
+        className={`w-10 h-10 rounded-lg object-contain ${company.logo_bg === 'black' ? 'bg-black' : company.logo_bg === 'white' ? 'bg-white' : 'bg-zinc-50'}`}
+      />
+    ) : (
+      <div className="w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center">
+        <span className="text-zinc-400 text-xs font-medium">
+          {company.name.charAt(0).toUpperCase()}
+        </span>
+      </div>
+    )
+  );
+
   const renderCompaniesTable = () => (
     <>
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        {companies!.data.map((company) => (
+          <div key={company.id} className="bg-white rounded-xl border border-zinc-100 shadow-sm p-4">
+            <div className="flex items-start gap-3">
+              {renderCompanyLogo(company)}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-zinc-900 truncate">{company.name}</div>
+                    {company.hq_country && (
+                      <div className="text-xs text-zinc-500 mt-0.5">{company.hq_country}</div>
+                    )}
+                  </div>
+                  <StatusBadge status={company.status} />
+                </div>
+                <div className="text-xs text-zinc-400 mt-1">{formatDate(company.created_at)}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-zinc-100">
+              <Link href={`/admin/manage?id=${company.id}`} className="flex-1">
+                <Button variant="outline" size="sm" className="w-full">
+                  Edit
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setConfirmDeleteId(company.id)}
+                disabled={deletingId === company.id}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                {deletingId === company.id ? '...' : 'Delete'}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50/80">
+        <table className="min-w-full divide-y divide-zinc-200">
+          <thead className="bg-zinc-50/80">
             <tr>
-              <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-600 uppercase tracking-wider">
                 Company
               </th>
-              <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-600 uppercase tracking-wider">
                 Country
               </th>
-              <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-600 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-600 uppercase tracking-wider">
                 Created
               </th>
-              <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-3.5 text-right text-xs font-semibold text-zinc-600 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-zinc-200">
             {companies!.data.map((company) => (
-              <tr key={company.id} className="hover:bg-gray-50/50 transition-colors duration-150">
+              <tr key={company.id} className="hover:bg-zinc-50/50 transition-colors duration-150">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-3">
-                    {company.logo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={company.logo}
-                        alt=""
-                        className={`w-10 h-10 rounded-lg object-contain ${company.logo_bg === 'black' ? 'bg-black' : company.logo_bg === 'white' ? 'bg-white' : 'bg-gray-50'}`}
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                        <span className="text-gray-400 text-xs font-medium">
-                          {company.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
+                    {renderCompanyLogo(company)}
                     <div>
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-zinc-900">
                         {company.name}
                       </div>
                       {company.company_url && (
-                        <div className="text-sm text-gray-500 truncate max-w-xs">
+                        <div className="text-sm text-zinc-500 truncate max-w-xs">
                           {company.company_url}
                         </div>
                       )}
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                   {company.hq_country}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <StatusBadge status={company.status} />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                   {formatDate(company.created_at)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
@@ -197,8 +241,8 @@ export default function CompaniesPage() {
 
   const renderEmptyState = () => (
     <Card className="text-center py-12">
-      <h3 className="text-lg font-medium text-gray-900">No companies found</h3>
-      <p className="mt-2 text-gray-500">
+      <h3 className="text-lg font-medium text-zinc-900">No companies found</h3>
+      <p className="mt-2 text-zinc-500">
         {hasActiveFilters
           ? 'No companies match your filters. Try adjusting your search criteria.'
           : 'No companies have been registered yet.'}
@@ -221,8 +265,8 @@ export default function CompaniesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">All Companies</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <h1 className="text-2xl font-bold text-zinc-900">All Companies</h1>
         <Link href="/admin/manage">
           <Button variant="primary">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,7 +278,7 @@ export default function CompaniesPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-6">
+      <div className="bg-white rounded-xl border border-zinc-100 shadow-sm p-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <Input
@@ -272,7 +316,7 @@ export default function CompaniesPage() {
         </div>
         {hasActiveFilters && (
           <div className="mt-4 flex items-center gap-2">
-            <span className="text-sm text-gray-500">Active filters:</span>
+            <span className="text-sm text-zinc-500">Active filters:</span>
             <Button variant="ghost" size="sm" onClick={clearFilters}>
               Clear all
             </Button>

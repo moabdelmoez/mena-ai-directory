@@ -56,7 +56,7 @@ export function ReviewReplyDisplay({ reply, companyName, isOwner, onEdit, onDele
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
           </div>
-          <span className="text-sm font-medium text-gray-900">{companyName}</span>
+          <span className="text-sm font-medium text-zinc-900">{companyName}</span>
           <span className="text-xs text-blue-600 font-medium bg-blue-50 px-1.5 py-0.5 rounded">Company Response</span>
         </div>
         {isOwner && !isEditing && (
@@ -65,7 +65,7 @@ export function ReviewReplyDisplay({ reply, companyName, isOwner, onEdit, onDele
               variant="ghost"
               size="sm"
               onClick={() => { setIsEditing(true); setEditComment(reply.comment); }}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-zinc-500 hover:text-zinc-700"
             >
               Edit
             </Button>
@@ -86,7 +86,7 @@ export function ReviewReplyDisplay({ reply, companyName, isOwner, onEdit, onDele
           <textarea
             value={editComment}
             onChange={(e) => setEditComment(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-blue-600/20 focus:border-blue-600 outline-none resize-none"
+            className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:ring-blue-600/20 focus:border-blue-600 outline-none resize-none"
             rows={3}
           />
           <div className="flex items-center gap-2">
@@ -100,10 +100,10 @@ export function ReviewReplyDisplay({ reply, companyName, isOwner, onEdit, onDele
         </div>
       ) : (
         <>
-          <p className="text-sm text-gray-700">{reply.comment}</p>
+          <p className="text-sm text-zinc-700">{reply.comment}</p>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-gray-500">{formatDate(reply.created_at)}</span>
-            {isEdited && <span className="text-xs text-gray-400">(edited)</span>}
+            <span className="text-xs text-zinc-500">{formatDate(reply.created_at)}</span>
+            {isEdited && <span className="text-xs text-zinc-400">(edited)</span>}
           </div>
         </>
       )}

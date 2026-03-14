@@ -15,7 +15,7 @@ export const ProductCard = memo(function ProductCard({ product, onEdit, onDelete
   return (
     <Card className="h-full">
       <div className="flex flex-col h-full">
-        <h4 className="font-semibold text-gray-900 mb-2">
+        <h4 className="font-semibold text-zinc-900 mb-2">
           {product.product_url ? (
             <a
               href={product.product_url}
@@ -32,7 +32,7 @@ export const ProductCard = memo(function ProductCard({ product, onEdit, onDelete
             product.name
           )}
         </h4>
-        <p className="text-sm text-gray-600 flex-1">{product.description}</p>
+        <p className="text-sm text-zinc-600 flex-1">{product.description}</p>
 
         {(product.tech_category || product.industry) && (
           <div className="flex flex-wrap gap-1 mt-3">
@@ -50,7 +50,7 @@ export const ProductCard = memo(function ProductCard({ product, onEdit, onDelete
         )}
 
         {showActions && (onEdit || onDelete) && (
-          <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
+          <div className="flex gap-2 mt-4 pt-4 border-t border-zinc-100">
             {onEdit && (
               <button
                 onClick={() => onEdit(product)}

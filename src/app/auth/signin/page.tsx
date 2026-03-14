@@ -25,7 +25,7 @@ function SignInContent() {
         <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
           <span className="text-white text-2xl font-bold">M</span>
         </div>
-        <p className="text-gray-600">Redirecting to sign in...</p>
+        <p className="text-zinc-600">Redirecting to sign in...</p>
       </div>
     </div>
   );

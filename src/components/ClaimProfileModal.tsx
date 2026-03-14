@@ -109,7 +109,7 @@ export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, on
       className="bg-transparent p-0 m-0 max-w-none max-h-none backdrop:bg-black/50"
     >
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 w-full max-w-md">
+        <div className="bg-white rounded-xl shadow-lg border border-zinc-200 p-6 w-full max-w-md">
           {step === 'success' ? (
             <>
               <div className="text-center">
@@ -118,8 +118,8 @@ export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, on
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Profile Claimed!</h3>
-                <p className="text-sm text-gray-600 mb-6">
+                <h3 className="text-lg font-semibold text-zinc-900 mb-2">Profile Claimed!</h3>
+                <p className="text-sm text-zinc-600 mb-6">
                   You now have direct edit access to this company profile and can manage its products.
                 </p>
                 <Button variant="primary" onClick={handleClose}>
@@ -129,7 +129,7 @@ export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, on
             </>
           ) : step === 'error' ? (
             <>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Claim Failed</h3>
+              <h3 className="text-lg font-semibold text-zinc-900 mb-2">Claim Failed</h3>
               <p className="text-sm text-red-600 mb-6">{error}</p>
               <div className="flex items-center justify-end gap-3">
                 <Button variant="outline" onClick={handleClose}>
@@ -142,12 +142,12 @@ export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, on
             </>
           ) : step === 'confirming' || (step === 'prompt' && user && domainMatches) ? (
             <>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Claim this Profile</h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <h3 className="text-lg font-semibold text-zinc-900 mb-2">Claim this Profile</h3>
+              <p className="text-sm text-zinc-600 mb-4">
                 You&apos;re signed in as <span className="font-medium">{userEmail}</span>.
                 This email matches the company domain.
               </p>
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-sm text-zinc-500 mb-6">
                 Claiming this profile will give you direct edit access and display a Verified badge.
               </p>
               <div className="flex items-center justify-end gap-3">
@@ -165,8 +165,8 @@ export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, on
             </>
           ) : (
             <>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Claim this Profile</h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <h3 className="text-lg font-semibold text-zinc-900 mb-2">Claim this Profile</h3>
+              <p className="text-sm text-zinc-600 mb-4">
                 To verify you represent this company, sign in with an
                 <span className="font-medium"> @{companyDomain}</span> email address.
               </p>

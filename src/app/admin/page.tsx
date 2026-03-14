@@ -42,10 +42,10 @@ export default function AdminDashboard() {
   if (isLoading) {
     return (
       <div className="animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-1/4 mb-8" />
+        <div className="h-8 bg-zinc-200 rounded w-1/4 mb-8" />
         <div className="grid grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded-lg" />
+            <div key={i} className="h-32 bg-zinc-200 rounded-lg" />
           ))}
         </div>
       </div>
@@ -54,14 +54,14 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-zinc-900 mb-8">Dashboard</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="border-l-4 border-l-yellow-400">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Pending</p>
-              <p className="text-3xl font-bold text-gray-900">{stats?.pending || 0}</p>
+              <p className="text-sm text-zinc-500">Pending</p>
+              <p className="text-3xl font-bold text-zinc-900">{stats?.pending || 0}</p>
             </div>
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
               <svg
@@ -84,8 +84,8 @@ export default function AdminDashboard() {
         <Card className="border-l-4 border-l-green-400">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Approved</p>
-              <p className="text-3xl font-bold text-gray-900">{stats?.approved || 0}</p>
+              <p className="text-sm text-zinc-500">Approved</p>
+              <p className="text-3xl font-bold text-zinc-900">{stats?.approved || 0}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <svg
@@ -108,8 +108,8 @@ export default function AdminDashboard() {
         <Card className="border-l-4 border-l-red-400">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Rejected</p>
-              <p className="text-3xl font-bold text-gray-900">{stats?.rejected || 0}</p>
+              <p className="text-sm text-zinc-500">Rejected</p>
+              <p className="text-3xl font-bold text-zinc-900">{stats?.rejected || 0}</p>
             </div>
             <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
               <svg
@@ -132,8 +132,8 @@ export default function AdminDashboard() {
         <Card className="border-l-4 border-l-blue-400">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Total</p>
-              <p className="text-3xl font-bold text-gray-900">{stats?.total || 0}</p>
+              <p className="text-sm text-zinc-500">Total</p>
+              <p className="text-3xl font-bold text-zinc-900">{stats?.total || 0}</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <svg

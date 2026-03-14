@@ -49,8 +49,8 @@ export function ReviewForm({ onSubmit, existingReview }: ReviewFormProps) {
 
   if (!user) {
     return (
-      <div className="bg-gray-50 rounded-lg p-6 text-center">
-        <p className="text-gray-600">Sign in to leave a review</p>
+      <div className="bg-zinc-50 rounded-lg p-6 text-center">
+        <p className="text-zinc-600">Sign in to leave a review</p>
         <Button
           variant="primary"
           className="mt-3"
@@ -65,7 +65,7 @@ export function ReviewForm({ onSubmit, existingReview }: ReviewFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-zinc-700 mb-2">
           Your Rating
         </label>
         <StarRating

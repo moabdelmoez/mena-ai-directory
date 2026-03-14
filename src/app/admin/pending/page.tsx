@@ -58,10 +58,10 @@ export default function PendingPage() {
   if (isLoading && !companies) {
     return (
       <div className="animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-1/4 mb-8" />
+        <div className="h-8 bg-zinc-200 rounded w-1/4 mb-8" />
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded-lg" />
+            <div key={i} className="h-32 bg-zinc-200 rounded-lg" />
           ))}
         </div>
       </div>
@@ -70,7 +70,7 @@ export default function PendingPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Pending Registrations</h1>
+      <h1 className="text-2xl font-bold text-zinc-900 mb-8">Pending Registrations</h1>
 
       {companies && companies.data.length > 0 ? (
         <>
@@ -80,12 +80,12 @@ export default function PendingPage() {
                 <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-zinc-900">
                         {company.name}
                       </h3>
                     </div>
-                    <p className="text-gray-600 text-sm mb-3">{company.description}</p>
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                    <p className="text-zinc-600 text-sm mb-3">{company.description}</p>
+                    <div className="flex flex-wrap gap-4 text-sm text-zinc-500">
                       <span>{company.hq_country}</span>
                       {company.company_url && (
                         <a
@@ -138,7 +138,7 @@ export default function PendingPage() {
       ) : (
         <Card className="text-center py-12">
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className="mx-auto h-12 w-12 text-zinc-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -150,10 +150,10 @@ export default function PendingPage() {
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <h3 className="mt-4 text-lg font-medium text-gray-900">
+          <h3 className="mt-4 text-lg font-medium text-zinc-900">
             No pending registrations
           </h3>
-          <p className="mt-2 text-gray-500">
+          <p className="mt-2 text-zinc-500">
             All company registrations have been reviewed.
           </p>
         </Card>

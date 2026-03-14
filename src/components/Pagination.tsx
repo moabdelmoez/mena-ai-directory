@@ -49,23 +49,27 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         disabled={currentPage === 1}
         aria-label="Go to previous page"
       >
-        Previous
+        <span className="hidden sm:inline">Previous</span>
+        <svg className="sm:hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
       </Button>
 
-      <div className="flex items-center gap-1 mx-2">
+      {/* Page numbers - hidden on very small screens */}
+      <div className="hidden sm:flex items-center gap-1 mx-2">
         {pages.map((page, index) => (
           <div key={typeof page === 'number' ? `page-${page}` : `ellipsis-${index}`}>
             {page === '...' ? (
-              <span className="px-3 py-1 text-gray-500">...</span>
+              <span className="px-3 py-1 text-zinc-500">...</span>
             ) : (
               <button
                 onClick={() => onPageChange(page as number)}
                 aria-current={currentPage === page ? 'page' : undefined}
                 aria-label={`Go to page ${page}`}
-                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600/20 ${
                   currentPage === page
                     ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    : 'text-zinc-700 hover:bg-zinc-100'
                 }`}
               >
                 {page}
@@ -75,6 +79,11 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         ))}
       </div>
 
+      {/* Mobile page indicator */}
+      <span className="sm:hidden text-sm text-zinc-600 mx-3 tabular-nums">
+        {currentPage} / {totalPages}
+      </span>
+
       <Button
         variant="outline"
         size="sm"
@@ -82,7 +91,10 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         disabled={currentPage === totalPages}
         aria-label="Go to next page"
       >
-        Next
+        <span className="hidden sm:inline">Next</span>
+        <svg className="sm:hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
       </Button>
     </nav>
   );

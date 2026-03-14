@@ -60,7 +60,7 @@ export default function ImportPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">CSV Import</h1>
+      <h1 className="text-2xl font-bold text-zinc-900 mb-8">CSV Import</h1>
 
       <div className="max-w-2xl">
         <Card>
@@ -81,10 +81,10 @@ export default function ImportPage() {
 
             {/* File Upload */}
             <div>
-              <label htmlFor="csv-upload" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="csv-upload" className="block text-sm font-medium text-zinc-700 mb-2">
                 CSV File
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+              <div className="border-2 border-dashed border-zinc-300 rounded-lg p-6 text-center">
                 <input
                   type="file"
                   accept=".csv"
@@ -111,12 +111,12 @@ export default function ImportPage() {
                           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      <span className="text-gray-900 font-medium">{file.name}</span>
+                      <span className="text-zinc-900 font-medium">{file.name}</span>
                     </div>
                   ) : (
                     <div>
                       <svg
-                        className="mx-auto h-12 w-12 text-gray-400"
+                        className="mx-auto h-12 w-12 text-zinc-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -128,10 +128,10 @@ export default function ImportPage() {
                           d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                         />
                       </svg>
-                      <p className="mt-2 text-sm text-gray-600">
+                      <p className="mt-2 text-sm text-zinc-600">
                         Click to upload or drag and drop
                       </p>
-                      <p className="text-xs text-gray-500">CSV files only</p>
+                      <p className="text-xs text-zinc-500">CSV files only</p>
                     </div>
                   )}
                 </label>
@@ -144,9 +144,9 @@ export default function ImportPage() {
                 type="checkbox"
                 checked={autoApprove}
                 onChange={(e) => setAutoApprove(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">
+              <span className="text-sm text-zinc-700">
                 Auto-approve imported companies
               </span>
             </label>
@@ -172,7 +172,7 @@ export default function ImportPage() {
         {/* Results */}
         {result && (
           <Card className="mt-6">
-            <h3 className="font-semibold text-gray-900 mb-4">Import Results</h3>
+            <h3 className="font-semibold text-zinc-900 mb-4">Import Results</h3>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="bg-green-50 rounded-lg p-4 text-center">
@@ -187,9 +187,9 @@ export default function ImportPage() {
 
             {result.errors.length > 0 && (
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Errors:</h4>
-                <div className="bg-gray-50 rounded-lg p-4 max-h-48 overflow-y-auto">
-                  <ul className="text-sm text-gray-600 space-y-1">
+                <h4 className="font-medium text-zinc-900 mb-2">Errors:</h4>
+                <div className="bg-zinc-50 rounded-lg p-4 max-h-48 overflow-y-auto">
+                  <ul className="text-sm text-zinc-600 space-y-1">
                     {result.errors.map((err, index) => (
                       <li key={index}>{err}</li>
                     ))}

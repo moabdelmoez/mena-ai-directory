@@ -36,10 +36,10 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex-1 p-8">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8" />
+          <div className="h-8 bg-zinc-200 rounded w-1/4 mb-8" />
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-24 bg-gray-200 rounded-lg" />
+              <div key={i} className="h-24 bg-zinc-200 rounded-lg" />
             ))}
           </div>
         </div>
@@ -95,8 +95,8 @@ export default function AdminLayout({
 
   const sidebarContent = (
     <>
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Admin Panel</h2>
+      <div className="p-4 border-b border-zinc-200">
+        <h2 className="text-lg font-semibold text-zinc-900">Admin Panel</h2>
       </div>
       <nav className="p-4 pb-20">
         <ul className="space-y-1">
@@ -108,7 +108,7 @@ export default function AdminLayout({
                   'block px-4 py-2 rounded-lg text-sm font-medium transition-colors',
                   pathname === item.href
                     ? 'bg-blue-50 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    : 'text-zinc-700 hover:bg-zinc-100'
                 )}
               >
                 {item.name}
@@ -117,7 +117,7 @@ export default function AdminLayout({
           ))}
         </ul>
       </nav>
-      <div className="absolute bottom-0 w-full p-4 border-t border-gray-200">
+      <div className="absolute bottom-0 w-full p-4 border-t border-zinc-200">
         <button
           onClick={async () => {
             await fetch('/api/admin/login', { method: 'DELETE' });
@@ -132,20 +132,20 @@ export default function AdminLayout({
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-zinc-50">
       {/* Mobile header with hamburger */}
-      <div className="lg:hidden sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
+      <div className="lg:hidden sticky top-0 z-40 bg-white border-b border-zinc-200 px-4 py-3 flex items-center gap-3">
         <button
           type="button"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open sidebar"
-          className="p-2 -ml-2 rounded-lg text-gray-600 hover:bg-gray-100"
+          className="p-2 -ml-2 rounded-lg text-zinc-600 hover:bg-zinc-100"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <span className="text-lg font-semibold text-gray-900">Admin Panel</span>
+        <span className="text-lg font-semibold text-zinc-900">Admin Panel</span>
       </div>
 
       {/* Mobile sidebar overlay */}
@@ -166,7 +166,7 @@ export default function AdminLayout({
               type="button"
               onClick={() => setSidebarOpen(false)}
               aria-label="Close sidebar"
-              className="absolute top-3 right-3 p-2 rounded-lg text-gray-500 hover:bg-gray-100"
+              className="absolute top-3 right-3 p-2 rounded-lg text-zinc-500 hover:bg-zinc-100"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -179,7 +179,7 @@ export default function AdminLayout({
 
       <div className="flex">
         {/* Desktop sidebar */}
-        <aside className="hidden lg:block relative w-64 flex-shrink-0 bg-white border-r border-gray-200 min-h-screen sticky top-0">
+        <aside className="hidden lg:block relative w-64 flex-shrink-0 bg-white border-r border-zinc-200 min-h-screen sticky top-0">
           {sidebarContent}
         </aside>
 

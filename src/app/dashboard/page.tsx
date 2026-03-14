@@ -51,10 +51,10 @@ export default function DashboardPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-8" />
+          <div className="h-8 bg-zinc-200 rounded w-1/3 mb-8" />
           <div className="space-y-4">
-            <div className="h-24 bg-gray-200 rounded" />
-            <div className="h-24 bg-gray-200 rounded" />
+            <div className="h-24 bg-zinc-200 rounded" />
+            <div className="h-24 bg-zinc-200 rounded" />
           </div>
         </div>
       </div>
@@ -65,8 +65,8 @@ export default function DashboardPage() {
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Dashboard</h1>
-          <p className="text-gray-600 mt-1">Manage your company submissions</p>
+          <h1 className="text-2xl font-bold text-zinc-900">My Dashboard</h1>
+          <p className="text-zinc-600 mt-1">Manage your company submissions</p>
         </div>
         <Button
           variant="primary"
@@ -79,7 +79,7 @@ export default function DashboardPage() {
       {isLoading ? (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-24 bg-gray-200 rounded-lg animate-pulse" />
+            <div key={i} className="h-24 bg-zinc-200 rounded-lg animate-pulse" />
           ))}
         </div>
       ) : companies && companies.data.length > 0 ? (
@@ -90,7 +90,7 @@ export default function DashboardPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">
+                      <h3 className="text-lg font-semibold text-zinc-900 truncate">
                         {company.name}
                       </h3>
                       <StatusBadge status={company.status} />
@@ -103,10 +103,10 @@ export default function DashboardPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-gray-600 text-sm line-clamp-2 mb-2">
+                    <p className="text-zinc-600 text-sm line-clamp-2 mb-2">
                       {company.description}
                     </p>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-4 text-sm text-zinc-500">
                       <span>{company.hq_country}</span>
                       <span>Submitted {formatDate(company.created_at)}</span>
                     </div>
@@ -122,7 +122,7 @@ export default function DashboardPage() {
                         </Link>
                         <Link
                           href={`/dashboard/company/${company.id}/products`}
-                          className="text-gray-600 hover:text-gray-700 font-medium text-sm"
+                          className="text-zinc-600 hover:text-zinc-700 font-medium text-sm"
                         >
                           Manage Products
                         </Link>
@@ -147,7 +147,7 @@ export default function DashboardPage() {
       ) : (
         <Card className="text-center py-12">
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className="mx-auto h-12 w-12 text-zinc-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -159,10 +159,10 @@ export default function DashboardPage() {
               d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
             />
           </svg>
-          <h3 className="mt-4 text-lg font-medium text-gray-900">
+          <h3 className="mt-4 text-lg font-medium text-zinc-900">
             No companies yet
           </h3>
-          <p className="mt-2 text-gray-500">
+          <p className="mt-2 text-zinc-500">
             Get started by registering your first company.
           </p>
           <Button

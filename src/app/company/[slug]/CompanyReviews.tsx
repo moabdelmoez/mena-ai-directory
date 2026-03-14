@@ -182,8 +182,8 @@ export function CompanyReviews({ companyId, companyName, companySubmittedBy, com
   if (isLoading) {
     return (
       <div className="animate-pulse space-y-4">
-        <div className="h-24 bg-gray-200 rounded-lg" />
-        <div className="h-24 bg-gray-200 rounded-lg" />
+        <div className="h-24 bg-zinc-200 rounded-lg" />
+        <div className="h-24 bg-zinc-200 rounded-lg" />
       </div>
     );
   }
@@ -191,8 +191,8 @@ export function CompanyReviews({ companyId, companyName, companySubmittedBy, com
   return (
     <div className="space-y-8">
       {/* Review Form */}
-      <div className="border-b border-gray-200 pb-8">
-        <h3 className="font-medium text-gray-900 mb-4">
+      <div className="border-b border-zinc-200 pb-8">
+        <h3 className="font-medium text-zinc-900 mb-4">
           {userReview ? 'Update Your Review' : 'Write a Review'}
         </h3>
         <ReviewForm
@@ -212,7 +212,7 @@ export function CompanyReviews({ companyId, companyName, companySubmittedBy, com
 
       {/* Reviews List */}
       <div>
-        <h3 className="font-medium text-gray-900 mb-4">
+        <h3 className="font-medium text-zinc-900 mb-4">
           All Reviews ({reviews.length})
         </h3>
         <ReviewList

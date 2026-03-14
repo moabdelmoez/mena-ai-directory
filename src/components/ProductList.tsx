@@ -21,7 +21,7 @@ export const ProductList = memo(function ProductList({
 }: ProductListProps) {
   if (products.length === 0) {
     return (
-      <p className="text-gray-500 text-sm text-center py-4">{emptyMessage}</p>
+      <p className="text-zinc-500 text-sm text-center py-4">{emptyMessage}</p>
     );
   }
 
