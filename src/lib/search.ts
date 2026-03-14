@@ -84,7 +84,8 @@ export async function hybridSearch(
   const offset = (page - 1) * limit;
 
   // Parse natural language query to extract structured filters
-  let effectiveQuery = query?.trim() || '';
+  const rawQuery = query?.trim() || '';
+  let effectiveQuery = rawQuery;
   let effectiveCountry = hq_country;
   let effectiveTechCategories = tech_categories;
   let effectiveIndustries = industries;
@@ -98,14 +99,15 @@ export async function hybridSearch(
     if ((!effectiveIndustries?.length) && parsed.extractedIndustries.length > 0) effectiveIndustries = parsed.extractedIndustries;
   }
 
-  // Generate embedding for the cleaned query if provided (with cache)
+  // Generate embedding from the raw query to preserve full semantic context
+  // (cleaned query is used for keyword search to avoid double-matching on filter terms)
   let queryEmbedding: number[] | null = null;
-  if (effectiveQuery) {
-    queryEmbedding = getCachedEmbedding(effectiveQuery);
+  if (rawQuery) {
+    queryEmbedding = getCachedEmbedding(rawQuery);
     if (!queryEmbedding) {
-      queryEmbedding = await generateEmbedding(effectiveQuery);
+      queryEmbedding = await generateEmbedding(rawQuery);
       if (queryEmbedding) {
-        setCachedEmbedding(effectiveQuery, queryEmbedding);
+        setCachedEmbedding(rawQuery, queryEmbedding);
       }
     }
   }
@@ -127,10 +129,12 @@ export async function hybridSearch(
   // Run search RPC (total_count is included in each result row via COUNT(*) OVER())
   const rpcParams: Record<string, unknown> = {
     query_embedding: JSON.stringify(queryEmbedding),
-    search_query: effectiveQuery || null,
+    search_query: rawQuery || null,
     filter_hq_country: effectiveCountry || null,
     result_limit: limit,
     result_offset: offset,
+    filter_tech_categories: effectiveTechCategories?.length ? effectiveTechCategories : null,
+    filter_industries: effectiveIndustries?.length ? effectiveIndustries : null,
   };
 
   if (companyIds !== null) {

@@ -107,6 +107,7 @@ The `search_companies_with_products` SQL function uses RRF (Reciprocal Rank Fusi
 - **Company RRF k**: `60` (standard) — `1/(60+rank)`
 - **Product RRF k**: `45` (lower = top ranks more impactful) with **1.5× boost** — `(1/(45+rank)) * 1.5`
 - **OR keyword fallback**: `safe_tsquery_or()` splits multi-word queries into OR terms; matches not already found by AND keywords get dampened score (k=80, 0.5× weight). Single-word queries are unaffected (OR CTE returns empty due to NOT IN exclusion).
+- **Classification-aware product filtering**: When `filter_tech_categories` or `filter_industries` are active (extracted from query or explicit), the `filtered_products` CTE excludes products without matching `product_classification` rows. This ensures only relevant products compete in ranking and are shown as matching products. Company-level gate (`filter_company_ids`) remains separate.
 - Product-level matches outscore equivalent company-level matches, so a company with a matching product ranks above a company with only a vague description match
 - Pagination uses `COUNT(*) OVER()` in the SQL function (returned as `total_count`); no separate count query needed in the TS client
 
@@ -197,7 +198,7 @@ Key endpoints:
 - **`/src/lib/company-permissions.ts`** — `isCompanyOwner()` (claimed_by takes precedence over submitted_by) and `canEditDirectly()` (true only for claimed owners, bypasses approval workflow).
 - **`/src/lib/domain-utils.ts`** — `extractDomain()`, `isPublicEmailDomain()`, `emailMatchesCompanyDomain()` for claim verification.
 - **`/src/lib/stack-client.ts`** — Client-side Stack Auth app (lazy-initialized).
-- **`/src/lib/search.ts`** — `hybridSearch()` and filtered company listing. Uses `embedding-cache.ts` to skip redundant OpenAI calls. `getFilteredCompanies()` includes matching products when classification filters are active (queries `product_classification` joined with `products`). Re-exports repository functions for backward compatibility.
+- **`/src/lib/search.ts`** — `hybridSearch()` and filtered company listing. Uses `embedding-cache.ts` to skip redundant OpenAI calls. Passes `filter_tech_categories`/`filter_industries` to the SQL function for product-level filtering (in addition to `filter_company_ids` for company-level gating). `getFilteredCompanies()` includes matching products when classification filters are active (queries `product_classification` joined with `products`). Re-exports repository functions for backward compatibility.
 
 ### UI Patterns
 
