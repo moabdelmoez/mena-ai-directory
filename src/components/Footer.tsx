@@ -22,7 +22,10 @@ export function Footer() {
           </nav>
         </div>
 
-        <div className="border-t border-zinc-800 mt-6 pt-6 text-center">
+        <div className="border-t border-zinc-800 mt-6 pt-6 flex flex-col items-center gap-2">
+          <p className="text-xs tracking-wide text-zinc-400">
+            Built with AI, Reviewed by Humans
+          </p>
           <p className="text-xs text-zinc-500">
             &copy; {new Date().getFullYear()} MENA AI Directory. All rights reserved.
           </p>
