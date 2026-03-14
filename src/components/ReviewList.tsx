@@ -57,6 +57,7 @@ export const ReviewList = memo(function ReviewList({
                 alt={review.user.name || 'User'}
                 width={40}
                 height={40}
+                sizes="40px"
                 className="rounded-full"
               />
             ) : (

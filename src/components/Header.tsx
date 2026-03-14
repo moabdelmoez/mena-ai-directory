@@ -74,6 +74,7 @@ export function Header() {
                       alt={user.displayName || 'User'}
                       width={32}
                       height={32}
+                      sizes="32px"
                       className="rounded-full"
                     />
                   )}

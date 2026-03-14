@@ -52,22 +52,27 @@ export function CompanyReviews({ companyId, companyName, companySubmittedBy, com
       const response = await fetch(`/api/reviews?companyId=${companyId}`);
       const data = await response.json();
       setReviews(data);
-
-      // Find user's review if logged in
-      if (dbUserId) {
-        const existing = data.find((r: Review) => r.user_id === dbUserId);
-        setUserReview(existing || null);
-      }
     } catch (error) {
       console.error('Error fetching reviews:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [companyId, dbUserId]);
+  }, [companyId]);
 
+  // Fetch reviews once on mount
   useEffect(() => {
     fetchReviews();
   }, [fetchReviews]);
+
+  // Update userReview when reviews or dbUserId change (no extra fetch)
+  useEffect(() => {
+    if (dbUserId && reviews.length > 0) {
+      const existing = reviews.find((r) => r.user_id === dbUserId);
+      setUserReview(existing || null);
+    } else {
+      setUserReview(null);
+    }
+  }, [dbUserId, reviews]);
 
   const handleSubmitReview = async (rating: number, comment: string) => {
     if (userReview) {

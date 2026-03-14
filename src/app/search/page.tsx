@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense, memo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { SearchBox } from '@/components/SearchBox';
 import { CompanyList } from '@/components/CompanyList';
@@ -14,7 +14,7 @@ interface FilterOptions {
   industries: string[];
 }
 
-function AccordionFilter({
+const AccordionFilter = memo(function AccordionFilter({
   label,
   options,
   selected,
@@ -70,7 +70,7 @@ function AccordionFilter({
       )}
     </div>
   );
-}
+});
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -114,7 +114,14 @@ function SearchContent() {
       .catch(() => {});
   }, []);
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const fetchResults = useCallback(async () => {
+    // Abort any in-flight request
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setIsLoading(true);
     setError(null);
     try {
@@ -133,20 +140,24 @@ function SearchContent() {
         return;
       }
 
-      const response = await fetch(`/api/search?${cacheKey}`);
+      const response = await fetch(`/api/search?${cacheKey}`, { signal: controller.signal });
       const data = await response.json();
       setResults(data);
       resultCache.current.set(cacheKey, data);
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       console.error('Search error:', err);
       setError('Something went wrong. Please try again.');
     } finally {
-      setIsLoading(false);
+      if (!controller.signal.aborted) {
+        setIsLoading(false);
+      }
     }
   }, [query, hq_country, tech_categories_param, industries_param, page]);
 
   useEffect(() => {
     fetchResults();
+    return () => { abortControllerRef.current?.abort(); };
   }, [fetchResults]);
 
   const toggleArrayParam = useCallback(

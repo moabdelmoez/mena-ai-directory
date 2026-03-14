@@ -134,11 +134,14 @@ All three scripts are idempotent: they delete existing rows for the target recor
 ### Performance
 
 - **Embedding cache** (`embedding-cache.ts`): LRU cache for OpenAI embeddings, avoids redundant API calls for repeated searches
-- **Client search cache**: `useRef` Map in search page caches API responses by URL params; filter toggles and back-navigation are instant
+- **Client search cache**: `useRef` Map in search page caches API responses by URL params; filter toggles and back-navigation are instant. AbortController cancels in-flight requests on rapid filter changes.
 - **`optimizePackageImports`**: Tree-shakes `@supabase/supabase-js`, `framer-motion`, `@stackframe/stack`, `openai`
 - **Lazy-loaded CompanyReviews**: `next/dynamic` import on company detail page (below-the-fold)
 - **`generateStaticParams`**: Top 50 approved companies pre-built at build time (ISR 1hr revalidation)
 - **Image priority**: `CompanyLogo` sets `priority={true}` automatically for `size="lg"` (detail page hero)
+- **Image formats**: AVIF + WebP via `images.formats` in next.config; avatar images include explicit `sizes` prop
+- **Reviews API caching**: `Cache-Control: public, s-maxage=60, stale-while-revalidate=120` on GET `/api/reviews`
+- **Memoized filters**: `AccordionFilter` wrapped with `memo()` to prevent re-renders on sibling state changes
 - **Preconnect hints**: `<link rel="preconnect">` for Supabase URL and Google CDN in root layout
 - **Bundle analyzer**: `ANALYZE=true npm run build` to inspect bundle sizes (`@next/bundle-analyzer`)
 

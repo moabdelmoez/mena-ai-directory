@@ -33,7 +33,11 @@ export async function GET(request: NextRequest) {
     reply: Array.isArray(review.reply) && review.reply.length > 0 ? review.reply[0] : null,
   }));
 
-  return NextResponse.json(reviews);
+  return NextResponse.json(reviews, {
+    headers: {
+      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+    },
+  });
 }
 
 async function getAuthUserId(): Promise<string | null> {

@@ -58,7 +58,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       {/* Page numbers - hidden on very small screens */}
       <div className="hidden sm:flex items-center gap-1 mx-2">
         {pages.map((page, index) => (
-          <div key={typeof page === 'number' ? `page-${page}` : `ellipsis-${index}`}>
+          <div key={typeof page === 'number' ? `page-${page}` : `ellipsis-${index < 3 ? 'start' : 'end'}`}>
             {page === '...' ? (
               <span className="px-3 py-1 text-zinc-500">...</span>
             ) : (
