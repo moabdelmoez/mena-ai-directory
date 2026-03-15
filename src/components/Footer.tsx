@@ -24,7 +24,7 @@ export function Footer() {
 
         <div className="border-t border-zinc-800 mt-6 pt-6 flex flex-col items-center gap-2">
           <p className="text-xs tracking-wide text-zinc-400">
-            Built with AI, Reviewed by Humans
+            Built by AI, Reviewed by Human
           </p>
           <p className="text-xs text-zinc-500">
             &copy; {new Date().getFullYear()} MENA AI Directory. All rights reserved.
