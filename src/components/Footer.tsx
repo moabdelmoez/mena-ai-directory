@@ -7,9 +7,9 @@ export function Footer() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-white rounded flex items-center justify-center">
-              <span className="text-black font-semibold text-sm">M</span>
+              <span className="text-black font-semibold text-sm">A</span>
             </div>
-            <span className="text-sm font-semibold text-white">MENA AI Directory</span>
+            <span className="text-sm font-semibold text-white">Arab AI Directory</span>
           </div>
 
           <nav className="flex items-center gap-6">
@@ -27,7 +27,7 @@ export function Footer() {
             Built by AI, Reviewed by Human
           </p>
           <p className="text-xs text-zinc-500">
-            &copy; {new Date().getFullYear()} MENA AI Directory. All rights reserved.
+            &copy; {new Date().getFullYear()} Arab AI Directory. All rights reserved.
           </p>
         </div>
       </div>

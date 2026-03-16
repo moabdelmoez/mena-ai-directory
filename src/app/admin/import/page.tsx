@@ -75,7 +75,7 @@ export default function ImportPage() {
                 name,company_url,description,hq_country,logo_url
               </code>
               <p className="text-sm text-blue-700 mt-2">
-                The <strong>hq_country</strong> must be a valid MENA country name. The <strong>company_url</strong> column also accepts <code>website</code> as an alias.
+                The <strong>hq_country</strong> must be a valid Arab country name. The <strong>company_url</strong> column also accepts <code>website</code> as an alias.
               </p>
             </div>
 

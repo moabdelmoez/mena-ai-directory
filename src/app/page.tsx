@@ -10,11 +10,11 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <FadeIn>
             <h1 className="text-fluid-hero tracking-tight text-zinc-800 font-semibold">
-              Discover AI Companies in MENA
+              Discover AI Companies in the Arab World
             </h1>
             <p className="mt-6 text-fluid-body text-zinc-500 max-w-2xl mx-auto">
-              Your gateway to the Middle East and North Africa AI ecosystem.
-              Browse and connect with innovative AI companies across the region.
+              Your gateway to the Arab AI ecosystem.
+              Browse and connect with innovative AI companies across the Arab world.
             </p>
           </FadeIn>
 
@@ -35,7 +35,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
             <h2 className="text-fluid-title text-center text-zinc-800 font-semibold tracking-tight mb-12">
-              Why Use MENA AI Directory?
+              Why Use the Arab AI Directory?
             </h2>
           </FadeIn>
           <StaggerChildren className="grid md:grid-cols-3 gap-8">
@@ -131,8 +131,8 @@ export default function HomePage() {
               List Your AI Company
             </h2>
             <p className="text-zinc-500 text-lg mb-8">
-              Join the MENA AI directory and get discovered by potential clients
-              and partners across the region.
+              Join the Arab AI Directory and get discovered by potential clients
+              and partners across the Arab world.
             </p>
             <a
               href="/register"

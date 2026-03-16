@@ -6,15 +6,15 @@ import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: {
-    default: 'MENA AI Directory - Discover AI Companies in the Middle East',
-    template: '%s | MENA AI Directory',
+    default: 'Arab AI Directory - Discover AI Companies in the Arab World',
+    template: '%s | Arab AI Directory',
   },
   description:
-    'Discover and connect with AI companies across the Middle East and North Africa. Browse AI infrastructure, platforms, and vertical applications in UAE, Saudi Arabia, Qatar, Egypt, and Jordan.',
+    'Discover and connect with AI companies across the Arab world. Browse AI infrastructure, platforms, and vertical applications in UAE, Saudi Arabia, Qatar, Egypt, and Jordan.',
   keywords: [
     'AI companies',
-    'MENA AI',
-    'Middle East AI',
+    'Arab AI',
+    'Arab world AI',
     'AI directory',
     'UAE AI',
     'Saudi Arabia AI',
@@ -22,19 +22,19 @@ export const metadata: Metadata = {
     'AI platforms',
   ],
   openGraph: {
-    title: 'MENA AI Directory',
+    title: 'Arab AI Directory',
     description:
-      'Discover and connect with AI companies across the Middle East and North Africa.',
+      'Discover and connect with AI companies across the Arab world.',
     url: 'https://mena-ai.directory',
-    siteName: 'MENA AI Directory',
+    siteName: 'Arab AI Directory',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MENA AI Directory',
+    title: 'Arab AI Directory',
     description:
-      'Discover and connect with AI companies across the Middle East and North Africa.',
+      'Discover and connect with AI companies across the Arab world.',
   },
   robots: {
     index: true,
