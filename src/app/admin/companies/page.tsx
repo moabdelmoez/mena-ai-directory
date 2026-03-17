@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useId } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, Button, Select, Input, ConfirmDialog } from '@/components/ui';
@@ -12,6 +12,7 @@ import { MENA_COUNTRIES } from '@/constants';
 
 export default function CompaniesPage() {
   const router = useRouter();
+  const skeletonBaseId = useId();
   const [companies, setCompanies] = useState<PaginatedResponse<Company> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -89,10 +90,16 @@ export default function CompaniesPage() {
   const renderLoadingState = () => (
     <div className="space-y-4">
       {[...Array(5)].map((_, i) => (
-        <div key={`skeleton-loader-${i}`} className="h-20 bg-zinc-200 rounded-lg animate-pulse" />
+        <div key={`${skeletonBaseId}-skeleton-${i}`} className="h-20 bg-zinc-200 rounded-lg animate-pulse" />
       ))}
     </div>
   );
+
+  const getLogoBackgroundClass = (logoBg: string | undefined): string => {
+    if (logoBg === 'black') return 'bg-black';
+    if (logoBg === 'white') return 'bg-white';
+    return 'bg-zinc-50';
+  };
 
   const renderCompanyLogo = (company: Company) => (
     company.logo ? (
@@ -100,7 +107,7 @@ export default function CompaniesPage() {
       <img
         src={company.logo}
         alt=""
-        className={`w-10 h-10 rounded-lg object-contain ${company.logo_bg === 'black' ? 'bg-black' : company.logo_bg === 'white' ? 'bg-white' : 'bg-zinc-50'}`}
+        className={`w-10 h-10 rounded-lg object-contain ${getLogoBackgroundClass(company.logo_bg)}`}
       />
     ) : (
       <div className="w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center">

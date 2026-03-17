@@ -169,9 +169,18 @@ interface CreateCompanyResult {
   warnings: string[];
 }
 
-export async function createCompany(opts: CreateCompanyOptions): Promise<CreateCompanyResult> {
-  const { formData, submittedBy, autoApprove, allowLogoBg } = opts;
+interface ParsedCompanyFormData {
+  name: string;
+  company_url: string | null;
+  linkedin_profile: string | null;
+  description: string;
+  hq_country: string;
+  logo: File | null;
+  logoBg: string | null;
+  products: ProductInput[];
+}
 
+function parseCompanyFormData(formData: FormData, allowLogoBg?: boolean): ParsedCompanyFormData {
   const name = getFormString(formData, 'name');
   const company_url = getFormStringOrNull(formData, 'company_url');
   const linkedin_profile = getFormStringOrNull(formData, 'linkedin_profile');
@@ -180,39 +189,36 @@ export async function createCompany(opts: CreateCompanyOptions): Promise<CreateC
   const logo = getFormFile(formData, 'logo');
   const productsJson = getFormStringOrNull(formData, 'products');
 
-  // Optional logo_bg (admin-only)
   let logoBg: string | null = null;
   if (allowLogoBg) {
     const logoBgRaw = getFormStringOrNull(formData, 'logo_bg');
     logoBg = (logoBgRaw === 'white' || logoBgRaw === 'black') ? logoBgRaw : null;
   }
 
-  // Parse products if provided
-  let products: ProductInput[] = [];
-  if (productsJson) {
-    products = parseAndValidateProducts(productsJson);
-  }
+  const products = productsJson ? parseAndValidateProducts(productsJson) : [];
 
-  // Validation
-  if (!name || !description || !hq_country) {
+  return { name, company_url, linkedin_profile, description, hq_country, logo, logoBg, products };
+}
+
+function validateCompanyFields(parsed: ParsedCompanyFormData): void {
+  if (!parsed.name || !parsed.description || !parsed.hq_country) {
     throw new CreateCompanyError('Name, description, and headquarters country are required', 400);
   }
-
-  if (!MENA_COUNTRIES.includes(hq_country as typeof MENA_COUNTRIES[number])) {
+  if (!MENA_COUNTRIES.includes(parsed.hq_country as typeof MENA_COUNTRIES[number])) {
     throw new CreateCompanyError('Invalid country', 400);
   }
+}
 
-  // Handle logo upload
-  let logoUrl: string | null = null;
-  if (logo && logo.size > 0) {
-    const logoError = validateLogo(logo);
-    if (logoError) {
-      throw new CreateCompanyError(logoError, 400);
-    }
-    logoUrl = await uploadLogo(logo);
+async function processCompanyLogo(logo: File | null): Promise<string | null> {
+  if (!logo || logo.size <= 0) return null;
+  const logoError = validateLogo(logo);
+  if (logoError) {
+    throw new CreateCompanyError(logoError, 400);
   }
+  return uploadLogo(logo);
+}
 
-  // Prefix-filtered slug generation (Phase 3.3)
+async function generateUniqueSlug(name: string): Promise<string> {
   const baseSlug = generateSlug(name);
   const { data: matchingSlugs, error: slugError } = await supabaseAdmin
     .from('companies')
@@ -231,32 +237,54 @@ export async function createCompany(opts: CreateCompanyOptions): Promise<CreateC
     slug = `${baseSlug}-${counter}`;
     counter++;
   }
+  return slug;
+}
 
-  // Generate embedding
-  const embedding = await generateCompanyEmbedding(name, description);
-
-  // Build insert data
+function buildCompanyInsertData(
+  parsed: ParsedCompanyFormData,
+  slug: string,
+  logoUrl: string | null,
+  embeddingJson: string,
+  autoApprove: boolean,
+  submittedBy?: string,
+  allowLogoBg?: boolean,
+): Record<string, unknown> {
   const insertData: Record<string, unknown> = {
-    name,
+    name: parsed.name,
     slug,
-    company_url: company_url || null,
-    linkedin_profile: linkedin_profile || null,
-    description,
+    company_url: parsed.company_url || null,
+    linkedin_profile: parsed.linkedin_profile || null,
+    description: parsed.description,
     logo: logoUrl,
-    hq_country,
+    hq_country: parsed.hq_country,
     status: autoApprove ? 'approved' : 'pending',
-    embedding: JSON.stringify(embedding),
+    embedding: embeddingJson,
   };
 
   if (submittedBy) {
     insertData.submitted_by = submittedBy;
   }
-
   if (allowLogoBg) {
-    insertData.logo_bg = logoBg;
+    insertData.logo_bg = parsed.logoBg;
   }
 
-  // Insert company
+  return insertData;
+}
+
+export async function createCompany(opts: CreateCompanyOptions): Promise<CreateCompanyResult> {
+  const { formData, submittedBy, autoApprove, allowLogoBg } = opts;
+
+  const parsed = parseCompanyFormData(formData, allowLogoBg);
+  validateCompanyFields(parsed);
+
+  const [logoUrl, slug, embedding] = await Promise.all([
+    processCompanyLogo(parsed.logo),
+    generateUniqueSlug(parsed.name),
+    generateCompanyEmbedding(parsed.name, parsed.description),
+  ]);
+
+  const insertData = buildCompanyInsertData(parsed, slug, logoUrl, JSON.stringify(embedding), autoApprove, submittedBy, allowLogoBg);
+
   const { data: company, error: insertError } = await supabaseAdmin
     .from('companies')
     .insert(insertData)
@@ -268,10 +296,9 @@ export async function createCompany(opts: CreateCompanyOptions): Promise<CreateC
     throw new CreateCompanyError('Failed to create company', 500);
   }
 
-  // Insert products if provided
   const warnings: string[] = [];
-  if (products.length > 0 && company) {
-    const productWarnings = await insertProducts(company.id, products, name);
+  if (parsed.products.length > 0 && company) {
+    const productWarnings = await insertProducts(company.id, parsed.products, parsed.name);
     warnings.push(...productWarnings);
   }
 

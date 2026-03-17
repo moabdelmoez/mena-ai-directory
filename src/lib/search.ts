@@ -38,7 +38,7 @@ interface CompanyWithMatchingProduct extends Company {
 }
 
 // Sanitize values before PostgREST interpolation to prevent injection
-const sanitize = (v: string) => v.replace(/["(),\.]/g, '');
+const sanitize = (v: string) => v.replace(/["(),.]/g, '');
 
 async function getCompanyIdsByClassification(
   tech_categories?: string[],
@@ -85,14 +85,12 @@ export async function hybridSearch(
 
   // Parse natural language query to extract structured filters
   const rawQuery = query?.trim() || '';
-  let effectiveQuery = rawQuery;
   let effectiveCountry = hq_country;
   let effectiveTechCategories = tech_categories;
   let effectiveIndustries = industries;
 
-  if (effectiveQuery) {
-    const parsed = parseSearchQuery(effectiveQuery);
-    effectiveQuery = parsed.cleanedQuery;
+  if (rawQuery) {
+    const parsed = parseSearchQuery(rawQuery);
     // Extracted filters only apply when user hasn't set explicit ones
     if (!effectiveCountry && parsed.extractedCountry) effectiveCountry = parsed.extractedCountry;
     if ((!effectiveTechCategories?.length) && parsed.extractedTechCategories.length > 0) effectiveTechCategories = parsed.extractedTechCategories;
@@ -245,10 +243,11 @@ async function getFilteredCompanies(
       .select('company_id, product_id, products!inner(id, name, description)')
       .in('company_id', returnedIds);
 
+    const formatForQuery = (values: string[]) => values.map(sanitize).map(v => `"${v}"`).join(',');
+
     if (tech_categories?.length && industries?.length) {
-      prodQuery = prodQuery.or(
-        `tech_category.in.(${tech_categories.map(sanitize).map(c => `"${c}"`).join(',')}),industry.in.(${industries.map(sanitize).map(i => `"${i}"`).join(',')})`
-      );
+      const orQuery = `tech_category.in.(${formatForQuery(tech_categories)}),industry.in.(${formatForQuery(industries)})`;
+      prodQuery = prodQuery.or(orQuery);
     } else if (tech_categories?.length) {
       prodQuery = prodQuery.in('tech_category', tech_categories.map(sanitize));
     } else if (industries?.length) {

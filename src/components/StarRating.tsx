@@ -47,16 +47,17 @@ export function StarRating({
 
   if (!interactive) {
     return (
-      <div className="flex items-center gap-0.5" role="img" aria-label={`Rating: ${rating} out of ${maxRating}`}>
+      <div className="flex items-center gap-0.5" aria-label={`Rating: ${rating} out of ${maxRating}`}>
         {Array.from({ length: maxRating }, (_, index) => {
           const filled = index < Math.floor(rating);
           const half = index === Math.floor(rating) && rating % 1 >= 0.5;
           return (
-            <span key={index} className="cursor-default">
+            <span key={index} className="cursor-default" aria-hidden="true">
               {starIcon(filled, half)}
             </span>
           );
         })}
+        <span className="sr-only">Rating: {rating} out of {maxRating}</span>
       </div>
     );
   }

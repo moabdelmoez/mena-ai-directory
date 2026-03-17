@@ -168,7 +168,7 @@ export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, on
               <h3 className="text-lg font-semibold text-zinc-900 mb-2">Claim this Profile</h3>
               <p className="text-sm text-zinc-600 mb-4">
                 To verify you represent this company, sign in with an
-                <span className="font-medium"> @{companyDomain}</span> email address.
+                {' '}<span className="font-medium">@{companyDomain}</span> email address.
               </p>
               {user && !domainMatches && userEmail && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">

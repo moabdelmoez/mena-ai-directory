@@ -9,7 +9,7 @@ import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
 export async function POST(request: NextRequest) {
   const stackUser = await stackServerApp.getUser();
 
-  if (!stackUser || !stackUser.primaryEmail) {
+  if (!stackUser?.primaryEmail) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

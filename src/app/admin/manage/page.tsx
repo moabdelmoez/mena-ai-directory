@@ -275,7 +275,7 @@ function ManageCompanyForm() {
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Logo Upload */}
           <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-2">
+            <label htmlFor="logo-upload" className="block text-sm font-medium text-zinc-700 mb-2">
               Company Logo
             </label>
             <div className="flex items-center gap-4">

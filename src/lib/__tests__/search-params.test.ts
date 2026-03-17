@@ -1,22 +1,43 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock dependencies before importing search module
-const mockRpc = vi.fn().mockResolvedValue({ data: [], error: null });
+const {
+  mockRpc,
+  createFromMock,
+} = vi.hoisted(() => {
+  const mockOrResponse = Promise.resolve({ data: [], error: null });
+  const mockRangeResponse = Promise.resolve({ data: [], error: null, count: 0 });
+
+  const createInMock = () => ({
+    or: () => mockOrResponse,
+  });
+
+  const createOrderMock = () => ({
+    range: () => mockRangeResponse,
+  });
+
+  const createEqMock = () => ({
+    order: createOrderMock,
+  });
+
+  const createSelectMock = () => ({
+    in: createInMock,
+    eq: createEqMock,
+  });
+
+  const createFromMock = () => ({
+    select: createSelectMock,
+  });
+
+  const mockRpc = vi.fn().mockResolvedValue({ data: [], error: null });
+
+  return { mockRpc, createFromMock };
+});
+
 vi.mock('../supabase', () => ({
   supabaseAdmin: {
     rpc: (...args: unknown[]) => mockRpc(...args),
-    from: () => ({
-      select: () => ({
-        in: () => ({
-          or: () => Promise.resolve({ data: [], error: null }),
-        }),
-        eq: () => ({
-          order: () => ({
-            range: () => Promise.resolve({ data: [], error: null, count: 0 }),
-          }),
-        }),
-      }),
-    }),
+    from: createFromMock,
   },
 }));
 
