@@ -47,6 +47,11 @@ export default function HomePage() {
             webmSrc="/videos/category.webm"
             reverse
           />
+          <FeatureShowcase
+            title="Trusted Reviews from Real Users"
+            description="Make informed decisions based on authentic feedback from business users who've worked with these companies. Ratings and reviews you can trust."
+            imageSrc="/images/reviews-feature.png"
+          />
         </div>
       </section>
 

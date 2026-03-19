@@ -6,8 +6,9 @@ import { motion } from 'framer-motion';
 interface FeatureShowcaseProps {
   title: string;
   description: string;
-  videoSrc: string;
-  webmSrc: string;
+  videoSrc?: string;
+  webmSrc?: string;
+  imageSrc?: string;
   reverse?: boolean;
 }
 
@@ -16,11 +17,13 @@ export function FeatureShowcase({
   description,
   videoSrc,
   webmSrc,
+  imageSrc,
   reverse = false,
 }: FeatureShowcaseProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    if (imageSrc) return;
     const video = videoRef.current;
     if (!video) return;
 
@@ -46,9 +49,17 @@ export function FeatureShowcase({
 
     observer.observe(video);
     return () => observer.disconnect();
-  }, []);
+  }, [imageSrc]);
 
-  const videoBlock = (
+  const mediaBlock = imageSrc ? (
+    <div className="rounded-2xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-zinc-200/60">
+      <img
+        src={imageSrc}
+        alt={title}
+        className="w-full h-auto block"
+      />
+    </div>
+  ) : (
     <div className="rounded-2xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-zinc-200/60">
       <video
         ref={videoRef}
@@ -84,7 +95,7 @@ export function FeatureShowcase({
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
         {/* Video is always first on mobile. On desktop, text comes first when not reversed. */}
-        <div>{videoBlock}</div>
+        <div>{mediaBlock}</div>
         <div className={reverse ? '' : 'lg:order-first'}>{textBlock}</div>
       </div>
     </motion.div>
