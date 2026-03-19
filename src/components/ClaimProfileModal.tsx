@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@stackframe/stack';
 import { Button } from '@/components/ui';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { extractDomain, getEmailDomain, emailMatchesCompanyDomain } from '@/lib/domain-utils';
 
 interface ClaimProfileModalProps {
@@ -12,13 +13,14 @@ interface ClaimProfileModalProps {
   companyUrl: string;
   open: boolean;
   onClose: () => void;
+  onClaimed?: () => void;
 }
 
 const PENDING_CLAIM_KEY = 'pendingClaim';
 
 type Step = 'prompt' | 'confirming' | 'success' | 'error';
 
-export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, onClose }: ClaimProfileModalProps) {
+export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, onClose, onClaimed }: ClaimProfileModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const router = useRouter();
   const user = useUser();
@@ -86,6 +88,7 @@ export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, on
       }
 
       localStorage.removeItem(PENDING_CLAIM_KEY);
+      onClaimed?.();
       setStep('success');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to claim profile');
@@ -200,6 +203,7 @@ export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, on
  */
 export function ClaimProfileButton({ companyId, companySlug, companyUrl }: { companyId: string; companySlug: string; companyUrl: string }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [claimed, setClaimed] = useState(false);
 
   // Auto-open if returning from auth with pending claim
   useEffect(() => {
@@ -223,6 +227,10 @@ export function ClaimProfileButton({ companyId, companySlug, companyUrl }: { com
     }
   }, [companyId]);
 
+  if (claimed) {
+    return <VerifiedBadge />;
+  }
+
   return (
     <>
       <button
@@ -240,6 +248,7 @@ export function ClaimProfileButton({ companyId, companySlug, companyUrl }: { com
         companyUrl={companyUrl}
         open={isOpen}
         onClose={() => setIsOpen(false)}
+        onClaimed={() => setClaimed(true)}
       />
     </>
   );
