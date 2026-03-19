@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useUser } from '@stackframe/stack';
 import { Button } from '@/components/ui';
+import { UserMenu } from '@/components/UserMenu';
 import Image from 'next/image';
 
 export function Header() {
@@ -60,34 +61,7 @@ export function Header() {
                 <div className="w-8 h-8 rounded-full bg-zinc-700 animate-pulse" />
               </div>
             ) : user ? (
-              <div className="flex items-center gap-4">
-                <Link
-                  href="/dashboard"
-                  className="text-zinc-400 hover:text-white transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <div className="flex items-center gap-2">
-                  {user.profileImageUrl && (
-                    <Image
-                      src={user.profileImageUrl}
-                      alt={user.displayName || 'User'}
-                      width={32}
-                      height={32}
-                      sizes="32px"
-                      className="rounded-full"
-                    />
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleSignOut}
-                    className="text-zinc-400 hover:text-white hover:bg-zinc-800"
-                  >
-                    Sign Out
-                  </Button>
-                </div>
-              </div>
+              <UserMenu user={user} />
             ) : (
               <Button
                 variant="primary"
@@ -154,6 +128,27 @@ export function Header() {
             <div className="w-20 h-4 bg-zinc-700 rounded animate-pulse" />
           ) : user ? (
             <>
+              <div className="flex items-center gap-3 py-1">
+                {user.profileImageUrl ? (
+                  <Image
+                    src={user.profileImageUrl}
+                    alt={user.displayName || 'User'}
+                    width={32}
+                    height={32}
+                    sizes="32px"
+                    className="rounded-full"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center">
+                    <span className="text-sm font-medium text-zinc-300">
+                      {(user.displayName || 'U').charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <span className="text-sm font-medium text-white truncate">
+                  {user.displayName || 'User'}
+                </span>
+              </div>
               <Link
                 href="/dashboard"
                 className="text-zinc-400 hover:text-white transition-colors"
@@ -161,28 +156,15 @@ export function Header() {
               >
                 Dashboard
               </Link>
-              <div className="flex items-center gap-2">
-                {user.profileImageUrl && (
-                  <Image
-                    src={user.profileImageUrl}
-                    alt={user.displayName || 'User'}
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                  />
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    handleSignOut();
-                  }}
-                  className="text-zinc-400 hover:text-white hover:bg-zinc-800"
-                >
-                  Sign Out
-                </Button>
-              </div>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleSignOut();
+                }}
+                className="text-red-400 hover:text-red-300 transition-colors text-left"
+              >
+                Sign Out
+              </button>
             </>
           ) : (
             <Button
