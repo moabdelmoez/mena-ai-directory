@@ -35,6 +35,25 @@ export async function getCompanyById(id: string): Promise<Company | null> {
   return data as Company;
 }
 
+export async function getFeaturedCompanyLogos(count = 15): Promise<{ name: string; logo: string }[]> {
+  const { data, error } = await supabaseAdmin
+    .from('companies')
+    .select('name, logo')
+    .eq('status', 'approved')
+    .not('logo', 'is', null)
+    .limit(100);
+
+  if (error || !data) return [];
+
+  // Fisher-Yates shuffle (Supabase doesn't support ORDER BY random())
+  const arr = [...data] as { name: string; logo: string }[];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.slice(0, count);
+}
+
 export async function getCompanyProducts(companyId: string): Promise<Product[]> {
   // Single query with join to fetch products and their classifications together
   const { data: products, error } = await supabaseAdmin

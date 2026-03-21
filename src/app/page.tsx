@@ -1,9 +1,13 @@
 import { SearchBox } from '@/components/SearchBox';
 import { CategoryChips } from '@/components/CategoryChips';
 import { FeatureShowcase } from '@/components/FeatureShowcase';
+import { LogoMarquee } from '@/components/LogoMarquee';
 import { FadeIn } from '@/components/ui';
+import { getFeaturedCompanyLogos } from '@/lib/company-repository';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featuredCompanies = await getFeaturedCompanyLogos();
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -30,6 +34,9 @@ export default function HomePage() {
           </FadeIn>
         </div>
       </section>
+
+      {/* Logo Marquee */}
+      <LogoMarquee companies={featuredCompanies} />
 
       {/* Features Section */}
       <section className="py-16 bg-[var(--background)]">

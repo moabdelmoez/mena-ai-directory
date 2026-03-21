@@ -60,6 +60,26 @@ body {
   50% { opacity: 0.5; }
 }
 
+/* Logo marquee */
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  animation: marquee-scroll 40s linear infinite;
+  width: max-content;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-container {
+    display: none;
+  }
+  .marquee-static {
+    display: block;
+  }
+}
+
 /* Global micro-interactions for interactive elements */
 @layer base {
   a,
