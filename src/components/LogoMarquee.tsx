@@ -22,7 +22,7 @@ export function LogoMarquee({ companies }: LogoMarqueeProps) {
         <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 bg-gradient-to-l from-[var(--background)] to-transparent z-10" />
 
         {/* Scrolling track: two copies for seamless loop */}
-        <div className="marquee-track flex items-center gap-12 sm:gap-16">
+        <div className="marquee-track flex items-center gap-8 sm:gap-12">
           {companies.map((company, i) => (
             <div key={`a-${i}`} className="flex-shrink-0 w-[100px] h-[40px] sm:w-[120px] sm:h-[48px] relative grayscale opacity-60">
               <Image
