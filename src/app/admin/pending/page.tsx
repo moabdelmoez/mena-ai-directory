@@ -58,10 +58,11 @@ export default function PendingPage() {
   if (isLoading && !companies) {
     return (
       <div className="animate-pulse">
-        <div className="h-8 bg-zinc-200 rounded w-1/4 mb-8" />
+        <div className="h-9 bg-zinc-200 rounded-lg w-1/3 mb-2" />
+        <div className="h-5 bg-zinc-100 rounded-lg w-1/2 mb-10" />
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-32 bg-zinc-200 rounded-lg" />
+            <div key={i} className="h-32 bg-zinc-200 rounded-2xl" />
           ))}
         </div>
       </div>
@@ -70,7 +71,10 @@ export default function PendingPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-zinc-900 mb-8">Pending Registrations</h1>
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">Pending Registrations</h1>
+        <p className="text-zinc-500 mt-1">Review and approve new company submissions.</p>
+      </div>
 
       {companies && companies.data.length > 0 ? (
         <>
@@ -138,7 +142,7 @@ export default function PendingPage() {
       ) : (
         <Card className="text-center py-12">
           <svg
-            className="mx-auto h-12 w-12 text-zinc-400"
+            className="mx-auto h-12 w-12 text-zinc-300"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -146,14 +150,14 @@ export default function PendingPage() {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={1.5}
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
           <h3 className="mt-4 text-lg font-medium text-zinc-900">
             No pending registrations
           </h3>
-          <p className="mt-2 text-zinc-500">
+          <p className="mt-2 text-sm text-zinc-500">
             All company registrations have been reviewed.
           </p>
         </Card>

@@ -248,12 +248,12 @@ function ManageCompanyForm() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">
+          <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">
             {isEditMode ? 'Edit Company' : 'Create Company'}
           </h1>
-          <p className="text-zinc-600 mt-1">
+          <p className="text-zinc-500 mt-1">
             {isEditMode
               ? 'Update company information. Changes will be auto-approved.'
               : 'Add a new company to the directory. It will be automatically approved.'}

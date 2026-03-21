@@ -90,12 +90,12 @@ export default function CompaniesPage() {
   const renderLoadingState = () => (
     <div className="space-y-4">
       {[...Array(5)].map((_, i) => (
-        <div key={`${skeletonBaseId}-skeleton-${i}`} className="h-20 bg-zinc-200 rounded-lg animate-pulse" />
+        <div key={`${skeletonBaseId}-skeleton-${i}`} className="h-20 bg-zinc-100 rounded-2xl animate-pulse" />
       ))}
     </div>
   );
 
-  const getLogoBackgroundClass = (logoBg: string | undefined): string => {
+  const getLogoBackgroundClass = (logoBg: string | null | undefined): string => {
     if (logoBg === 'black') return 'bg-black';
     if (logoBg === 'white') return 'bg-white';
     return 'bg-zinc-50';
@@ -123,7 +123,7 @@ export default function CompaniesPage() {
       {/* Mobile Card View */}
       <div className="md:hidden space-y-3">
         {companies!.data.map((company) => (
-          <div key={company.id} className="bg-white rounded-xl border border-zinc-100 shadow-sm p-4">
+          <div key={company.id} className="bg-white rounded-2xl border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-4">
             <div className="flex items-start gap-3">
               {renderCompanyLogo(company)}
               <div className="flex-1 min-w-0">
@@ -160,9 +160,9 @@ export default function CompaniesPage() {
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
+      <div className="hidden md:block bg-white rounded-2xl border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-zinc-200">
+        <table className="min-w-full divide-y divide-zinc-100">
           <thead className="bg-zinc-50/80">
             <tr>
               <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-600 uppercase tracking-wider">
@@ -182,7 +182,7 @@ export default function CompaniesPage() {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-zinc-200">
+          <tbody className="bg-white divide-y divide-zinc-100">
             {companies!.data.map((company) => (
               <tr key={company.id} className="hover:bg-zinc-50/50 transition-colors duration-150">
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -272,8 +272,11 @@ export default function CompaniesPage() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-zinc-900">All Companies</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">All Companies</h1>
+          <p className="text-zinc-500 mt-1 hidden sm:block">Browse, edit, and manage your directory listings.</p>
+        </div>
         <Link href="/admin/manage">
           <Button variant="primary">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,7 +288,7 @@ export default function CompaniesPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-zinc-100 shadow-sm p-4 mb-6">
+      <div className="bg-white rounded-2xl border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <Input

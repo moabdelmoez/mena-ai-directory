@@ -60,18 +60,21 @@ export default function ImportPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-zinc-900 mb-8">CSV Import</h1>
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">CSV Import</h1>
+        <p className="text-zinc-500 mt-1">Bulk import companies from a CSV file.</p>
+      </div>
 
       <div className="max-w-2xl">
         <Card>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* CSV Format Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-blue-50 border border-blue-200/60 rounded-xl p-4">
               <h3 className="font-medium text-blue-900 mb-2">CSV Format</h3>
               <p className="text-sm text-blue-700 mb-2">
                 Your CSV file should have the following columns:
               </p>
-              <code className="text-xs bg-blue-100 px-2 py-1 rounded block overflow-x-auto">
+              <code className="text-xs bg-blue-100 px-2 py-1 rounded-md block overflow-x-auto">
                 name,company_url,description,hq_country,logo_url
               </code>
               <p className="text-sm text-blue-700 mt-2">
@@ -84,7 +87,7 @@ export default function ImportPage() {
               <label htmlFor="csv-upload" className="block text-sm font-medium text-zinc-700 mb-2">
                 CSV File
               </label>
-              <div className="border-2 border-dashed border-zinc-300 rounded-lg p-6 text-center">
+              <div className="border-2 border-dashed border-zinc-300 rounded-xl p-6 text-center hover:border-zinc-400 transition-colors">
                 <input
                   type="file"
                   accept=".csv"
@@ -152,7 +155,7 @@ export default function ImportPage() {
             </label>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+              <div className="bg-red-50 border border-red-200/60 rounded-xl p-4 text-red-700 text-sm">
                 {error}
               </div>
             )}
@@ -175,11 +178,11 @@ export default function ImportPage() {
             <h3 className="font-semibold text-zinc-900 mb-4">Import Results</h3>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-green-50 rounded-lg p-4 text-center">
-                <p className="text-2xl font-bold text-green-700">{result.success}</p>
-                <p className="text-sm text-green-600">Successful</p>
+              <div className="bg-emerald-50 rounded-xl p-4 text-center ring-1 ring-emerald-200/50">
+                <p className="text-2xl font-bold text-emerald-700">{result.success}</p>
+                <p className="text-sm text-emerald-600">Successful</p>
               </div>
-              <div className="bg-red-50 rounded-lg p-4 text-center">
+              <div className="bg-red-50 rounded-xl p-4 text-center ring-1 ring-red-200/50">
                 <p className="text-2xl font-bold text-red-700">{result.failed}</p>
                 <p className="text-sm text-red-600">Failed</p>
               </div>
@@ -187,8 +190,8 @@ export default function ImportPage() {
 
             {result.errors.length > 0 && (
               <div>
-                <h4 className="font-medium text-zinc-900 mb-2">Errors:</h4>
-                <div className="bg-zinc-50 rounded-lg p-4 max-h-48 overflow-y-auto">
+                <h4 className="font-medium text-zinc-900 mb-2">Errors</h4>
+                <div className="bg-zinc-50 rounded-xl p-4 max-h-48 overflow-y-auto">
                   <ul className="text-sm text-zinc-600 space-y-1">
                     {result.errors.map((err, index) => (
                       <li key={index}>{err}</li>
