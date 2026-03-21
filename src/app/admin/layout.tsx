@@ -144,7 +144,7 @@ export default function AdminLayout({
           </div>
           <div>
             <h2 className="text-sm font-semibold text-white tracking-tight">Admin Panel</h2>
-            <p className="text-[11px] text-zinc-500">MENA AI Directory</p>
+            <p className="text-[11px] text-zinc-500">Arab AI Directory</p>
           </div>
         </div>
       </div>

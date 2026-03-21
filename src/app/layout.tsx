@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from '@/components/Providers';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
+import { LayoutShell } from '@/components/LayoutShell';
 
 export const metadata: Metadata = {
   title: {
@@ -55,9 +54,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased min-h-screen flex flex-col bg-[var(--background)]">
         <Providers>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <LayoutShell>{children}</LayoutShell>
         </Providers>
       </body>
     </html>
