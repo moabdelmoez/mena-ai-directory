@@ -16,7 +16,7 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    requestAnimationFrame(() => setMounted(true));
   }, []);
 
   // Close menu on route change
@@ -54,23 +54,26 @@ export function Header() {
             >
               Register Company
             </Link>
+            <Link
+              href="/about"
+              className="text-zinc-400 hover:text-white transition-colors"
+            >
+              About
+            </Link>
 
-            {!mounted ? (
-              <div className="flex items-center gap-4">
-                <div className="w-20 h-4 bg-zinc-700 rounded animate-pulse" />
-                <div className="w-8 h-8 rounded-full bg-zinc-700 animate-pulse" />
-              </div>
-            ) : user ? (
-              <UserMenu user={user} />
-            ) : (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => router.push('/handler/sign-in')}
-              >
-                Sign In
-              </Button>
-            )}
+            <div className={`transition-opacity duration-300 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+              {user ? (
+                <UserMenu user={user} />
+              ) : (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => router.push('/handler/sign-in')}
+                >
+                  Sign In
+                </Button>
+              )}
+            </div>
           </nav>
 
           {/* Hamburger button */}
@@ -123,10 +126,15 @@ export function Header() {
           >
             Register Company
           </Link>
+          <Link
+            href="/about"
+            className="text-zinc-400 hover:text-white transition-colors"
+            onClick={() => setMenuOpen(false)}
+          >
+            About
+          </Link>
 
-          {!mounted ? (
-            <div className="w-20 h-4 bg-zinc-700 rounded animate-pulse" />
-          ) : user ? (
+          {user ? (
             <>
               <div className="flex items-center gap-3 py-1">
                 {user.profileImageUrl ? (
