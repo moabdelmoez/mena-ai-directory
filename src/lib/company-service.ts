@@ -92,7 +92,7 @@ export function parseAndValidateProducts(productsJson: string): ProductInput[] {
 
 const MAX_PRODUCTS_PER_BATCH = 20;
 
-export async function insertProducts(
+async function insertProducts(
   companyId: string,
   products: ProductInput[],
   companyName: string

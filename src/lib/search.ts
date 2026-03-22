@@ -1,12 +1,9 @@
 import { supabaseAdmin } from './supabase';
 import { generateEmbedding } from './openai';
 import { Company, SearchFilters, PaginatedResponse, MatchingProduct } from '@/types';
-import { COMPANY_COLUMNS, getCompanyBySlug, getCompanyById, getCompanyProducts } from './company-repository';
+import { COMPANY_COLUMNS } from './company-repository';
 import { parseSearchQuery } from './query-parser';
 import { getCachedEmbedding, setCachedEmbedding } from './embedding-cache';
-
-// Re-export repository functions for backward compatibility
-export { COMPANY_COLUMNS, getCompanyBySlug, getCompanyById, getCompanyProducts };
 
 interface SearchResultRow {
   id: string;

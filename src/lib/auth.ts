@@ -2,7 +2,7 @@ import { StackServerApp } from '@stackframe/stack';
 
 let _app: StackServerApp | null = null;
 
-export function getStackServerApp(): StackServerApp {
+function getStackServerApp(): StackServerApp {
   if (!_app) {
     _app = new StackServerApp({
       tokenStore: 'nextjs-cookie',

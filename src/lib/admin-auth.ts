@@ -97,23 +97,6 @@ export async function createAdminSession(adminId: string, email: string): Promis
   });
 }
 
-export async function getAdminSession(): Promise<AdminSession | null> {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get(ADMIN_SESSION_COOKIE);
-
-  if (!sessionCookie) {
-    return null;
-  }
-
-  const session = decodeSession(sessionCookie.value);
-
-  if (!session || session.expiresAt < Date.now()) {
-    return null;
-  }
-
-  return session;
-}
-
 export async function clearAdminSession(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(ADMIN_SESSION_COOKIE);
@@ -144,8 +127,4 @@ export async function requireAdmin(request: NextRequest): Promise<AdminSession |
   }
 
   return session;
-}
-
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
 }

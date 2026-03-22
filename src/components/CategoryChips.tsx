@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 
-interface FilterChipsProps {
+interface CategoryChipsProps {
   className?: string;
 }
 
-export function FilterChips({ className = '' }: FilterChipsProps) {
+export function CategoryChips({ className = '' }: CategoryChipsProps) {
   return (
     <div className={`flex flex-wrap gap-2 justify-center ${className}`}>
       <Link
@@ -18,6 +18,3 @@ export function FilterChips({ className = '' }: FilterChipsProps) {
     </div>
   );
 }
-
-// Keeping the old name as an alias for backward compatibility
-export const CategoryChips = FilterChips;

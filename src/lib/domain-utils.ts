@@ -39,7 +39,7 @@ export function extractDomain(url: string): string {
 /**
  * Check if a domain is a public/free email provider.
  */
-export function isPublicEmailDomain(domain: string): boolean {
+function isPublicEmailDomain(domain: string): boolean {
   return PUBLIC_EMAIL_DOMAINS.has(domain.toLowerCase());
 }
 
