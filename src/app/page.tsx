@@ -18,7 +18,7 @@ export default async function HomePage() {
               Discover AI Companies in the Arab World
             </h1>
             <p className="mt-6 text-fluid-body text-zinc-500 max-w-2xl mx-auto">
-              Your gateway to the Arab AI ecosystem.
+              Your gateway to the Arab world&apos;s AI ecosystem.
               Browse and connect with innovative AI companies across the Arab world.
             </p>
           </FadeIn>
@@ -49,7 +49,7 @@ export default async function HomePage() {
           />
           <FeatureShowcase
             title="Browse by Category"
-            description="Explore companies by technology, industry, or region. Filter and discover the Arab AI ecosystem at a glance."
+            description="Explore companies by technology, industry, or region. Filter and discover the Arab world's AI ecosystem at a glance."
             videoSrc="/videos/category.mp4"
             webmSrc="/videos/category.webm"
             reverse
@@ -70,7 +70,7 @@ export default async function HomePage() {
               List Your AI Company
             </h2>
             <p className="text-zinc-500 text-lg mb-8">
-              Join the Arab AI Directory and get discovered by potential clients
+              Join BayanBase and get discovered by potential clients
               and partners across the Arab world.
             </p>
             <a

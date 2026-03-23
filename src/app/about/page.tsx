@@ -164,12 +164,12 @@ export default function AboutPage() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-6">
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-sm font-medium border border-zinc-200">
-                About Arab AI
+                About BayanBase
               </span>
             </div>
             <h1 id="about-hero" className="text-fluid-hero tracking-tight font-semibold text-zinc-900 text-balance mb-6">
               We are building the{' '}
-              <span className="text-blue-600">missing layer</span> of the Arab AI
+              <span className="text-blue-600">missing layer</span> of the Arab world&apos;s AI
               ecosystem.
             </h1>
             <p className="text-lg text-zinc-500 max-w-2xl mx-auto">
@@ -342,7 +342,7 @@ export default function AboutPage() {
                   </h3>
                   <p className="text-sm text-zinc-500 leading-relaxed">
                     Research reports, trend analysis, and rankings of AI companies — built
-                    specifically for our region. Understand where the Arab AI market is
+                    specifically for our region. Understand where the Arab world&apos;s AI market is
                     heading and who is leading it.
                   </p>
                 </Card>
@@ -381,7 +381,7 @@ export default function AboutPage() {
                     The Arab world is full of brilliant AI builders. They just need a stage.
                     And the businesses looking for them need a guide.{' '}
                     <strong className="text-zinc-900 font-medium">
-                      Arab AI Directory is both.
+                      BayanBase is both.
                     </strong>
                   </p>
                 </div>
@@ -425,8 +425,8 @@ export default function AboutPage() {
                         Transparency Always
                       </h3>
                       <p className="text-sm text-zinc-500 leading-relaxed">
-                        No pay-to-play rankings. No hidden deals. What you see on Arab AI
-                        Directory is what real users actually experience.
+                        No pay-to-play rankings. No hidden deals. What you see on BayanBase
+                        is what real users actually experience.
                       </p>
                     </div>
                   </div>
@@ -474,7 +474,7 @@ export default function AboutPage() {
         <FadeIn inView>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-fluid-title tracking-tight font-semibold text-zinc-900 text-balance mb-4">
-              Ready to explore the Arab AI ecosystem?
+              Ready to explore the Arab world&apos;s AI ecosystem?
             </h2>
             <p className="text-zinc-500 text-lg mb-8 max-w-xl mx-auto">
               Browse AI companies, read real reviews, and find the right partner for your business.

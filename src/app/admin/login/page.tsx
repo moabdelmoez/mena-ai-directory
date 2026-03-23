@@ -102,7 +102,7 @@ export default function AdminLoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-xs text-zinc-700 mt-6">Arab AI Directory Admin</p>
+        <p className="text-center text-xs text-zinc-700 mt-6">BayanBase Admin</p>
       </div>
     </div>
   );

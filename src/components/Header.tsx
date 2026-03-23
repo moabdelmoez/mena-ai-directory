@@ -34,10 +34,14 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
-              <span className="text-black font-bold text-lg">A</span>
-            </div>
-            <span className="text-xl font-semibold text-white">Arab AI</span>
+            <Image
+              src="/images/bayanbase-logo.png"
+              alt="BayanBase"
+              width={280}
+              height={56}
+              className="h-20 w-auto"
+              priority
+            />
           </Link>
 
           {/* Desktop nav */}

@@ -174,7 +174,7 @@ export default function RegisterPage() {
     <div className="max-w-2xl mx-auto px-4 py-12">
       <h1 className="text-2xl font-bold text-zinc-900 mb-2">Register Your Company</h1>
       <p className="text-zinc-600 mb-8">
-        Fill in the details below to list your AI company in the Arab AI Directory.
+        Fill in the details below to list your AI company on BayanBase.
         All submissions are reviewed before publication.
       </p>
 

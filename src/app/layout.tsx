@@ -5,14 +5,14 @@ import { LayoutShell } from '@/components/LayoutShell';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Arab AI Directory - Discover AI Companies in the Arab World',
-    template: '%s | Arab AI Directory',
+    default: 'BayanBase - Discover AI Companies in the Arab World',
+    template: '%s | BayanBase',
   },
   description:
     'Discover and connect with AI companies across the Arab world. Browse AI infrastructure, platforms, and vertical applications in UAE, Saudi Arabia, Qatar, Egypt, and Jordan.',
   keywords: [
     'AI companies',
-    'Arab AI',
+    'BayanBase',
     'Arab world AI',
     'AI directory',
     'UAE AI',
@@ -21,17 +21,17 @@ export const metadata: Metadata = {
     'AI platforms',
   ],
   openGraph: {
-    title: 'Arab AI Directory',
+    title: 'BayanBase',
     description:
       'Discover and connect with AI companies across the Arab world.',
     url: 'https://mena-ai.directory',
-    siteName: 'Arab AI Directory',
+    siteName: 'BayanBase',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Arab AI Directory',
+    title: 'BayanBase',
     description:
       'Discover and connect with AI companies across the Arab world.',
   },
