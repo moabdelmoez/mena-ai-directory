@@ -18,8 +18,8 @@ export function ReviewReplyForm({ onSubmit, onCancel }: ReviewReplyFormProps) {
     setIsSubmitting(true);
     try {
       await onSubmit(comment.trim());
-    } catch (error) {
-      console.error('Failed to submit reply:', error);
+    } catch {
+      // Error handled by caller
     } finally {
       setIsSubmitting(false);
     }

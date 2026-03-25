@@ -24,7 +24,7 @@ export const ProductCard = memo(function ProductCard({ product, onEdit, onDelete
               className="hover:text-blue-600 inline-flex items-center gap-1"
             >
               {product.name}
-              <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </a>
@@ -53,16 +53,18 @@ export const ProductCard = memo(function ProductCard({ product, onEdit, onDelete
           <div className="flex gap-2 mt-4 pt-4 border-t border-zinc-100">
             {onEdit && (
               <button
+                type="button"
                 onClick={() => onEdit(product)}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/20 rounded"
               >
                 Edit
               </button>
             )}
             {onDelete && (
               <button
+                type="button"
                 onClick={() => onDelete(product)}
-                className="text-sm text-red-600 hover:text-red-700 font-medium"
+                className="text-sm text-red-600 hover:text-red-700 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600/20 rounded"
               >
                 Delete
               </button>

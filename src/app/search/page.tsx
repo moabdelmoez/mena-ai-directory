@@ -146,7 +146,6 @@ function SearchContent() {
       resultCache.current.set(cacheKey, data);
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') return;
-      console.error('Search error:', err);
       setError('Something went wrong. Please try again.');
     } finally {
       if (!controller.signal.aborted) {
@@ -205,10 +204,11 @@ function SearchContent() {
         {/* Mobile Filter Toggle */}
         <div className="lg:hidden">
           <button
+            type="button"
             onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
             className="flex items-center gap-2 w-full bg-white rounded-2xl border border-zinc-200/60 px-4 py-3 text-sm font-medium text-zinc-700 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
           >
-            <svg className="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
             Filters
@@ -217,7 +217,7 @@ function SearchContent() {
                 {selectedCountries.length + selectedTechCategories.length + selectedIndustries.length}
               </span>
             )}
-            <svg className={`w-4 h-4 text-zinc-400 transition-transform ${mobileFiltersOpen ? 'rotate-180' : ''} ${hasFilters ? '' : 'ml-auto'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-4 h-4 text-zinc-400 transition-transform ${mobileFiltersOpen ? 'rotate-180' : ''} ${hasFilters ? '' : 'ml-auto'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
@@ -332,6 +332,7 @@ function SearchContent() {
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"

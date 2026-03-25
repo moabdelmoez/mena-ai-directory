@@ -82,6 +82,7 @@ export function Header() {
 
           {/* Hamburger button */}
           <button
+            type="button"
             className="md:hidden text-zinc-400 hover:text-white p-2"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-expanded={menuOpen}
@@ -92,6 +93,7 @@ export function Header() {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               {menuOpen ? (
                 <path

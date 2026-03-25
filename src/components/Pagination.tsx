@@ -50,7 +50,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         aria-label="Go to previous page"
       >
         <span className="hidden sm:inline">Previous</span>
-        <svg className="sm:hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="sm:hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </Button>
@@ -63,6 +63,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
               <span className="px-3 py-1 text-zinc-500">...</span>
             ) : (
               <button
+                type="button"
                 onClick={() => onPageChange(page as number)}
                 aria-current={currentPage === page ? 'page' : undefined}
                 aria-label={`Go to page ${page}`}
@@ -92,7 +93,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         aria-label="Go to next page"
       >
         <span className="hidden sm:inline">Next</span>
-        <svg className="sm:hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="sm:hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </Button>
