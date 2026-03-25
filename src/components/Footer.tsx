@@ -12,7 +12,7 @@ export function Footer() {
               alt="BayanBase"
               width={280}
               height={56}
-              className="h-20 w-auto"
+              className="h-8 w-auto"
             />
           </Link>
 
