@@ -173,9 +173,7 @@ export default function AboutPage() {
               ecosystem.
             </h1>
             <p className="text-lg text-zinc-500 max-w-2xl mx-auto">
-              The Arab world is investing billions in artificial intelligence. But when a
-              business owner needs to find the right AI company to work with? They ask a
-              friend. We are here to change that.
+              Despite strong investment in AI across the Arab world, finding the right partner remains difficult. Businesses often depend on personal networks to discover providers, BayanBase brings everything into one unified platform.
             </p>
           </div>
         </FadeIn>
