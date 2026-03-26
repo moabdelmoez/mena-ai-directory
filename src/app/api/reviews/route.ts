@@ -72,12 +72,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { companyId, rating, comment } = body;
 
-    if (!companyId || !rating) {
+    if (!companyId || rating === undefined || rating === null) {
       return NextResponse.json({ error: 'Company ID and rating are required' }, { status: 400 });
     }
 
-    if (rating < 1 || rating > 5) {
-      return NextResponse.json({ error: 'Rating must be between 1 and 5' }, { status: 400 });
+    if (typeof rating !== 'number' || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+      return NextResponse.json({ error: 'Rating must be an integer between 1 and 5' }, { status: 400 });
+    }
+
+    if (comment !== undefined && comment !== null && typeof comment !== 'string') {
+      return NextResponse.json({ error: 'Comment must be a string' }, { status: 400 });
     }
 
     // Check if company exists and is approved
@@ -148,8 +152,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Review ID is required' }, { status: 400 });
     }
 
-    if (rating && (rating < 1 || rating > 5)) {
-      return NextResponse.json({ error: 'Rating must be between 1 and 5' }, { status: 400 });
+    if (rating !== undefined && (typeof rating !== 'number' || !Number.isInteger(rating) || rating < 1 || rating > 5)) {
+      return NextResponse.json({ error: 'Rating must be an integer between 1 and 5' }, { status: 400 });
     }
 
     // Check if review belongs to user

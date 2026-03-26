@@ -70,6 +70,7 @@ export default function ProductManagementPage({ params }: Props) {
 
   const handleAddProduct = async (data: ProductInput) => {
     setIsSubmitting(true);
+    setError('');
     try {
       const res = await fetch('/api/products', {
         method: 'POST',
@@ -84,6 +85,8 @@ export default function ProductManagementPage({ params }: Props) {
 
       await fetchData();
       setIsAdding(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add product');
     } finally {
       setIsSubmitting(false);
     }
@@ -92,6 +95,7 @@ export default function ProductManagementPage({ params }: Props) {
   const handleUpdateProduct = async (data: ProductInput) => {
     if (!editingProduct) return;
     setIsSubmitting(true);
+    setError('');
     try {
       const res = await fetch(`/api/products/${editingProduct.id}`, {
         method: 'PUT',
@@ -106,6 +110,8 @@ export default function ProductManagementPage({ params }: Props) {
 
       await fetchData();
       setEditingProduct(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update product');
     } finally {
       setIsSubmitting(false);
     }

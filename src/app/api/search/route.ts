@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hybridSearch } from '@/lib/search';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
 import { SearchFilters } from '@/types';
-import { Country } from '@/constants';
+import { MENA_COUNTRIES, Country } from '@/constants';
 
 export async function GET(request: NextRequest) {
   // Rate limiting (skip in development)
@@ -23,9 +23,14 @@ export async function GET(request: NextRequest) {
   const techCategoriesParam = searchParams.get('tech_categories');
   const industriesParam = searchParams.get('industries');
 
+  const hqCountryParam = searchParams.get('hq_country');
+  const hqCountry = hqCountryParam && (MENA_COUNTRIES as readonly string[]).includes(hqCountryParam)
+    ? (hqCountryParam as Country)
+    : undefined;
+
   const filters: SearchFilters = {
     query: searchParams.get('q') || undefined,
-    hq_country: (searchParams.get('hq_country') as Country) || undefined,
+    hq_country: hqCountry,
     tech_categories: techCategoriesParam ? techCategoriesParam.split(',').filter(Boolean) : undefined,
     industries: industriesParam ? industriesParam.split(',').filter(Boolean) : undefined,
     page: parseInt(searchParams.get('page') || '1', 10),
@@ -44,11 +49,11 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Search error:', error);
-    const message = error instanceof Error ? error.message : 'Search failed';
+    const message = error instanceof Error ? error.message : '';
     const isConnectionError = message.includes('connect') || message.includes('timeout') || message.includes('internet');
     return NextResponse.json(
       {
-        error: message,
+        error: isConnectionError ? 'Search service unavailable' : 'Search failed',
         isConnectionError,
       },
       { status: isConnectionError ? 503 : 500 }

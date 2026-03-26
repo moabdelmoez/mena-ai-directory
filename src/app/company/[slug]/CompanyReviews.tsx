@@ -50,6 +50,9 @@ export function CompanyReviews({ companyId, companyName, companySubmittedBy, com
   const fetchReviews = useCallback(async () => {
     try {
       const response = await fetch(`/api/reviews?companyId=${companyId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch reviews');
+      }
       const data = await response.json();
       setReviews(data);
     } catch (error) {

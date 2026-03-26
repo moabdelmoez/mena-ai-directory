@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useId } from 'react';
+import { useState, useId, useRef } from 'react';
 import { Input, Textarea, Button } from '@/components/ui';
 import { ProductInput } from '@/types';
 
@@ -31,12 +31,10 @@ export function ProductInputList({
   const [newProduct, setNewProduct] = useState<ProductWithKey>({ name: '', description: '', product_url: null, tech_category: null, industry: null });
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const baseId = useId();
-  const [keyCounter, setKeyCounter] = useState(0);
+  const keyCounterRef = useRef(0);
 
-  // Generate a unique key for new products
   const generateKey = () => {
-    setKeyCounter((c) => c + 1);
-    return `${baseId}-${keyCounter}-${Date.now()}`;
+    return `${baseId}-${++keyCounterRef.current}-${Date.now()}`;
   };
 
   // Ensure products have keys for stable rendering
@@ -136,7 +134,7 @@ export function ProductInputList({
                     placeholder="https://..."
                     type="url"
                   />
-                  {showClassificationFields && (
+                  {classificationOptions && (classificationOptions.tech_categories.length > 0 || classificationOptions.industries.length > 0) && (
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-medium text-zinc-600 mb-1">Tech Category</label>
@@ -146,7 +144,7 @@ export function ProductInputList({
                           className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                         >
                           <option value="">None</option>
-                          {classificationOptions!.tech_categories.map((tc) => (
+                          {classificationOptions.tech_categories.map((tc) => (
                             <option key={tc} value={tc}>{tc}</option>
                           ))}
                         </select>
@@ -159,7 +157,7 @@ export function ProductInputList({
                           className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                         >
                           <option value="">None</option>
-                          {classificationOptions!.industries.map((ind) => (
+                          {classificationOptions.industries.map((ind) => (
                             <option key={ind} value={ind}>{ind}</option>
                           ))}
                         </select>

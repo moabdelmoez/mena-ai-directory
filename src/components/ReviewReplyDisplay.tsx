@@ -18,17 +18,19 @@ export function ReviewReplyDisplay({ reply, companyName, isOwner, onEdit, onDele
   const [editComment, setEditComment] = useState(reply.comment);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const isEdited = reply.updated_at !== reply.created_at;
 
   const handleSave = async () => {
     if (!editComment.trim() || !onEdit) return;
     setIsSubmitting(true);
+    setError(null);
     try {
       await onEdit(reply.id, editComment.trim());
       setIsEditing(false);
-    } catch {
-      // Error handled by caller
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save reply');
     } finally {
       setIsSubmitting(false);
     }
@@ -37,10 +39,11 @@ export function ReviewReplyDisplay({ reply, companyName, isOwner, onEdit, onDele
   const handleDelete = async () => {
     if (!onDelete) return;
     setIsSubmitting(true);
+    setError(null);
     try {
       await onDelete(reply.id);
-    } catch {
-      // Error handled by caller
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete reply');
     } finally {
       setIsSubmitting(false);
       setShowDeleteConfirm(false);
@@ -80,6 +83,10 @@ export function ReviewReplyDisplay({ reply, companyName, isOwner, onEdit, onDele
           </div>
         )}
       </div>
+
+      {error && (
+        <p className="text-sm text-red-600 mb-2">{error}</p>
+      )}
 
       {isEditing ? (
         <div className="space-y-2">

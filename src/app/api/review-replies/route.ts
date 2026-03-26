@@ -83,6 +83,9 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
+      if (error.code === '23505') {
+        return NextResponse.json({ error: 'A reply already exists for this review' }, { status: 409 });
+      }
       console.error('Error creating reply:', error);
       return NextResponse.json({ error: 'Failed to create reply' }, { status: 500 });
     }

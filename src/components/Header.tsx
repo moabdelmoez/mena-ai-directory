@@ -86,7 +86,7 @@ export function Header() {
             className="md:hidden text-zinc-400 hover:text-white p-2"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-expanded={menuOpen}
-            aria-label="Main navigation"
+            aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
           >
             <svg
               className="w-6 h-6"
@@ -173,7 +173,7 @@ export function Header() {
               <button
                 onClick={() => {
                   setMenuOpen(false);
-                  handleSignOut();
+                  handleSignOut().catch(console.error);
                 }}
                 className="text-red-400 hover:text-red-300 transition-colors text-left"
               >

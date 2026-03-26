@@ -4,12 +4,61 @@ import { getOrCreateUser } from '@/lib/auth-helpers';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getCompanyById } from '@/lib/company-repository';
 import { isCompanyOwner, canEditDirectly } from '@/lib/company-permissions';
+import { MENA_COUNTRIES } from '@/constants';
+
+const MAX_FIELD_LENGTH = 1000;
+const MAX_URL_LENGTH = 2048;
+
+function isValidUrl(value: string): boolean {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function validateProposedData(data: Record<string, unknown>): { valid: Record<string, unknown>; errors: string[] } {
+  const valid: Record<string, unknown> = {};
+  const errors: string[] = [];
+
+  for (const [key, value] of Object.entries(data)) {
+    if (value === null || value === undefined || value === '') {
+      valid[key] = value;
+      continue;
+    }
+    if (typeof value !== 'string') {
+      errors.push(`${key} must be a string`);
+      continue;
+    }
+    if (key === 'hq_country' && !(MENA_COUNTRIES as readonly string[]).includes(value)) {
+      errors.push(`Invalid country: ${value}`);
+      continue;
+    }
+    if ((key === 'company_url' || key === 'linkedin_profile' || key === 'logo') && value && !isValidUrl(value)) {
+      errors.push(`${key} must be a valid URL`);
+      continue;
+    }
+    if ((key === 'company_url' || key === 'linkedin_profile' || key === 'logo') && value.length > MAX_URL_LENGTH) {
+      errors.push(`${key} exceeds maximum length`);
+      continue;
+    }
+    if ((key === 'name' || key === 'description') && value.length > MAX_FIELD_LENGTH) {
+      errors.push(`${key} exceeds maximum length of ${MAX_FIELD_LENGTH} characters`);
+      continue;
+    }
+    valid[key] = value;
+  }
+
+  return { valid, errors };
+}
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const company = await getCompanyById(params.id);
+  const { id } = await params;
+  const company = await getCompanyById(id);
 
   if (!company) {
     return NextResponse.json({ error: 'Company not found' }, { status: 404 });
@@ -20,7 +69,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const stackUser = await stackServerApp.getUser();
 
@@ -35,7 +84,8 @@ export async function PUT(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const company = await getCompanyById(params.id);
+  const { id } = await params;
+  const company = await getCompanyById(id);
 
   if (!company) {
     return NextResponse.json({ error: 'Company not found' }, { status: 404 });
@@ -49,11 +99,25 @@ export async function PUT(
   try {
     const body = await request.json();
 
+    if (typeof body !== 'object' || body === null) {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    }
+
     // Only allow editing specific fields to prevent injection of status, embedding, etc.
     const ALLOWED_EDIT_FIELDS = ['name', 'description', 'company_url', 'linkedin_profile', 'hq_country', 'logo'];
-    const proposed_data = Object.fromEntries(
+    const filtered = Object.fromEntries(
       Object.entries(body).filter(([key]) => ALLOWED_EDIT_FIELDS.includes(key))
     );
+
+    if (Object.keys(filtered).length === 0) {
+      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+    }
+
+    const { valid: proposed_data, errors: validationErrors } = validateProposedData(filtered);
+
+    if (validationErrors.length > 0) {
+      return NextResponse.json({ error: validationErrors.join(', ') }, { status: 400 });
+    }
 
     if (Object.keys(proposed_data).length === 0) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
@@ -64,7 +128,7 @@ export async function PUT(
       const { data: updated, error } = await supabaseAdmin
         .from('companies')
         .update({ ...proposed_data, updated_at: new Date().toISOString() })
-        .eq('id', params.id)
+        .eq('id', id)
         .select()
         .single();
 
@@ -83,7 +147,7 @@ export async function PUT(
     const { data: edit, error } = await supabaseAdmin
       .from('company_edits')
       .insert({
-        company_id: params.id,
+        company_id: id,
         proposed_data,
         submitted_by: userId,
         status: 'pending',

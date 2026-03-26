@@ -21,9 +21,10 @@ async function getProductById(id: string) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const product = await getProductById(params.id);
+  const { id } = await params;
+  const product = await getProductById(id);
 
   if (!product) {
     return NextResponse.json({ error: 'Product not found' }, { status: 404 });
@@ -34,8 +35,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const auth = await requireAuth(request);
 
   if (!auth) {
@@ -45,7 +47,7 @@ export async function PUT(
   const { admin: adminSession, userId } = auth;
 
   try {
-    const product = await getProductById(params.id);
+    const product = await getProductById(id);
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
@@ -81,7 +83,7 @@ export async function PUT(
         product_url: product_url || null,
         embedding: JSON.stringify(embedding),
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select('id, company_id, name, description, product_url, created_at, updated_at')
       .single();
 
@@ -99,8 +101,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const auth = await requireAuth(request);
 
   if (!auth) {
@@ -110,7 +113,7 @@ export async function DELETE(
   const { admin: adminSession, userId } = auth;
 
   try {
-    const product = await getProductById(params.id);
+    const product = await getProductById(id);
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
@@ -131,7 +134,7 @@ export async function DELETE(
     const { error } = await supabaseAdmin
       .from('products')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
       console.error('Error deleting product:', error);

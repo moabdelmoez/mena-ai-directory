@@ -22,6 +22,7 @@ export default function CompaniesPage() {
   const [searchInput, setSearchInput] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchCompanies = useCallback(async () => {
     setIsLoading(true);
@@ -61,6 +62,7 @@ export default function CompaniesPage() {
 
   const handleDelete = async (companyId: string) => {
     setDeletingId(companyId);
+    setError(null);
     try {
       const response = await fetch(`/api/admin/companies?companyId=${companyId}`, {
         method: 'DELETE',
@@ -68,9 +70,12 @@ export default function CompaniesPage() {
 
       if (response.ok) {
         await fetchCompanies();
+      } else {
+        setError('Failed to delete company. Please try again.');
       }
-    } catch (error) {
-      console.error('Error deleting company:', error);
+    } catch (err) {
+      console.error('Error deleting company:', err);
+      setError('Failed to delete company. Please try again.');
     } finally {
       setDeletingId(null);
       setConfirmDeleteId(null);
@@ -118,11 +123,11 @@ export default function CompaniesPage() {
     )
   );
 
-  const renderCompaniesTable = () => (
+  const renderCompaniesTable = (data: PaginatedResponse<Company>) => (
     <>
       {/* Mobile Card View */}
       <div className="md:hidden space-y-3">
-        {companies!.data.map((company) => (
+        {data.data.map((company) => (
           <div key={company.id} className="bg-white rounded-2xl border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-4">
             <div className="flex items-start gap-3">
               {renderCompanyLogo(company)}
@@ -183,7 +188,7 @@ export default function CompaniesPage() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-zinc-100">
-            {companies!.data.map((company) => (
+            {data.data.map((company) => (
               <tr key={company.id} className="hover:bg-zinc-50/50 transition-colors duration-150">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-3">
@@ -234,11 +239,11 @@ export default function CompaniesPage() {
         </div>
       </div>
 
-      {companies!.totalPages > 1 && (
+      {data.totalPages > 1 && (
         <div className="mt-8">
           <Pagination
-            currentPage={companies!.page}
-            totalPages={companies!.totalPages}
+            currentPage={data.page}
+            totalPages={data.totalPages}
             onPageChange={setPage}
           />
         </div>
@@ -266,7 +271,7 @@ export default function CompaniesPage() {
 
   const renderContent = () => {
     if (isLoading && !companies) return renderLoadingState();
-    if (companies && companies.data.length > 0) return renderCompaniesTable();
+    if (companies && companies.data.length > 0) return renderCompaniesTable(companies);
     return renderEmptyState();
   };
 
@@ -333,6 +338,12 @@ export default function CompaniesPage() {
           </div>
         )}
       </div>
+
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+          {error}
+        </div>
+      )}
 
       {renderContent()}
 

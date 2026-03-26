@@ -84,7 +84,7 @@ export const ReviewList = memo(function ReviewList({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => onDelete(review.id)}
+                    onClick={() => { onDelete(review.id).catch(console.error); }}
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
                     Delete

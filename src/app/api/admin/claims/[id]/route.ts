@@ -4,8 +4,9 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const admin = await requireAdmin(request);
 
   if (!admin) {
@@ -17,7 +18,7 @@ export async function DELETE(
     const { data: claim, error: claimError } = await supabaseAdmin
       .from('company_claims')
       .select('company_id')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (claimError || !claim) {
@@ -31,7 +32,7 @@ export async function DELETE(
         status: 'revoked',
         revoked_at: new Date().toISOString(),
       })
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (updateClaimError) {
       console.error('Claim revoke error:', updateClaimError);

@@ -11,15 +11,17 @@ interface ReviewReplyFormProps {
 export function ReviewReplyForm({ onSubmit, onCancel }: ReviewReplyFormProps) {
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!comment.trim()) return;
     setIsSubmitting(true);
+    setError(null);
     try {
       await onSubmit(comment.trim());
-    } catch {
-      // Error handled by caller
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to submit reply');
     } finally {
       setIsSubmitting(false);
     }
@@ -27,6 +29,9 @@ export function ReviewReplyForm({ onSubmit, onCancel }: ReviewReplyFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="ml-[52px] mt-3 bg-zinc-50 rounded-xl p-4 space-y-3">
+      {error && (
+        <p className="text-sm text-red-600">{error}</p>
+      )}
       <Textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}

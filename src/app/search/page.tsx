@@ -141,6 +141,9 @@ function SearchContent() {
       }
 
       const response = await fetch(`/api/search?${cacheKey}`, { signal: controller.signal });
+      if (!response.ok) {
+        throw new Error('Search failed');
+      }
       const data = await response.json();
       setResults(data);
       resultCache.current.set(cacheKey, data);
