@@ -27,7 +27,17 @@ export function Footer() {
               About
             </Link>
           </nav>
+
+          <p className="text-xs text-zinc-500 md:hidden mt-2">
+            Questions or feedback? Reach us at{' '}
+            <span className="text-zinc-400">support@bayanbase.com</span>
+          </p>
         </div>
+
+        <p className="hidden md:block text-center text-xs text-zinc-500 mt-4">
+          Questions or feedback? Reach us at{' '}
+          <span className="text-zinc-400">support@bayanbase.com</span>
+        </p>
 
         <div className="border-t border-zinc-800 mt-6 pt-6 flex flex-col items-center gap-2">
           <p className="text-xs tracking-wide text-zinc-400">
