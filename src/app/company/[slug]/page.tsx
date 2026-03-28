@@ -50,6 +50,7 @@ export const revalidate = 3600;
 
 // Pre-build top company pages at build time
 export async function generateStaticParams() {
+  if (!supabaseAdmin) return [];
   const { data } = await supabaseAdmin
     .from('companies')
     .select('slug')
