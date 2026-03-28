@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { stackServerApp } from '@/lib/auth';
 import { getOrCreateUser } from '@/lib/auth-helpers';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const stackUser = await stackServerApp.getUser();
 

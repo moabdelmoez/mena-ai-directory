@@ -4,6 +4,8 @@ import { getOrCreateUser } from '@/lib/auth-helpers';
 import { supabaseAdmin } from '@/lib/supabase';
 import { COMPANY_COLUMNS } from '@/lib/company-repository';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const stackUser = await stackServerApp.getUser();
 

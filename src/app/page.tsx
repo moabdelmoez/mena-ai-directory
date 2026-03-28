@@ -5,6 +5,8 @@ import { LogoMarquee } from '@/components/LogoMarquee';
 import { FadeIn } from '@/components/ui';
 import { getFeaturedCompanyLogos } from '@/lib/company-repository';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
   const featuredCompanies = await getFeaturedCompanyLogos();
 
