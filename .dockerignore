@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.gitignore
+.env*
+*.md
+tests
+playwright.config.ts
+vitest.config.ts
+playwright-report
+test-results
+.DS_Store
