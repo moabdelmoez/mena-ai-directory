@@ -46,8 +46,8 @@ export function UserMenu({ user }: { user: CurrentUser }) {
     router.push('/');
   };
 
-  const displayName = user.displayName || 'User';
-  const initial = displayName.charAt(0).toUpperCase();
+  const displayName = user.displayName || null;
+  const initial = (displayName || user.primaryEmail || 'U').charAt(0).toUpperCase();
 
   return (
     <div className="relative" ref={menuRef}>
@@ -67,7 +67,7 @@ export function UserMenu({ user }: { user: CurrentUser }) {
         {user.profileImageUrl ? (
           <Image
             src={user.profileImageUrl}
-            alt={displayName}
+            alt={displayName || 'Avatar'}
             width={32}
             height={32}
             sizes="32px"
@@ -102,7 +102,9 @@ export function UserMenu({ user }: { user: CurrentUser }) {
           >
             {/* User info */}
             <div className="px-4 py-3">
-              <p className="text-sm font-semibold text-white truncate max-w-[180px]">{displayName}</p>
+              {displayName && (
+                <p className="text-sm font-semibold text-white truncate max-w-[180px]">{displayName}</p>
+              )}
               {user.primaryEmail && (
                 <p className="text-xs text-zinc-400 truncate max-w-[180px]">{user.primaryEmail}</p>
               )}
