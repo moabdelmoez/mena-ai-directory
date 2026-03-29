@@ -64,11 +64,12 @@ export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, on
     }
   }, [user, open, companyId, domainMatches]);
 
-  const handleSignInWithWorkEmail = () => {
-    // Save pending claim to localStorage
+  const handleSignOut = async () => {
+    // Save pending claim so the modal auto-opens after re-sign-in
     localStorage.setItem(PENDING_CLAIM_KEY, JSON.stringify({ companyId, companySlug }));
-    // Redirect to Stack Auth sign-in with return URL
-    router.push(`/handler/sign-in?after_auth_return_to=/company/${companySlug}?claim=pending`);
+    if (user) {
+      await user.signOut();
+    }
   };
 
   const handleCompleteClaim = async () => {
@@ -170,23 +171,33 @@ export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, on
             <>
               <h3 className="text-lg font-semibold text-zinc-900 mb-2">Claim this Profile</h3>
               <p className="text-sm text-zinc-600 mb-4">
-                To verify you represent this company, sign in with an
+                To verify you represent this company, you need to sign in with an
                 {' '}<span className="font-medium">@{companyDomain}</span> email address.
               </p>
               {user && !domainMatches && userEmail && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-                  <p className="text-sm text-amber-800">
+                  <p className="text-sm text-amber-800 mb-3">
                     You&apos;re currently signed in as <span className="font-medium">{userEmail}</span> ({userEmailDomain}).
-                    You need to sign in with an @{companyDomain} email.
                   </p>
+                  <ol className="text-sm text-amber-900 space-y-2 list-decimal list-inside">
+                    <li>
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        className="text-blue-700 underline hover:text-blue-800 font-medium"
+                      >
+                        Sign out
+                      </button>
+                      {' '}of your current account
+                    </li>
+                    <li>Sign in with your <span className="font-medium">@{companyDomain}</span> email</li>
+                    <li>Return to this page and click &quot;Claim this Profile&quot;</li>
+                  </ol>
                 </div>
               )}
               <div className="flex items-center justify-end gap-3">
                 <Button variant="outline" onClick={handleClose}>
                   Cancel
-                </Button>
-                <Button variant="primary" onClick={handleSignInWithWorkEmail}>
-                  Sign in with work email
                 </Button>
               </div>
             </>
