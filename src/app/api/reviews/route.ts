@@ -63,8 +63,8 @@ async function checkReviewEligibility(stackUser: { primaryEmail: string | null; 
   try {
     const accounts = await stackUser.listConnectedAccounts?.() ?? [];
     if (accounts.some(a => a.provider === 'linkedin')) return null; // LinkedIn — allowed
-  } catch {
-    // If we can't check, fall through to rejection
+  } catch (err) {
+    console.error('checkReviewEligibility: failed to list connected accounts', err);
   }
 
   return 'Reviews can only be submitted using a LinkedIn account or a company email address.';
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
 
     if (existingReview) {
       return NextResponse.json(
-        { error: 'You have already reviewed this company. Use PUT to update your review.' },
+        { error: 'You have already reviewed this company.' },
         { status: 409 }
       );
     }

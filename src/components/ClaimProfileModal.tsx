@@ -216,28 +216,6 @@ export function ClaimProfileButton({ companyId, companySlug, companyUrl }: { com
   const [isOpen, setIsOpen] = useState(false);
   const [claimed, setClaimed] = useState(false);
 
-  // Auto-open if returning from auth with pending claim
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('claim') === 'pending') {
-      try {
-        const pending = localStorage.getItem(PENDING_CLAIM_KEY);
-        if (pending) {
-          const { companyId: pendingId } = JSON.parse(pending);
-          if (pendingId === companyId) {
-            setIsOpen(true);
-          }
-        }
-      } catch {
-        // Ignore
-      }
-      // Clean URL without reload
-      const url = new URL(window.location.href);
-      url.searchParams.delete('claim');
-      window.history.replaceState({}, '', url.toString());
-    }
-  }, [companyId]);
-
   if (claimed) {
     return <VerifiedBadge />;
   }

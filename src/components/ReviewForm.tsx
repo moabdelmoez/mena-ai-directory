@@ -15,17 +15,37 @@ interface ReviewFormProps {
 export function ReviewForm({ onSubmit }: ReviewFormProps) {
   const router = useRouter();
   const user = useUser();
-  const connectedAccounts = user?.useConnectedAccounts() ?? [];
+
+  if (!user) {
+    return (
+      <div className="bg-zinc-50 rounded-lg p-6 text-center">
+        <p className="text-zinc-600">Sign in to leave a review</p>
+        <Button
+          variant="primary"
+          className="mt-3"
+          onClick={() => router.push('/handler/sign-in')}
+        >
+          Sign In
+        </Button>
+      </div>
+    );
+  }
+
+  return <AuthenticatedReviewForm user={user} onSubmit={onSubmit} />;
+}
+
+function AuthenticatedReviewForm({ user, onSubmit }: { user: NonNullable<ReturnType<typeof useUser>>; onSubmit: ReviewFormProps['onSubmit'] }) {
+  const connectedAccounts = user.useConnectedAccounts();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const userEmail = user?.primaryEmail || '';
+  const userEmail = user.primaryEmail || '';
   const emailDomain = getEmailDomain(userEmail);
   const isPersonalEmail = userEmail ? isPublicEmailDomain(emailDomain) : false;
   const hasLinkedIn = connectedAccounts.some(a => a.provider === 'linkedin');
-  const isReviewBlocked = user && isPersonalEmail && !hasLinkedIn;
+  const isReviewBlocked = isPersonalEmail && !hasLinkedIn;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,21 +67,6 @@ export function ReviewForm({ onSubmit }: ReviewFormProps) {
       setIsSubmitting(false);
     }
   };
-
-  if (!user) {
-    return (
-      <div className="bg-zinc-50 rounded-lg p-6 text-center">
-        <p className="text-zinc-600">Sign in to leave a review</p>
-        <Button
-          variant="primary"
-          className="mt-3"
-          onClick={() => router.push('/handler/sign-in')}
-        >
-          Sign In
-        </Button>
-      </div>
-    );
-  }
 
   if (isReviewBlocked) {
     return (
