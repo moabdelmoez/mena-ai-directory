@@ -8,7 +8,7 @@ export function Footer() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/images/bayanbase-logo3.png"
+              src="/images/bayanbase-logo.png"
               alt="BayanBase"
               width={350}
               height={70}

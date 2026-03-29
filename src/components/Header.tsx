@@ -35,7 +35,7 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/images/bayanbase-logo3.png"
+              src="/images/bayanbase-logo.png"
               alt="BayanBase"
               width={350}
               height={70}
