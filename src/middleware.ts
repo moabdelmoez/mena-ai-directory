@@ -31,7 +31,7 @@ export function middleware(_request: NextRequest) {
     // Styles: self + inline styles (Tailwind)
     "style-src 'self' 'unsafe-inline'",
     // Images: self + configured remote patterns
-    "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://framerusercontent.com",
+    "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://framerusercontent.com https://media.licdn.com",
     // Fonts: self + Google Fonts
     "font-src 'self' https://fonts.gstatic.com",
     // Connect: self + Supabase + OpenAI (server-side only but CSP applies to client)

@@ -30,6 +30,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'framerusercontent.com',
       },
+      // LinkedIn profile images
+      {
+        protocol: 'https',
+        hostname: 'media.licdn.com',
+      },
     ],
   },
   // Enable experimental features for better performance
