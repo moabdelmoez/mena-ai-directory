@@ -14,7 +14,6 @@ interface ReviewListProps {
   currentUserId?: string;
   companyName?: string;
   isCompanyOwner?: boolean;
-  onDelete?: (reviewId: string) => Promise<void>;
   onReply?: (reviewId: string, comment: string) => Promise<void>;
   onEditReply?: (replyId: string, comment: string) => Promise<void>;
   onDeleteReply?: (replyId: string) => Promise<void>;
@@ -25,7 +24,6 @@ export const ReviewList = memo(function ReviewList({
   currentUserId,
   companyName,
   isCompanyOwner: isOwner,
-  onDelete,
   onReply,
   onEditReply,
   onDeleteReply,
@@ -80,15 +78,13 @@ export const ReviewList = memo(function ReviewList({
                     </span>
                   </div>
                 </div>
-                {currentUserId === review.user_id && onDelete && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => { onDelete(review.id).catch(console.error); }}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    Delete
-                  </Button>
+                {currentUserId === review.user_id && (
+                  <span className="text-xs text-zinc-400">
+                    To edit or remove, contact{' '}
+                    <a href="mailto:support@bayanbase.com" className="text-blue-600 hover:underline">
+                      support@bayanbase.com
+                    </a>
+                  </span>
                 )}
               </div>
               {review.comment && (

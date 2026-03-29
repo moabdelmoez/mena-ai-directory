@@ -5,24 +5,27 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@stackframe/stack';
 import { Button, Textarea } from '@/components/ui';
 import { StarRating } from './StarRating';
+import { getEmailDomain, isPublicEmailDomain } from '@/lib/domain-utils';
 
 interface ReviewFormProps {
   companyId: string;
   onSubmit: (rating: number, comment: string) => Promise<void>;
-  existingReview?: {
-    id: string;
-    rating: number;
-    comment: string | null;
-  };
 }
 
-export function ReviewForm({ onSubmit, existingReview }: ReviewFormProps) {
+export function ReviewForm({ onSubmit }: ReviewFormProps) {
   const router = useRouter();
   const user = useUser();
-  const [rating, setRating] = useState(existingReview?.rating || 0);
-  const [comment, setComment] = useState(existingReview?.comment || '');
+  const connectedAccounts = user?.useConnectedAccounts() ?? [];
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  const userEmail = user?.primaryEmail || '';
+  const emailDomain = getEmailDomain(userEmail);
+  const isPersonalEmail = userEmail ? isPublicEmailDomain(emailDomain) : false;
+  const hasLinkedIn = connectedAccounts.some(a => a.provider === 'linkedin');
+  const isReviewBlocked = user && isPersonalEmail && !hasLinkedIn;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,10 +39,8 @@ export function ReviewForm({ onSubmit, existingReview }: ReviewFormProps) {
     setIsSubmitting(true);
     try {
       await onSubmit(rating, comment);
-      if (!existingReview) {
-        setRating(0);
-        setComment('');
-      }
+      setRating(0);
+      setComment('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit review');
     } finally {
@@ -58,6 +59,23 @@ export function ReviewForm({ onSubmit, existingReview }: ReviewFormProps) {
         >
           Sign In
         </Button>
+      </div>
+    );
+  }
+
+  if (isReviewBlocked) {
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <p className="text-sm font-medium text-amber-900 mb-2">
+          Reviews require a verified identity
+        </p>
+        <p className="text-sm text-amber-800 mb-3">
+          You&apos;re signed in with <span className="font-medium">{userEmail}</span> ({emailDomain}).
+          Reviews can only be submitted using a LinkedIn account or a company email address.
+        </p>
+        <p className="text-sm text-amber-800">
+          To leave a review, sign out and sign back in with LinkedIn or your company email.
+        </p>
       </div>
     );
   }
@@ -94,7 +112,7 @@ export function ReviewForm({ onSubmit, existingReview }: ReviewFormProps) {
         variant="primary"
         isLoading={isSubmitting}
       >
-        {existingReview ? 'Update Review' : 'Submit Review'}
+        Submit Review
       </Button>
     </form>
   );

@@ -78,62 +78,24 @@ export function CompanyReviews({ companyId, companyName, companySubmittedBy, com
   }, [dbUserId, reviews]);
 
   const handleSubmitReview = async (rating: number, comment: string) => {
-    if (userReview) {
-      const response = await fetch('/api/reviews', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reviewId: userReview.id,
-          rating,
-          comment,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update review');
-      }
-
-      setReviews((prev) =>
-        prev.map((r) => (r.id === userReview.id ? { ...r, rating, comment } : r))
-      );
-      setUserReview((prev) => (prev ? { ...prev, rating, comment } : prev));
-    } else {
-      const response = await fetch('/api/reviews', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          companyId,
-          rating,
-          comment,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create review');
-      }
-
-      const newReview = await response.json();
-      setReviews((prev) => [newReview, ...prev]);
-      setUserReview(newReview);
-    }
-  };
-
-  const handleDeleteReview = async (reviewId: string) => {
-    const response = await fetch(`/api/reviews?reviewId=${reviewId}`, {
-      method: 'DELETE',
+    const response = await fetch('/api/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        companyId,
+        rating,
+        comment,
+      }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to delete review');
+      throw new Error(error.error || 'Failed to create review');
     }
 
-    setReviews((prev) => prev.filter((r) => r.id !== reviewId));
-    if (userReview?.id === reviewId) {
-      setUserReview(null);
-    }
+    const newReview = await response.json();
+    setReviews((prev) => [newReview, ...prev]);
+    setUserReview(newReview);
   };
 
   const handleReply = async (reviewId: string, comment: string) => {
@@ -198,24 +160,24 @@ export function CompanyReviews({ companyId, companyName, companySubmittedBy, com
 
   return (
     <div className="space-y-8">
-      {/* Review Form */}
+      {/* Review Form (only if user hasn't already reviewed) */}
       <div className="border-b border-zinc-200 pb-8">
-        <h3 className="font-medium text-zinc-900 mb-4">
-          {userReview ? 'Update Your Review' : 'Write a Review'}
-        </h3>
-        <ReviewForm
-          companyId={companyId}
-          onSubmit={handleSubmitReview}
-          existingReview={
-            userReview
-              ? {
-                  id: userReview.id,
-                  rating: userReview.rating,
-                  comment: userReview.comment,
-                }
-              : undefined
-          }
-        />
+        {userReview ? (
+          <p className="text-sm text-zinc-500">
+            You have already reviewed this company. To edit or remove your review, contact{' '}
+            <a href="mailto:support@bayanbase.com" className="text-blue-600 hover:underline">
+              support@bayanbase.com
+            </a>
+          </p>
+        ) : (
+          <>
+            <h3 className="font-medium text-zinc-900 mb-4">Write a Review</h3>
+            <ReviewForm
+              companyId={companyId}
+              onSubmit={handleSubmitReview}
+            />
+          </>
+        )}
       </div>
 
       {/* Reviews List */}
@@ -228,7 +190,6 @@ export function CompanyReviews({ companyId, companyName, companySubmittedBy, com
           currentUserId={dbUserId || undefined}
           companyName={companyName}
           isCompanyOwner={isOwner}
-          onDelete={handleDeleteReview}
           onReply={handleReply}
           onEditReply={handleEditReply}
           onDeleteReply={handleDeleteReply}

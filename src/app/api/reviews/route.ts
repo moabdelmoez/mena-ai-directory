@@ -3,6 +3,7 @@ import { stackServerApp } from '@/lib/auth';
 import { getOrCreateUser } from '@/lib/auth-helpers';
 import { supabaseAdmin } from '@/lib/supabase';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
+import { getEmailDomain, isPublicEmailDomain } from '@/lib/domain-utils';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -40,21 +41,48 @@ export async function GET(request: NextRequest) {
   });
 }
 
-async function getAuthUserId(): Promise<string | null> {
+async function getAuthUser() {
   const stackUser = await stackServerApp.getUser();
   if (!stackUser) return null;
   try {
-    return await getOrCreateUser(stackUser);
+    const userId = await getOrCreateUser(stackUser);
+    return { userId, stackUser };
   } catch {
     return null;
   }
 }
 
-export async function POST(request: NextRequest) {
-  const userId = await getAuthUserId();
+async function checkReviewEligibility(stackUser: { primaryEmail: string | null; listConnectedAccounts?: () => Promise<Array<{ provider: string }>> }): Promise<string | null> {
+  const email = stackUser.primaryEmail;
+  if (!email) return 'Email is required to submit a review.';
 
-  if (!userId) {
+  const domain = getEmailDomain(email);
+  if (!isPublicEmailDomain(domain)) return null; // Company email — allowed
+
+  // Personal email — check for LinkedIn
+  try {
+    const accounts = await stackUser.listConnectedAccounts?.() ?? [];
+    if (accounts.some(a => a.provider === 'linkedin')) return null; // LinkedIn — allowed
+  } catch {
+    // If we can't check, fall through to rejection
+  }
+
+  return 'Reviews can only be submitted using a LinkedIn account or a company email address.';
+}
+
+export async function POST(request: NextRequest) {
+  const auth = await getAuthUser();
+
+  if (!auth) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { userId, stackUser } = auth;
+
+  // Check review eligibility (LinkedIn or company email required)
+  const eligibilityError = await checkReviewEligibility(stackUser);
+  if (eligibilityError) {
+    return NextResponse.json({ error: eligibilityError }, { status: 403 });
   }
 
   // Rate limiting
@@ -137,98 +165,16 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function PUT(request: NextRequest) {
-  const userId = await getAuthUserId();
-
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  try {
-    const body = await request.json();
-    const { reviewId, rating, comment } = body;
-
-    if (!reviewId) {
-      return NextResponse.json({ error: 'Review ID is required' }, { status: 400 });
-    }
-
-    if (rating !== undefined && (typeof rating !== 'number' || !Number.isInteger(rating) || rating < 1 || rating > 5)) {
-      return NextResponse.json({ error: 'Rating must be an integer between 1 and 5' }, { status: 400 });
-    }
-
-    // Check if review belongs to user
-    const { data: existingReview } = await supabaseAdmin
-      .from('reviews')
-      .select('id')
-      .eq('id', reviewId)
-      .eq('user_id', userId)
-      .single();
-
-    if (!existingReview) {
-      return NextResponse.json({ error: 'Review not found or not yours' }, { status: 404 });
-    }
-
-    const updateData: Record<string, unknown> = {};
-    if (rating !== undefined) updateData.rating = rating;
-    if (comment !== undefined) updateData.comment = comment;
-
-    const { data: review, error } = await supabaseAdmin
-      .from('reviews')
-      .update(updateData)
-      .eq('id', reviewId)
-      .select(`
-        *,
-        user:users(name, avatar_url)
-      `)
-      .single();
-
-    if (error) {
-      console.error('Error updating review:', error);
-      return NextResponse.json({ error: 'Failed to update review' }, { status: 500 });
-    }
-
-    return NextResponse.json(review);
-  } catch (error) {
-    console.error('Review update error:', error);
-    return NextResponse.json({ error: 'Failed to update review' }, { status: 500 });
-  }
+export async function PUT() {
+  return NextResponse.json(
+    { error: 'Reviews cannot be edited. Contact support@bayanbase.com for help.' },
+    { status: 403 }
+  );
 }
 
-export async function DELETE(request: NextRequest) {
-  const userId = await getAuthUserId();
-
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const searchParams = request.nextUrl.searchParams;
-  const reviewId = searchParams.get('reviewId');
-
-  if (!reviewId) {
-    return NextResponse.json({ error: 'Review ID is required' }, { status: 400 });
-  }
-
-  // Check if review belongs to user
-  const { data: existingReview } = await supabaseAdmin
-    .from('reviews')
-    .select('id')
-    .eq('id', reviewId)
-    .eq('user_id', userId)
-    .single();
-
-  if (!existingReview) {
-    return NextResponse.json({ error: 'Review not found or not yours' }, { status: 404 });
-  }
-
-  const { error } = await supabaseAdmin
-    .from('reviews')
-    .delete()
-    .eq('id', reviewId);
-
-  if (error) {
-    console.error('Error deleting review:', error);
-    return NextResponse.json({ error: 'Failed to delete review' }, { status: 500 });
-  }
-
-  return NextResponse.json({ message: 'Review deleted' });
+export async function DELETE() {
+  return NextResponse.json(
+    { error: 'Reviews cannot be deleted. Contact support@bayanbase.com for help.' },
+    { status: 403 }
+  );
 }
