@@ -20,7 +20,7 @@ const PENDING_CLAIM_KEY = 'pendingClaim';
 
 type Step = 'prompt' | 'confirming' | 'success' | 'error';
 
-export function ClaimProfileModal({ companyId, companySlug, companyUrl, open, onClose, onClaimed }: ClaimProfileModalProps) {
+function ClaimProfileModal({ companyId, companySlug, companyUrl, open, onClose, onClaimed }: ClaimProfileModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const router = useRouter();
   const user = useUser();

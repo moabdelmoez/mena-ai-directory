@@ -1,6 +1,6 @@
 import { Country } from '@/constants';
 
-export interface ParsedQuery {
+interface ParsedQuery {
   cleanedQuery: string;
   extractedCountry?: Country;
   extractedTechCategories: string[];

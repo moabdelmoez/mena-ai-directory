@@ -15,7 +15,7 @@ function evictExpiredEntries() {
   });
 }
 
-export interface RateLimitConfig {
+interface RateLimitConfig {
   maxRequests: number;
   windowMs: number;
 }

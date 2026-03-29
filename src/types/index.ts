@@ -22,15 +22,6 @@ export interface ProductInput {
   industry?: string | null;
 }
 
-export interface ProductClassification {
-  id: string;
-  product_id: string;
-  company_id: string;
-  tech_category: string | null;
-  industry: string | null;
-  created_at: string;
-}
-
 export interface Company {
   id: string;
   company_id: string | null;
@@ -52,15 +43,6 @@ export interface Company {
   review_count?: number;
 }
 
-export interface CompanyEdit {
-  id: string;
-  company_id: string;
-  proposed_data: Partial<Company>;
-  submitted_by: string | null;
-  status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
-}
-
 export interface User {
   id: string;
   google_id: string | null;
@@ -68,13 +50,6 @@ export interface User {
   email: string;
   name: string | null;
   avatar_url: string | null;
-  created_at: string;
-}
-
-export interface Admin {
-  id: string;
-  email: string;
-  password_hash: string;
   created_at: string;
 }
 
@@ -99,20 +74,10 @@ export interface Review {
   reply?: ReviewReply | null;
 }
 
-export interface CompanyWithProducts extends Company {
-  products?: Product[];
-}
-
 export interface MatchingProduct {
   id: string;
   name: string;
   description: string;
-}
-
-export interface SearchResult {
-  company: Company;
-  score: number;
-  matchingProduct?: MatchingProduct;
 }
 
 export interface SearchFilters {
@@ -132,18 +97,3 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-export interface CompanyRegistrationInput {
-  name: string;
-  company_url?: string;
-  linkedin_profile?: string;
-  description: string;
-  hq_country: Country;
-  logo?: File;
-  products?: ProductInput[];
-}
-
-export interface ApiError {
-  error: string;
-  message: string;
-  status: number;
-}
