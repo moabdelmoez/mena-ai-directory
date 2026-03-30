@@ -13,11 +13,6 @@ export function Header() {
   const pathname = usePathname();
   const user = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    requestAnimationFrame(() => setMounted(true));
-  }, []);
 
   // Close menu on route change
   useEffect(() => {
@@ -65,19 +60,17 @@ export function Header() {
               About
             </Link>
 
-            <div className={`transition-opacity duration-300 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
-              {user ? (
-                <UserMenu user={user} />
-              ) : (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => router.push('/handler/sign-in')}
-                >
-                  Sign In
-                </Button>
-              )}
-            </div>
+            {user ? (
+              <UserMenu user={user} />
+            ) : (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => router.push('/handler/sign-in')}
+              >
+                Sign In
+              </Button>
+            )}
           </nav>
 
           {/* Hamburger button */}
