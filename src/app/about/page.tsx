@@ -145,7 +145,7 @@ export default function AboutPage() {
               </h2>
             </FadeIn>
 
-            <FadeIn inView className="space-y-4 text-zinc-500 leading-relaxed max-w-3xl mx-auto md:text-center">
+            <FadeIn inView className="space-y-4 text-lg text-zinc-500 leading-relaxed max-w-3xl mx-auto md:text-center">
               <p>
                 Business users waste hours searching scattered directories, outdated
                 listings, and generic global platforms. Relevant local and regional AI
@@ -164,7 +164,7 @@ export default function AboutPage() {
               <div className="max-w-3xl mx-auto">
                 <div className="relative bg-blue-50/50 rounded-2xl border border-blue-100 p-6 md:p-10 lg:p-14 text-center overflow-hidden">
                   <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400" />
-                  <p className="text-xl lg:text-2xl font-semibold text-zinc-900 leading-tight text-balance">
+                  <p className="text-fluid-title font-semibold text-zinc-900 leading-tight text-balance">
                     To become the{' '}
                     <span className="text-blue-600">trusted marketplace</span> where Arab
                     businesses discover AI solutions and where AI companies reach the
@@ -179,7 +179,7 @@ export default function AboutPage() {
         {/* How BayanBase Helps */}
         <TimelineNode label="How BayanBase Helps">
           <div className="px-4 sm:px-6 lg:px-8">
-            <FadeIn inView className="space-y-6 text-zinc-500 leading-relaxed max-w-3xl mx-auto md:text-center">
+            <FadeIn inView className="space-y-6 text-lg text-zinc-500 leading-relaxed max-w-3xl mx-auto md:text-center">
               <p>
                 We built BayanBase to solve this gap. Our platform brings together AI
                 companies serving the Arab market in one place, complete with detailed
@@ -205,7 +205,7 @@ export default function AboutPage() {
                 <h2 id="about-vision" className="text-fluid-title tracking-tight font-semibold text-zinc-900 text-balance mb-8">
                   Built by us. For us.
                 </h2>
-                <p className="text-zinc-500 leading-relaxed max-w-2xl mx-auto">
+                <p className="text-lg text-zinc-500 leading-relaxed max-w-2xl mx-auto">
                   We help businesses accelerate their AI adoption by connecting them
                   with capable partners, while enabling strong AI companies to reach the
                   right buyers across the Arab world. A clear and efficient bridge
