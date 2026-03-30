@@ -112,25 +112,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Comment must be a string' }, { status: 400 });
     }
 
-    // Check if company exists and is approved
-    const { data: company } = await supabaseAdmin
-      .from('companies')
-      .select('id')
-      .eq('id', companyId)
-      .eq('status', 'approved')
-      .single();
+    // Check company existence and existing review in parallel
+    const [{ data: company }, { data: existingReview }] = await Promise.all([
+      supabaseAdmin
+        .from('companies')
+        .select('id')
+        .eq('id', companyId)
+        .eq('status', 'approved')
+        .single(),
+      supabaseAdmin
+        .from('reviews')
+        .select('id')
+        .eq('company_id', companyId)
+        .eq('user_id', userId)
+        .single(),
+    ]);
 
     if (!company) {
       return NextResponse.json({ error: 'Company not found or not approved' }, { status: 404 });
     }
-
-    // Check if user already reviewed this company
-    const { data: existingReview } = await supabaseAdmin
-      .from('reviews')
-      .select('id')
-      .eq('company_id', companyId)
-      .eq('user_id', userId)
-      .single();
 
     if (existingReview) {
       return NextResponse.json(

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useId, useRef } from 'react';
+import { useState, useCallback, useId, useRef } from 'react';
 import { Input, Textarea, Button } from '@/components/ui';
 import { ProductInput } from '@/types';
 
@@ -13,6 +13,14 @@ interface ClassificationOptions {
   tech_categories: string[];
   industries: string[];
 }
+
+const DEFAULT_PRODUCT: ProductWithKey = {
+  name: '',
+  description: '',
+  product_url: null,
+  tech_category: null,
+  industry: null,
+};
 
 interface ProductInputListProps {
   products: ProductInput[];
@@ -28,7 +36,7 @@ export function ProductInputList({
   classificationOptions,
 }: ProductInputListProps) {
   const [isAdding, setIsAdding] = useState(false);
-  const [newProduct, setNewProduct] = useState<ProductWithKey>({ name: '', description: '', product_url: null, tech_category: null, industry: null });
+  const [newProduct, setNewProduct] = useState<ProductWithKey>(DEFAULT_PRODUCT);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const baseId = useId();
   const keyCounterRef = useRef(0);
@@ -57,7 +65,7 @@ export function ProductInputList({
       _key: generateKey(),
     };
     onChange([...products, productWithKey]);
-    setNewProduct({ name: '', description: '', product_url: null, tech_category: null, industry: null });
+    setNewProduct(DEFAULT_PRODUCT);
     setIsAdding(false);
   };
 
@@ -84,11 +92,11 @@ export function ProductInputList({
     onChange(products.filter((_, i) => i !== index));
   };
 
-  const handleProductChange = (index: number, field: keyof ProductInput, value: string | null) => {
+  const handleProductChange = useCallback((index: number, field: keyof ProductInput, value: string | null) => {
     const updated = [...products];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
-  };
+  }, [products, onChange]);
 
   const showClassificationFields = !!(
     classificationOptions &&
@@ -297,7 +305,7 @@ export function ProductInputList({
                 size="sm"
                 onClick={() => {
                   setIsAdding(false);
-                  setNewProduct({ name: '', description: '', product_url: null, tech_category: null, industry: null });
+                  setNewProduct(DEFAULT_PRODUCT);
                 }}
               >
                 Cancel

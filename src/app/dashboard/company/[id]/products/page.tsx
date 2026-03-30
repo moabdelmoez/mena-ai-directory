@@ -36,16 +36,18 @@ export default function ProductManagementPage({ params }: Props) {
     setIsLoading(true);
     setError('');
     try {
-      // Fetch company
-      const companyRes = await fetch(`/api/companies/${companyId}`);
+      // Fetch company and products in parallel
+      const [companyRes, productsRes] = await Promise.all([
+        fetch(`/api/companies/${companyId}`),
+        fetch(`/api/products?company_id=${companyId}`),
+      ]);
+
       if (!companyRes.ok) {
         throw new Error('Company not found');
       }
       const companyData = await companyRes.json();
       setCompany(companyData);
 
-      // Fetch products
-      const productsRes = await fetch(`/api/products?company_id=${companyId}`);
       if (productsRes.ok) {
         const productsData = await productsRes.json();
         setProducts(productsData);

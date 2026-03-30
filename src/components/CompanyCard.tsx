@@ -8,6 +8,9 @@ import { Card } from '@/components/ui';
 import { truncateText } from '@/lib/utils';
 import { CompanyLogo } from './CompanyLogo';
 
+const EMPTY_PROPS = {} as const;
+const MOTION_PROPS = { whileHover: { y: -2 }, whileTap: { scale: 0.98 } } as const;
+
 interface CompanyCardProps {
   company: Company;
   matchingProduct?: MatchingProduct;
@@ -17,7 +20,7 @@ export const CompanyCard = memo(function CompanyCard({ company, matchingProduct 
   const prefersReducedMotion = useReducedMotion();
 
   const Wrapper = prefersReducedMotion ? 'div' : motion.div;
-  const motionProps = prefersReducedMotion ? {} : { whileHover: { y: -2 }, whileTap: { scale: 0.98 } };
+  const motionProps = prefersReducedMotion ? EMPTY_PROPS : MOTION_PROPS;
 
   return (
     <Wrapper {...motionProps}>

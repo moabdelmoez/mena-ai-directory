@@ -1,5 +1,11 @@
 'use client';
 
+const SIZES = {
+  sm: 'w-4 h-4',
+  md: 'w-5 h-5',
+  lg: 'w-6 h-6',
+} as const;
+
 interface StarRatingProps {
   rating: number;
   maxRating?: number;
@@ -15,11 +21,6 @@ export function StarRating({
   interactive = false,
   onChange,
 }: StarRatingProps) {
-  const sizes = {
-    sm: 'w-4 h-4',
-    md: 'w-5 h-5',
-    lg: 'w-6 h-6',
-  };
 
   const handleClick = (index: number) => {
     if (interactive && onChange) {
@@ -29,7 +30,7 @@ export function StarRating({
 
   const starIcon = (filled: boolean, half: boolean) => (
     <svg
-      className={`${sizes[size]} ${
+      className={`${SIZES[size]} ${
         filled ? 'text-yellow-400' : half ? 'text-yellow-400' : 'text-zinc-300'
       }`}
       fill={filled || half ? 'currentColor' : 'none'}

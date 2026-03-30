@@ -230,10 +230,10 @@ async function generateUniqueSlug(name: string): Promise<string> {
     throw new CreateCompanyError('Failed to generate unique slug', 500);
   }
 
-  const existingSlugs = (matchingSlugs || []).map(s => s.slug);
+  const existingSlugs = new Set((matchingSlugs || []).map(s => s.slug));
   let slug = baseSlug;
   let counter = 1;
-  while (existingSlugs.includes(slug)) {
+  while (existingSlugs.has(slug)) {
     slug = `${baseSlug}-${counter}`;
     counter++;
   }

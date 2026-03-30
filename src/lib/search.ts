@@ -71,7 +71,7 @@ async function getCompanyIdsByClassification(
     return null;
   }
 
-  return [...new Set(data.map((r) => r.company_id).filter(Boolean) as string[])];
+  return [...new Set(data.filter((r) => r.company_id).map((r) => r.company_id as string))];
 }
 
 export async function hybridSearch(

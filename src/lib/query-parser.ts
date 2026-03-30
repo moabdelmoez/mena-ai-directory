@@ -72,6 +72,18 @@ function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// Pre-compiled regex cache to avoid recreating RegExp objects on every search
+const regexCache = new Map<string, RegExp>();
+
+function getCachedRegex(key: string): RegExp {
+  let regex = regexCache.get(key);
+  if (!regex) {
+    regex = new RegExp(`\\b${escapeRegex(key)}\\b`, 'gi');
+    regexCache.set(key, regex);
+  }
+  return regex;
+}
+
 /**
  * Extract matches from text using an alias map.
  * Returns the matched canonical values (deduplicated) and the text with matches removed.
@@ -88,9 +100,11 @@ function extractFromAliases(
   let remaining = text;
 
   for (const key of keys) {
-    const regex = new RegExp(`\\b${escapeRegex(key)}\\b`, 'gi');
+    const regex = getCachedRegex(key);
+    regex.lastIndex = 0;
     if (regex.test(remaining)) {
       found.add(aliases[key]);
+      regex.lastIndex = 0;
       remaining = remaining.replace(regex, ' ');
       if (firstOnly) break;
     }
