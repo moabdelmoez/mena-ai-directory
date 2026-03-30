@@ -47,7 +47,7 @@ export function StarRating({
 
   if (!interactive) {
     return (
-      <div className="flex items-center gap-0.5" aria-label={`Rating: ${rating} out of ${maxRating}`}>
+      <div className="flex items-center gap-0.5" role="img" aria-label={`Rating: ${rating} out of ${maxRating}`}>
         {Array.from({ length: maxRating }, (_, index) => {
           const filled = index < Math.floor(rating);
           const half = index === Math.floor(rating) && rating % 1 >= 0.5;
@@ -63,7 +63,7 @@ export function StarRating({
   }
 
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-0.5" role="radiogroup" aria-label={`Rating: select 1 to ${maxRating}`}>
       {Array.from({ length: maxRating }, (_, index) => {
         const filled = index < Math.floor(rating);
         const half = index === Math.floor(rating) && rating % 1 >= 0.5;
@@ -74,7 +74,7 @@ export function StarRating({
             type="button"
             onClick={() => handleClick(index)}
             aria-label={`Rate ${index + 1} out of ${maxRating}`}
-            className="cursor-pointer hover:scale-110 transition-transform"
+            className="cursor-pointer hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/20 rounded"
           >
             {starIcon(filled, half)}
           </button>

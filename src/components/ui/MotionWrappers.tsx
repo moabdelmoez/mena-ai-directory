@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ReactNode } from 'react';
 
 interface FadeInProps {
@@ -11,6 +11,12 @@ interface FadeInProps {
 }
 
 export function FadeIn({ children, className, delay = 0, inView = false }: FadeInProps) {
+  const prefersReducedMotion = useReducedMotion();
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   const animateProp = inView
     ? { whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-50px' } }
     : { animate: { opacity: 1, y: 0 } };
@@ -34,6 +40,12 @@ interface StaggerChildrenProps {
 }
 
 export function StaggerChildren({ children, className, inView = false }: StaggerChildrenProps) {
+  const prefersReducedMotion = useReducedMotion();
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   const animateProp = inView
     ? { whileInView: 'visible' as const, viewport: { once: true, margin: '-50px' } }
     : { animate: 'visible' as const };
@@ -54,6 +66,12 @@ export function StaggerChildren({ children, className, inView = false }: Stagger
 }
 
 export function StaggerItem({ children, className }: { children: ReactNode; className?: string }) {
+  const prefersReducedMotion = useReducedMotion();
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       variants={{

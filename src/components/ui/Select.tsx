@@ -26,7 +26,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           aria-describedby={errorId}
           aria-invalid={!!error}
           className={classNames(
-            'block w-full rounded-xl border px-3 py-2 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors bg-white',
+            'block w-full rounded-xl border px-3 py-2 text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/20 focus-visible:border-blue-600 transition-colors bg-white',
             error ? 'border-red-500' : 'border-zinc-300',
             className
           )}
@@ -42,7 +42,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ))}
         </select>
         {error && (
-          <p id={errorId} className="mt-1 text-sm text-red-600">{error}</p>
+          <p id={errorId} role="alert" className="mt-1 text-sm text-red-600">{error}</p>
         )}
       </div>
     );

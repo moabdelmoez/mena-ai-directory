@@ -30,7 +30,7 @@ export function Footer() {
 
           <p className="text-xs text-zinc-500 md:hidden mt-2">
             Questions or feedback? Reach us at{' '}
-            <span className="text-zinc-400">support@bayanbase.com</span>
+            <a href="mailto:support@bayanbase.com" className="text-zinc-400 hover:text-white transition-colors">support@bayanbase.com</a>
           </p>
         </div>
 

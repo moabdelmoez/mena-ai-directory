@@ -23,7 +23,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
     pages.push(1);
 
     if (showEllipsisStart) {
-      pages.push('...');
+      pages.push('\u2026');
     }
 
     const start = Math.max(2, currentPage - 1);
@@ -34,7 +34,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
     }
 
     if (showEllipsisEnd) {
-      pages.push('...');
+      pages.push('\u2026');
     }
 
     pages.push(totalPages);
@@ -59,15 +59,15 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       <div className="hidden sm:flex items-center gap-1 mx-2">
         {pages.map((page, index) => (
           <div key={typeof page === 'number' ? `page-${page}` : `ellipsis-${index < 3 ? 'start' : 'end'}`}>
-            {page === '...' ? (
-              <span className="px-3 py-1 text-zinc-500">...</span>
+            {typeof page === 'string' ? (
+              <span className="px-3 py-1 text-zinc-500">{'\u2026'}</span>
             ) : (
               <button
                 type="button"
                 onClick={() => onPageChange(page as number)}
                 aria-current={currentPage === page ? 'page' : undefined}
                 aria-label={`Go to page ${page}`}
-                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600/20 ${
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/20 ${
                   currentPage === page
                     ? 'bg-blue-600 text-white'
                     : 'text-zinc-700 hover:bg-zinc-100'

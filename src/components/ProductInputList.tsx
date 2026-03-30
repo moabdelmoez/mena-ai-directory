@@ -120,19 +120,22 @@ export function ProductInputList({
                   <Input
                     value={product.name}
                     onChange={(e) => handleProductChange(index, 'name', e.target.value)}
-                    placeholder="Product name"
+                    placeholder="Product name\u2026"
+                    aria-label="Product name"
                   />
                   <Textarea
                     value={product.description}
                     onChange={(e) => handleProductChange(index, 'description', e.target.value)}
-                    placeholder="Product description"
+                    placeholder="Product description\u2026"
+                    aria-label="Product description"
                     rows={2}
                   />
                   <Input
                     value={product.product_url || ''}
                     onChange={(e) => handleProductChange(index, 'product_url', e.target.value || null)}
-                    placeholder="https://..."
+                    placeholder="https://\u2026"
                     type="url"
+                    aria-label="Product URL"
                   />
                   {classificationOptions && (classificationOptions.tech_categories.length > 0 || classificationOptions.industries.length > 0) && (
                     <div className="grid grid-cols-2 gap-3">
@@ -141,7 +144,7 @@ export function ProductInputList({
                         <select
                           value={product.tech_category || ''}
                           onChange={(e) => handleProductChange(index, 'tech_category', e.target.value || null)}
-                          className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
                         >
                           <option value="">None</option>
                           {classificationOptions.tech_categories.map((tc) => (
@@ -154,7 +157,7 @@ export function ProductInputList({
                         <select
                           value={product.industry || ''}
                           onChange={(e) => handleProductChange(index, 'industry', e.target.value || null)}
-                          className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
                         >
                           <option value="">None</option>
                           {classificationOptions.industries.map((ind) => (
@@ -247,7 +250,8 @@ export function ProductInputList({
             <Textarea
               value={newProduct.description}
               onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-              placeholder="Product description"
+              placeholder="Product description\u2026"
+                    aria-label="Product description"
               rows={2}
             />
             <Input
@@ -263,7 +267,7 @@ export function ProductInputList({
                   <select
                     value={newProduct.tech_category || ''}
                     onChange={(e) => setNewProduct({ ...newProduct, tech_category: e.target.value || null })}
-                    className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
                   >
                     <option value="">None</option>
                     {classificationOptions!.tech_categories.map((tc) => (
@@ -276,7 +280,7 @@ export function ProductInputList({
                   <select
                     value={newProduct.industry || ''}
                     onChange={(e) => setNewProduct({ ...newProduct, industry: e.target.value || null })}
-                    className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
                   >
                     <option value="">None</option>
                     {classificationOptions!.industries.map((ind) => (
@@ -319,7 +323,7 @@ export function ProductInputList({
             onClick={() => setIsAdding(true)}
             className="w-full"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Add Product

@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Company, MatchingProduct } from '@/types';
 import { Card } from '@/components/ui';
 import { truncateText } from '@/lib/utils';
@@ -14,9 +14,14 @@ interface CompanyCardProps {
 }
 
 export const CompanyCard = memo(function CompanyCard({ company, matchingProduct }: CompanyCardProps) {
+  const prefersReducedMotion = useReducedMotion();
+
+  const Wrapper = prefersReducedMotion ? 'div' : motion.div;
+  const motionProps = prefersReducedMotion ? {} : { whileHover: { y: -2 }, whileTap: { scale: 0.98 } };
+
   return (
-    <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
-    <Link href={`/company/${company.slug}`}>
+    <Wrapper {...motionProps}>
+    <Link href={`/company/${company.slug}`} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-2xl block">
       <Card className="h-full" interactive>
         <div className="flex gap-4">
           <CompanyLogo logo={company.logo} name={company.name} size="sm" logo_bg={company.logo_bg} />
@@ -37,7 +42,7 @@ export const CompanyCard = memo(function CompanyCard({ company, matchingProduct 
                   </svg>
                   Matching Product
                 </div>
-                <span className="text-sm text-zinc-900 font-medium">{matchingProduct.name}</span>
+                <span className="text-sm text-zinc-900 font-medium truncate block">{matchingProduct.name}</span>
                 <p className="text-xs text-zinc-600 line-clamp-1">{matchingProduct.description}</p>
               </div>
             )}
@@ -56,6 +61,6 @@ export const CompanyCard = memo(function CompanyCard({ company, matchingProduct 
         </div>
       </Card>
     </Link>
-    </motion.div>
+    </Wrapper>
   );
 });

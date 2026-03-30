@@ -43,7 +43,7 @@ export function ConfirmDialog({
     <dialog
       ref={dialogRef}
       onCancel={handleCancel}
-      className="bg-transparent p-0 m-0 max-w-none max-h-none backdrop:bg-black/50"
+      className="bg-transparent p-0 m-0 max-w-none max-h-none backdrop:bg-black/50 overscroll-contain"
     >
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-lg border border-zinc-200/60 p-6 w-full max-w-md">
@@ -53,7 +53,7 @@ export function ConfirmDialog({
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-300 rounded-xl hover:bg-zinc-50 active:scale-[0.98] transition-all"
+              className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-300 rounded-xl hover:bg-zinc-50 active:scale-[0.98] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/20"
             >
               Cancel
             </button>
@@ -61,7 +61,7 @@ export function ConfirmDialog({
               type="button"
               onClick={onConfirm}
               className={classNames(
-                'px-4 py-2 text-sm font-medium text-white rounded-xl active:scale-[0.98] transition-all',
+                'px-4 py-2 text-sm font-medium text-white rounded-xl active:scale-[0.98] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600',
                 variant === 'danger'
                   ? 'bg-red-600 hover:bg-red-700'
                   : 'bg-blue-600 hover:bg-blue-700'

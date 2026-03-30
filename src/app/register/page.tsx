@@ -239,7 +239,7 @@ export default function RegisterPage() {
             required
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Enter company name"
+            placeholder="Enter company name\u2026"
           />
 
           <Input
@@ -248,7 +248,7 @@ export default function RegisterPage() {
             type="url"
             value={formData.company_url}
             onChange={(e) => setFormData({ ...formData, company_url: e.target.value })}
-            placeholder="https://example.com"
+            placeholder="https://example.com\u2026"
           />
 
           <Input
@@ -257,7 +257,7 @@ export default function RegisterPage() {
             type="url"
             value={formData.linkedin_profile}
             onChange={(e) => setFormData({ ...formData, linkedin_profile: e.target.value })}
-            placeholder="https://linkedin.com/company/example"
+            placeholder="https://linkedin.com/company/\u2026"
           />
 
           <Textarea
@@ -266,7 +266,7 @@ export default function RegisterPage() {
             required
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Describe what your company does..."
+            placeholder="Describe what your company does\u2026"
             rows={4}
           />
 
@@ -289,7 +289,7 @@ export default function RegisterPage() {
           />
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+            <div role="alert" className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
               {error}
             </div>
           )}

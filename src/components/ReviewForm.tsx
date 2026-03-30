@@ -104,12 +104,12 @@ function AuthenticatedReviewForm({ user, onSubmit }: { user: NonNullable<ReturnT
         id="comment"
         value={comment}
         onChange={(e) => setComment(e.target.value)}
-        placeholder="Share your experience with this company..."
+        placeholder="Share your experience with this company\u2026"
         rows={4}
       />
 
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p role="alert" className="text-sm text-red-600">{error}</p>
       )}
 
       <Button

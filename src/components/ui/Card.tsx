@@ -20,7 +20,7 @@ export function Card({ children, className, padding = 'md', interactive = false 
   return (
     <div
       className={classNames(
-        'bg-white rounded-2xl border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200',
+        'bg-white rounded-2xl border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-[transform,box-shadow] duration-200',
         interactive && 'hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] cursor-pointer',
         paddings[padding],
         className

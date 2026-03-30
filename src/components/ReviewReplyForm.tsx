@@ -30,17 +30,17 @@ export function ReviewReplyForm({ onSubmit, onCancel }: ReviewReplyFormProps) {
   return (
     <form onSubmit={handleSubmit} className="ml-[52px] mt-3 bg-zinc-50 rounded-xl p-4 space-y-3">
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p role="alert" className="text-sm text-red-600">{error}</p>
       )}
       <Textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
-        placeholder="Write a response..."
+        placeholder="Write a response\u2026"
         rows={3}
       />
       <div className="flex items-center gap-2">
         <Button type="submit" size="sm" disabled={isSubmitting || !comment.trim()}>
-          {isSubmitting ? 'Submitting...' : 'Submit Reply'}
+          {isSubmitting ? 'Submitting\u2026' : 'Submit Reply'}
         </Button>
         <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={isSubmitting}>
           Cancel

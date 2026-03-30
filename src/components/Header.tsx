@@ -83,7 +83,7 @@ export function Header() {
           {/* Hamburger button */}
           <button
             type="button"
-            className="md:hidden text-zinc-400 hover:text-white p-2"
+            className="md:hidden text-zinc-400 hover:text-white p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 rounded-lg"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-expanded={menuOpen}
             aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
@@ -175,7 +175,7 @@ export function Header() {
                   setMenuOpen(false);
                   handleSignOut().catch(console.error);
                 }}
-                className="text-red-400 hover:text-red-300 transition-colors text-left"
+                className="text-red-400 hover:text-red-300 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 rounded"
               >
                 Sign Out
               </button>

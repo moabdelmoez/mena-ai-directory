@@ -68,13 +68,13 @@ export function SearchBox({ initialQuery = '', size = 'lg', className = '' }: Se
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            placeholder="Search AI companies in the Arab world..."
+            placeholder="Search AI companies in the Arab world\u2026"
             aria-label="Search AI companies"
-            className={`w-full ${sizes[size]} pl-12 pr-20 rounded-2xl border border-zinc-300 bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] focus:shadow-[0_2px_12px_rgba(0,0,0,0.08)]`}
+            className={`w-full ${sizes[size]} pl-12 pr-20 rounded-2xl border border-zinc-300 bg-white text-zinc-900 placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/20 focus-visible:border-blue-600 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] focus:shadow-[0_2px_12px_rgba(0,0,0,0.08)]`}
           />
           <button
             type="submit"
-            className={`absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600 hover:text-blue-700 font-semibold ${size === 'lg' ? 'text-base' : 'text-sm'}`}
+            className={`absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600 hover:text-blue-700 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-r-2xl ${size === 'lg' ? 'text-base' : 'text-sm'}`}
           >
             Search
           </button>

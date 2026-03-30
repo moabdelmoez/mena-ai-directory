@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 interface FeatureShowcaseProps {
   title: string;
@@ -56,6 +56,8 @@ export function FeatureShowcase({
       <img
         src={imageSrc}
         alt={title}
+        width={2504}
+        height={1276}
         className="w-full h-auto block"
       />
     </div>
@@ -85,6 +87,19 @@ export function FeatureShowcase({
       </p>
     </div>
   );
+
+  const prefersReducedMotion = useReducedMotion();
+
+  if (prefersReducedMotion) {
+    return (
+      <div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div>{mediaBlock}</div>
+          <div className={reverse ? '' : 'lg:order-first'}>{textBlock}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
