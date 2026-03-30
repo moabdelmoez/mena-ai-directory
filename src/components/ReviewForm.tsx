@@ -23,7 +23,7 @@ export function ReviewForm({ onSubmit }: ReviewFormProps) {
         <Button
           variant="primary"
           className="mt-3"
-          onClick={() => router.push('/handler/sign-in')}
+          onClick={() => router.push('/signin')}
         >
           Sign In
         </Button>

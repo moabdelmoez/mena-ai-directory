@@ -66,7 +66,7 @@ export function Header() {
               <Button
                 variant="primary"
                 size="sm"
-                onClick={() => router.push('/handler/sign-in')}
+                onClick={() => router.push('/signin')}
               >
                 Sign In
               </Button>
@@ -179,7 +179,7 @@ export function Header() {
               size="sm"
               onClick={() => {
                 setMenuOpen(false);
-                router.push('/handler/sign-in');
+                router.push('/signin');
               }}
             >
               Sign In

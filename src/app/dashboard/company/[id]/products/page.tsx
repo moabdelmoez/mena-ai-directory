@@ -63,7 +63,7 @@ export default function ProductManagementPage({ params }: Props) {
     if (!mounted) return;
 
     if (!user) {
-      router.push('/handler/sign-in');
+      router.push('/signin');
       return;
     }
 

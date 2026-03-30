@@ -6,6 +6,9 @@ function getStackServerApp(): StackServerApp {
   if (!_app) {
     _app = new StackServerApp({
       tokenStore: 'nextjs-cookie',
+      urls: {
+        signIn: '/signin',
+      },
     });
   }
   return _app;

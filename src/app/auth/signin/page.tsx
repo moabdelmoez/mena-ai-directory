@@ -15,7 +15,7 @@ function SignInContent() {
       router.push(callbackUrl);
     } else {
       // Redirect to Stack Auth's sign-in handler
-      router.push(`/handler/sign-in?after_auth_return_to=${encodeURIComponent(callbackUrl)}`);
+      router.push(`/signin?after_auth_return_to=${encodeURIComponent(callbackUrl)}`);
     }
   }, [user, router, callbackUrl]);
 

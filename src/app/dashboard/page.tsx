@@ -40,7 +40,7 @@ export default function DashboardPage() {
     if (!mounted) return;
 
     if (!user) {
-      router.push('/handler/sign-in');
+      router.push('/signin');
       return;
     }
 

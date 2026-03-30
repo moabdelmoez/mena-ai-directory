@@ -125,7 +125,7 @@ export default function RegisterPage() {
         </p>
         <Button
           variant="primary"
-          onClick={() => router.push('/handler/sign-in')}
+          onClick={() => router.push('/signin')}
         >
           Sign In
         </Button>
