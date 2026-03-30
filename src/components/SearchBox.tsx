@@ -70,7 +70,7 @@ export function SearchBox({ initialQuery = '', size = 'lg', className = '' }: Se
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            placeholder="Search AI companies in the Arab world\u2026"
+            placeholder="Search AI companies in the Arab world…"
             aria-label="Search AI companies"
             className={`w-full ${SIZES[size]} pl-12 pr-20 rounded-2xl border border-zinc-300 bg-white text-zinc-900 placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/20 focus-visible:border-blue-600 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] focus:shadow-[0_2px_12px_rgba(0,0,0,0.08)]`}
           />
