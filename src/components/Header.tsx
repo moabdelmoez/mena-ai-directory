@@ -155,12 +155,12 @@ export function Header() {
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center">
                     <span className="text-sm font-medium text-zinc-300">
-                      {(user.displayName || 'U').charAt(0).toUpperCase()}
+                      {(user.displayName || user.primaryEmail || 'U').charAt(0).toUpperCase()}
                     </span>
                   </div>
                 )}
                 <span className="text-sm font-medium text-white truncate">
-                  {user.displayName || 'User'}
+                  {user.displayName || user.primaryEmail || 'User'}
                 </span>
               </div>
               <Link
