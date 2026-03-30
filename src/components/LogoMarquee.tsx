@@ -1,11 +1,26 @@
-import Image from 'next/image';
+'use client';
+
+import { CompanyLogo } from './CompanyLogo';
 
 interface LogoMarqueeProps {
-  companies: { name: string; logo: string }[];
+  companies: { name: string; logo: string; logo_bg: 'white' | 'black' | null }[];
 }
 
 export function LogoMarquee({ companies }: LogoMarqueeProps) {
   if (companies.length === 0) return null;
+
+  function renderLogos(prefix: string, ariaHidden = false) {
+    return companies.map((company, i) => (
+      <div key={`${prefix}-${i}`} className="flex-shrink-0" aria-hidden={ariaHidden || undefined}>
+        <CompanyLogo
+          logo={company.logo}
+          name={company.name}
+          size="sm"
+          logo_bg={company.logo_bg}
+        />
+      </div>
+    ));
+  }
 
   return (
     <section className="py-12 bg-[var(--background)]">
@@ -23,45 +38,15 @@ export function LogoMarquee({ companies }: LogoMarqueeProps) {
 
         {/* Scrolling track: two copies for seamless loop */}
         <div className="marquee-track flex items-center gap-8 sm:gap-12">
-          {companies.map((company, i) => (
-            <div key={`a-${i}`} className="flex-shrink-0 w-[100px] h-[40px] sm:w-[120px] sm:h-[48px] relative grayscale opacity-60">
-              <Image
-                src={company.logo}
-                alt={company.name}
-                fill
-                className="object-contain"
-                sizes="120px"
-              />
-            </div>
-          ))}
-          {companies.map((company, i) => (
-            <div key={`b-${i}`} className="flex-shrink-0 w-[100px] h-[40px] sm:w-[120px] sm:h-[48px] relative grayscale opacity-60" aria-hidden="true">
-              <Image
-                src={company.logo}
-                alt=""
-                fill
-                className="object-contain"
-                sizes="120px"
-              />
-            </div>
-          ))}
+          {renderLogos('a')}
+          {renderLogos('b', true)}
         </div>
       </div>
 
       {/* Static fallback for reduced motion */}
       <div className="marquee-static hidden max-w-5xl mx-auto px-4">
         <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12">
-          {companies.map((company, i) => (
-            <div key={i} className="w-[100px] h-[40px] sm:w-[120px] sm:h-[48px] relative grayscale opacity-60">
-              <Image
-                src={company.logo}
-                alt={company.name}
-                fill
-                className="object-contain"
-                sizes="120px"
-              />
-            </div>
-          ))}
+          {renderLogos('static')}
         </div>
       </div>
     </section>

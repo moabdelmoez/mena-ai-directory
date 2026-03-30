@@ -35,10 +35,10 @@ export async function getCompanyById(id: string): Promise<Company | null> {
   return data as Company;
 }
 
-export async function getFeaturedCompanyLogos(count = 15): Promise<{ name: string; logo: string }[]> {
+export async function getFeaturedCompanyLogos(count = 15): Promise<{ name: string; logo: string; logo_bg: 'white' | 'black' | null }[]> {
   const { data, error } = await supabaseAdmin
     .from('companies')
-    .select('name, logo')
+    .select('name, logo, logo_bg')
     .eq('status', 'approved')
     .not('logo', 'is', null)
     .limit(100);
@@ -46,7 +46,7 @@ export async function getFeaturedCompanyLogos(count = 15): Promise<{ name: strin
   if (error || !data) return [];
 
   // Fisher-Yates shuffle (Supabase doesn't support ORDER BY random())
-  const arr = [...data] as { name: string; logo: string }[];
+  const arr = [...data] as { name: string; logo: string; logo_bg: 'white' | 'black' | null }[];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
