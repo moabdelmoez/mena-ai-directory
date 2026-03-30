@@ -40,54 +40,6 @@ function IconBadge({
   );
 }
 
-function SearchIcon() {
-  return (
-    <IconBadge color="zinc">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-    </IconBadge>
-  );
-}
-
-function ChatBubblesIcon() {
-  return (
-    <IconBadge color="zinc">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
-    </IconBadge>
-  );
-}
-
-function GlobeIcon() {
-  return (
-    <IconBadge color="zinc">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-    </IconBadge>
-  );
-}
-
-function StarIcon() {
-  return (
-    <IconBadge color="zinc">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-    </IconBadge>
-  );
-}
-
-function GridIcon() {
-  return (
-    <IconBadge color="zinc">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-    </IconBadge>
-  );
-}
-
-function TrendingUpIcon() {
-  return (
-    <IconBadge color="zinc">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-    </IconBadge>
-  );
-}
-
 function UsersIcon() {
   return (
     <IconBadge color="zinc">
@@ -173,7 +125,7 @@ export default function AboutPage() {
               ecosystem.
             </h1>
             <p className="text-lg text-zinc-500 max-w-2xl mx-auto">
-              Despite strong investment in AI across the Arab world, finding the right partner remains difficult. Businesses often depend on personal networks to discover providers, BayanBase brings everything into one unified platform.
+              BayanBase connects businesses across the Arab world with the right AI companies and solutions. We make it simple for decision-makers to discover, evaluate, and engage with AI providers that understand regional needs and deliver practical results.
             </p>
           </div>
         </FadeIn>
@@ -193,82 +145,15 @@ export default function AboutPage() {
               </h2>
             </FadeIn>
 
-            <FadeIn inView className="space-y-4 text-zinc-500 leading-relaxed max-w-3xl mx-auto md:text-center mb-10">
+            <FadeIn inView className="space-y-4 text-zinc-500 leading-relaxed max-w-3xl mx-auto md:text-center">
               <p>
-                Let&apos;s be honest. If you are a business owner in Cairo, Riyadh, or
-                Dubai and you need an AI solution — what do you do?
-              </p>
-              <p>
-                You ask your friends. You post in WhatsApp groups. You spend hours
-                scrolling through LinkedIn. You Google and get results about companies in
-                San Francisco, not in your city.{' '}
-                <strong className="text-zinc-900 font-medium">
-                  There is no single, trusted place where Arab businesses can discover,
-                  compare, and review AI companies built for our market.
-                </strong>
-              </p>
-              <p>
-                The West has G2 for software reviews, Gartner for enterprise research,
-                and CB Insights for market intelligence. Platforms where real users help
-                other users make smarter decisions.{' '}
-                <strong className="text-zinc-900 font-medium">
-                  The Arab world has nothing like this for AI. Until now.
-                </strong>
+                Business users waste hours searching scattered directories, outdated
+                listings, and generic global platforms. Relevant local and regional AI
+                companies remain difficult to find. Language barriers, fragmented
+                information, and a lack of trusted reviews turn what should be a
+                straightforward discovery process into a frustrating experience.
               </p>
             </FadeIn>
-
-            <StaggerChildren inView className="grid md:grid-cols-3 gap-4">
-              <StaggerItem>
-                <Card className="h-full">
-                  <div className="flex items-start gap-4">
-                    <SearchIcon />
-                    <div>
-                      <h3 className="font-semibold text-zinc-900 mb-1">
-                        Discovery is broken
-                      </h3>
-                      <p className="text-sm text-zinc-500 leading-relaxed">
-                        There is no central directory of AI companies serving the Arab
-                        market. Searching takes hours and the results are often outdated
-                        or irrelevant.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </StaggerItem>
-              <StaggerItem>
-                <Card className="h-full">
-                  <div className="flex items-start gap-4">
-                    <ChatBubblesIcon />
-                    <div>
-                      <h3 className="font-semibold text-zinc-900 mb-1">
-                        Trust is word-of-mouth
-                      </h3>
-                      <p className="text-sm text-zinc-500 leading-relaxed">
-                        Businesses rely on personal connections to find AI providers. If
-                        you don&apos;t know the right people, you are stuck guessing.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </StaggerItem>
-              <StaggerItem>
-                <Card className="h-full">
-                  <div className="flex items-start gap-4">
-                    <GlobeIcon />
-                    <div>
-                      <h3 className="font-semibold text-zinc-900 mb-1">
-                        Our ecosystem is invisible
-                      </h3>
-                      <p className="text-sm text-zinc-500 leading-relaxed">
-                        Hundreds of AI companies across 22 Arab countries are building
-                        great products. But they have no shared stage to showcase their
-                        work.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </StaggerItem>
-            </StaggerChildren>
           </div>
         </TimelineNode>
 
@@ -279,16 +164,11 @@ export default function AboutPage() {
               <div className="max-w-3xl mx-auto">
                 <div className="relative bg-blue-50/50 rounded-2xl border border-blue-100 p-6 md:p-10 lg:p-14 text-center overflow-hidden">
                   <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400" />
-                  <p className="text-xl lg:text-2xl font-semibold text-zinc-900 leading-tight text-balance mb-4">
+                  <p className="text-xl lg:text-2xl font-semibold text-zinc-900 leading-tight text-balance">
                     To become the{' '}
                     <span className="text-blue-600">trusted marketplace</span> where Arab
                     businesses discover AI solutions and where AI companies reach the
                     customers they deserve.
-                  </p>
-                  <p className="text-zinc-500 leading-relaxed max-w-xl mx-auto">
-                    We believe the Arab world doesn&apos;t just need to adopt AI — it needs
-                    to build, own, and celebrate its own AI ecosystem. One that reflects our
-                    languages, our culture, and our way of doing business.
                   </p>
                 </div>
               </div>
@@ -296,56 +176,24 @@ export default function AboutPage() {
           </div>
         </TimelineNode>
 
-        {/* What We Do */}
-        <TimelineNode label="What We Do">
+        {/* How BayanBase Helps */}
+        <TimelineNode label="How BayanBase Helps">
           <div className="px-4 sm:px-6 lg:px-8">
-            <FadeIn inView>
-              <h2 id="about-whatwedo" className="text-fluid-title tracking-tight font-semibold text-zinc-900 text-balance mb-10 md:text-center">
-                Three things. Done right.
-              </h2>
+            <FadeIn inView className="space-y-6 text-zinc-500 leading-relaxed max-w-3xl mx-auto md:text-center">
+              <p>
+                We built BayanBase to solve this gap. Our platform brings together AI
+                companies serving the Arab market in one place, complete with detailed
+                profiles and authentic reviews from actual business users. These reviews
+                highlight real outcomes, implementation challenges, and value delivered,
+                giving you clear insights before you ever reach out.
+              </p>
+              <p>
+                For AI companies, BayanBase opens direct access to buyers across
+                Arabic-speaking countries. Instead of struggling with broad marketing or
+                cold outreach, providers can showcase their solutions to the right
+                audience and build visibility in a growing regional market.
+              </p>
             </FadeIn>
-
-            <StaggerChildren inView className="grid md:grid-cols-3 gap-6">
-              <StaggerItem>
-                <Card className="h-full" padding="lg">
-                  <StarIcon />
-                  <h3 className="font-semibold text-zinc-900 mt-4 mb-2">
-                    Real Reviews from Real Users
-                  </h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">
-                    Business owners share honest reviews about AI companies they have
-                    worked with. No paid placements. No fake ratings. Just real experiences
-                    from people like you.
-                  </p>
-                </Card>
-              </StaggerItem>
-              <StaggerItem>
-                <Card className="h-full" padding="lg">
-                  <GridIcon />
-                  <h3 className="font-semibold text-zinc-900 mt-4 mb-2">
-                    AI Company Directory
-                  </h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">
-                    A complete, searchable directory of AI companies across the Arab world.
-                    Filter by country, industry, service type, and company size. Find
-                    exactly what you need in minutes, not days.
-                  </p>
-                </Card>
-              </StaggerItem>
-              <StaggerItem>
-                <Card className="h-full" padding="lg">
-                  <TrendingUpIcon />
-                  <h3 className="font-semibold text-zinc-900 mt-4 mb-2">
-                    Market Intelligence &amp; Rankings
-                  </h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">
-                    Research reports, trend analysis, and rankings of AI companies — built
-                    specifically for our region. Understand where the Arab world&apos;s AI market is
-                    heading and who is leading it.
-                  </p>
-                </Card>
-              </StaggerItem>
-            </StaggerChildren>
           </div>
         </TimelineNode>
 
@@ -357,32 +205,12 @@ export default function AboutPage() {
                 <h2 id="about-vision" className="text-fluid-title tracking-tight font-semibold text-zinc-900 text-balance mb-8">
                   Built by us. For us.
                 </h2>
-                <div className="space-y-6 text-zinc-500 leading-relaxed">
-                  <p>
-                    We are not trying to copy the West. We are building something that
-                    reflects who we are. A platform that understands that business in the
-                    Arab world runs on{' '}
-                    <strong className="text-zinc-900 font-medium">
-                      trust, relationships, and reputation
-                    </strong>{' '}
-                    — and brings that online in a way that feels natural.
-                  </p>
-                  <p>
-                    We believe that when an AI company in Amman builds something great, a
-                    business owner in Casablanca should be able to find it. When a startup in
-                    Cairo solves a real problem, a company in Jeddah should hear about it —{' '}
-                    <strong className="text-zinc-900 font-medium">
-                      not through luck, but through a system designed to connect them.
-                    </strong>
-                  </p>
-                  <p>
-                    The Arab world is full of brilliant AI builders. They just need a stage.
-                    And the businesses looking for them need a guide.{' '}
-                    <strong className="text-zinc-900 font-medium">
-                      BayanBase is both.
-                    </strong>
-                  </p>
-                </div>
+                <p className="text-zinc-500 leading-relaxed max-w-2xl mx-auto">
+                  We help businesses accelerate their AI adoption by connecting them
+                  with capable partners, while enabling strong AI companies to reach the
+                  right buyers across the Arab world. A clear and efficient bridge
+                  between both sides.
+                </p>
               </div>
             </FadeIn>
           </div>
