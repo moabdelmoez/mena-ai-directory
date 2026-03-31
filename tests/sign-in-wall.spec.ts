@@ -6,8 +6,8 @@ test.describe('Sign-In Wall', () => {
       await page.goto('/search?q=AI');
       await page.waitForLoadState('networkidle');
 
-      // The "Sign in for full access" CTA should be visible
-      await expect(page.locator('a:has-text("Sign in for full access")')).toBeVisible();
+      // The "Get full access — sign in for free" CTA should be visible
+      await expect(page.locator('a:has-text("Get full access — sign in for free")')).toBeVisible();
 
       // The blurred container should exist
       await expect(page.locator('[aria-hidden="true"].blur-sm')).toBeVisible();
@@ -20,7 +20,7 @@ test.describe('Sign-In Wall', () => {
       await page.goto('/search?q=AI');
       await page.waitForLoadState('networkidle');
 
-      const ctaLink = page.locator('a:has-text("Sign in for full access")');
+      const ctaLink = page.locator('a:has-text("Get full access — sign in for free")');
       const href = await ctaLink.getAttribute('href');
       expect(href).toContain('/signin');
       expect(href).toContain('after_auth_return_to');

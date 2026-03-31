@@ -372,7 +372,7 @@ function SearchContent() {
                         href={`/signin?after_auth_return_to=${encodeURIComponent(`/search?${searchParams.toString()}`)}`}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl text-lg shadow-lg active:scale-[0.98] transition-all"
                       >
-                        Sign in for full access
+                        Get full access — sign in for free
                       </Link>
                     </div>
                   </div>

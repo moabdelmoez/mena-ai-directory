@@ -5,7 +5,7 @@ export default function SignInPage() {
     <SignIn
       fullPage
       extraInfo={
-        <span>Sign in using your work email for full access and features</span>
+        <span>Sign in using your company email for full access and features</span>
       }
     />
   );
