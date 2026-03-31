@@ -1,13 +1,12 @@
 import { cache } from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 import { headers } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import { getCompanyBySlug, getCompanyProducts } from '@/lib/company-repository';
 import { stackServerApp } from '@/lib/auth';
 import { isBot } from '@/lib/bot-detection';
-import { supabaseAdmin } from '@/lib/supabase';
 import { Card } from '@/components/ui';
 import { StarRating } from '@/components/StarRating';
 import { ProductList } from '@/components/ProductList';
@@ -15,7 +14,7 @@ import { CompanyLogo } from '@/components/CompanyLogo';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { ClaimProfileButton } from '@/components/ClaimProfileModal';
 
-const CompanyReviews = dynamic(
+const CompanyReviews = nextDynamic(
   () => import('./CompanyReviews').then(m => ({ default: m.CompanyReviews })),
   { loading: () => <div className="animate-pulse h-32 bg-zinc-100 rounded-xl" /> }
 );
@@ -48,20 +47,8 @@ function safeJsonLdSerialize(data: unknown): string {
     .replace(/&/g, '\\u0026');
 }
 
-// ISR: Revalidate company pages every hour
-export const revalidate = 3600;
-
-// Pre-build top company pages at build time
-export async function generateStaticParams() {
-  if (!supabaseAdmin) return [];
-  const { data } = await supabaseAdmin
-    .from('companies')
-    .select('slug')
-    .eq('status', 'approved')
-    .order('created_at', { ascending: false })
-    .limit(50);
-  return (data || []).map(c => ({ slug: c.slug }));
-}
+// Force dynamic rendering — auth gate requires cookies/headers on every request
+export const dynamic = 'force-dynamic';
 
 // Cache the company fetch to deduplicate calls between generateMetadata and page
 const getCachedCompany = cache(async (slug: string) => {
