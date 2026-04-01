@@ -1,9 +1,4 @@
-// Lazy import to avoid requiring @aws-sdk/client-s3 at build time
-// (will be installed in Task 3)
-async function getS3Imports() {
-  const { S3Client, PutObjectCommand, DeleteObjectCommand } = await import('@aws-sdk/client-s3');
-  return { S3Client, PutObjectCommand, DeleteObjectCommand };
-}
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 
 // --- Validation ---
 
@@ -32,8 +27,7 @@ export function validateMediaFile(file: File): { error: string | null; fileType:
 
 // --- R2 Client ---
 
-async function getR2Client() {
-  const { S3Client } = await getS3Imports();
+function getR2Client(): S3Client {
   return new S3Client({
     region: 'auto',
     endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -59,11 +53,10 @@ export async function uploadMediaToR2(
     throw new Error(validation.error);
   }
 
-  const { PutObjectCommand } = await getS3Imports();
   const key = generateKey(companyId, validation.ext);
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  const client = await getR2Client();
+  const client = getR2Client();
   await client.send(new PutObjectCommand({
     Bucket: process.env.R2_BUCKET_NAME!,
     Key: key,
@@ -88,10 +81,9 @@ export async function deleteMediaFromR2(fileUrl: string): Promise<void> {
     return;
   }
 
-  const { DeleteObjectCommand } = await getS3Imports();
   const key = fileUrl.slice(publicUrl.length + 1);
 
-  const client = await getR2Client();
+  const client = getR2Client();
   await client.send(new DeleteObjectCommand({
     Bucket: process.env.R2_BUCKET_NAME!,
     Key: key,

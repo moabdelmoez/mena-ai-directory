@@ -18,6 +18,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1021.0",
     "@stackframe/stack": "^2.8.72",
     "@supabase/supabase-js": "^2.93.1",
     "bcryptjs": "^3.0.3",

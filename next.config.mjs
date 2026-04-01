@@ -35,6 +35,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'media.licdn.com',
       },
+      // Cloudflare R2 (media uploads)
+      {
+        protocol: 'https',
+        hostname: '**.r2.dev',
+      },
     ],
   },
   // Enable experimental features for better performance
