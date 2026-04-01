@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase';
-import { COMPANY_COLUMNS, getCompanyProducts } from '@/lib/company-repository';
+import { COMPANY_COLUMNS, getCompanyProducts, getCompanyMedia } from '@/lib/company-repository';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
 import { generateCompanyEmbedding, generateProductEmbedding } from '@/lib/openai';
 import { MENA_COUNTRIES } from '@/constants';
 import { ProductInput } from '@/types';
 import { validateLogo, uploadLogo, deleteLogoByUrl, parseAndValidateProducts, getFormString, getFormStringOrNull, getFormFile } from '@/lib/company-service';
+import { deleteMediaFromR2 } from '@/lib/r2';
 
 interface ProductWithId extends ProductInput {
   id?: string;
@@ -357,6 +358,16 @@ export async function DELETE(
   // Delete logo from storage if exists
   if (company?.logo) {
     await deleteLogoByUrl(company.logo);
+  }
+
+  // Delete media files from R2
+  const mediaItems = await getCompanyMedia(id);
+  for (const item of mediaItems) {
+    try {
+      await deleteMediaFromR2(item.file_url);
+    } catch (err) {
+      console.error('Failed to delete media from R2:', item.file_url, err);
+    }
   }
 
   // Delete products first (foreign key constraint)
