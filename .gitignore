@@ -37,5 +37,8 @@ next-env.d.ts
 # editor / tool settings
 /.claude/
 
+# git worktrees
+/.worktrees/
+
 # assets served externally
 /logos/
