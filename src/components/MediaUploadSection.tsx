@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Button, ConfirmDialog } from '@/components/ui';
+import { ConfirmDialog } from '@/components/ui';
 import { CompanyMedia } from '@/types';
 
 interface Props {
