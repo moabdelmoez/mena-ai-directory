@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Card, Button, ConfirmDialog } from '@/components/ui';
 import { ProductList } from '@/components/ProductList';
 import { ProductForm } from '@/components/ProductForm';
+import { MediaUploadSection } from '@/components/MediaUploadSection';
 import { Product, ProductInput, Company } from '@/types';
 
 interface Props {
@@ -235,6 +236,12 @@ export default function ProductManagementPage({ params }: Props) {
           />
         </Card>
       )}
+
+      {/* Media Section */}
+      <Card className="mt-6">
+        <h2 className="text-lg font-semibold text-zinc-900 mb-4">Media</h2>
+        <MediaUploadSection companyId={companyId} />
+      </Card>
 
       <ConfirmDialog
         open={!!productToDelete}

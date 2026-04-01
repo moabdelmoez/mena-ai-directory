@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Input, Select, Textarea, Button, Card, ConfirmDialog } from '@/components/ui';
 import { MENA_COUNTRIES } from '@/constants';
 import { ProductInputList } from '@/components/ProductInputList';
+import { MediaUploadSection } from '@/components/MediaUploadSection';
 import { ProductInput, Product } from '@/types';
 
 interface ProductWithId extends ProductInput {
@@ -440,6 +441,14 @@ function ManageCompanyForm() {
               classificationOptions={classificationOptions}
             />
           </div>
+
+          {/* Media Section - only in edit mode */}
+          {isEditMode && companyId && (
+            <div className="border-t border-zinc-200 pt-6">
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Media</h3>
+              <MediaUploadSection companyId={companyId} />
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (
