@@ -4,7 +4,7 @@ import Link from 'next/link';
 import nextDynamic from 'next/dynamic';
 import { headers } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
-import { getCompanyBySlug, getCompanyProducts } from '@/lib/company-repository';
+import { getCompanyBySlug, getCompanyProducts, getCompanyMedia } from '@/lib/company-repository';
 import { stackServerApp } from '@/lib/auth';
 import { isBot } from '@/lib/bot-detection';
 import { Card } from '@/components/ui';
@@ -13,6 +13,7 @@ import { ProductList } from '@/components/ProductList';
 import { CompanyLogo } from '@/components/CompanyLogo';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { ClaimProfileButton } from '@/components/ClaimProfileModal';
+import { MediaGallery } from '@/components/MediaGallery';
 
 const CompanyReviews = nextDynamic(
   () => import('./CompanyReviews').then(m => ({ default: m.CompanyReviews })),
@@ -98,6 +99,7 @@ export default async function CompanyPage({ params }: Props) {
   }
 
   const products = await getCompanyProducts(company.id);
+  const media = await getCompanyMedia(company.id);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -248,6 +250,16 @@ export default async function CompanyPage({ params }: Props) {
             </div>
           </div>
         </Card>
+
+        {/* Media Section */}
+        {media.length > 0 && (
+          <Card className="mb-8">
+            <h2 className="text-xl font-semibold text-zinc-900 mb-4">
+              Media <span className="text-zinc-400 font-normal text-base">({media.length})</span>
+            </h2>
+            <MediaGallery media={media} />
+          </Card>
+        )}
 
         {/* Products Section */}
         {products.length > 0 && (
