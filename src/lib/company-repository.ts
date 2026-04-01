@@ -1,5 +1,5 @@
 import { supabaseAdmin } from './supabase';
-import { Company, Product } from '@/types';
+import { Company, Product, CompanyMedia } from '@/types';
 
 // Explicit column lists to exclude embedding vectors (1536-dim, ~6KB per row)
 export const COMPANY_COLUMNS = 'id, company_id, name, slug, company_url, linkedin_profile, description, logo, logo_bg, hq_country, status, submitted_by, claimed_by, created_at, updated_at';
@@ -80,4 +80,35 @@ export async function getCompanyProducts(companyId: string): Promise<Product[]> 
       industry: classification?.industry ?? null,
     } as Product;
   });
+}
+
+const MEDIA_COLUMNS = 'id, company_id, file_url, file_type, mime_type, file_size, original_filename, sort_order, created_at';
+
+export async function getCompanyMedia(companyId: string): Promise<CompanyMedia[]> {
+  const { data, error } = await supabaseAdmin
+    .from('company_media')
+    .select(MEDIA_COLUMNS)
+    .eq('company_id', companyId)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching company media:', error);
+    return [];
+  }
+
+  return (data || []) as CompanyMedia[];
+}
+
+export async function getCompanyMediaCount(companyId: string): Promise<number> {
+  const { count, error } = await supabaseAdmin
+    .from('company_media')
+    .select('id', { count: 'exact', head: true })
+    .eq('company_id', companyId);
+
+  if (error) {
+    console.error('Error counting company media:', error);
+    return 0;
+  }
+
+  return count || 0;
 }

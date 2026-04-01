@@ -26,6 +26,7 @@ export const RATE_LIMITS = {
   reviews: { maxRequests: 10, windowMs: 60 * 60 * 1000 }, // 10 per hour
   admin: { maxRequests: 100, windowMs: 60 * 1000 }, // 100 per minute
   adminLogin: { maxRequests: 5, windowMs: 15 * 60 * 1000 }, // 5 per 15 minutes
+  media: { maxRequests: 20, windowMs: 60 * 60 * 1000 }, // 20 per hour
 } as const;
 
 export function checkRateLimit(
