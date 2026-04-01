@@ -22,6 +22,18 @@ export interface ProductInput {
   industry?: string | null;
 }
 
+export interface CompanyMedia {
+  id: string;
+  company_id: string;
+  file_url: string;
+  file_type: 'image' | 'video' | 'document';
+  mime_type: string;
+  file_size: number;
+  original_filename: string;
+  sort_order: number;
+  created_at: string;
+}
+
 export interface Company {
   id: string;
   company_id: string | null;
