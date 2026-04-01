@@ -22,6 +22,10 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'company_id and media_ids are required' }, { status: 400 });
   }
 
+  if (media_ids.length > 10) {
+    return NextResponse.json({ error: 'Too many media items' }, { status: 400 });
+  }
+
   // Check ownership for non-admin users
   if (!auth.admin) {
     const company = await getCompanyById(company_id);

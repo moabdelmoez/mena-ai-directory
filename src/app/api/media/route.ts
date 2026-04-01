@@ -4,9 +4,10 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { getCompanyById, getCompanyMediaCount } from '@/lib/company-repository';
 import { isCompanyOwner } from '@/lib/company-permissions';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rate-limit';
-import { uploadMediaToR2, validateMediaFile } from '@/lib/r2';
+import { uploadMediaToR2, validateMediaFile, deleteMediaFromR2 } from '@/lib/r2';
 
 const MAX_MEDIA_PER_COMPANY = 10;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(request: NextRequest) {
   const auth = await requireAuth(request);
@@ -31,6 +32,10 @@ export async function POST(request: NextRequest) {
 
   if (!file || !companyId) {
     return NextResponse.json({ error: 'file and company_id are required' }, { status: 400 });
+  }
+
+  if (!UUID_REGEX.test(companyId)) {
+    return NextResponse.json({ error: 'Invalid company_id format' }, { status: 400 });
   }
 
   // Validate file
@@ -86,6 +91,8 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
+    // Clean up orphaned R2 file
+    try { await deleteMediaFromR2(uploadResult.url); } catch {}
     console.error('DB insert error:', error);
     return NextResponse.json({ error: 'Failed to save media record' }, { status: 500 });
   }
@@ -98,6 +105,10 @@ export async function GET(request: NextRequest) {
 
   if (!companyId) {
     return NextResponse.json({ error: 'company_id is required' }, { status: 400 });
+  }
+
+  if (!UUID_REGEX.test(companyId)) {
+    return NextResponse.json({ error: 'Invalid company_id format' }, { status: 400 });
   }
 
   // Rate limiting by IP
