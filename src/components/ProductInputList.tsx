@@ -128,20 +128,20 @@ export function ProductInputList({
                   <Input
                     value={product.name}
                     onChange={(e) => handleProductChange(index, 'name', e.target.value)}
-                    placeholder="Product name\u2026"
+                    placeholder="Product name…"
                     aria-label="Product name"
                   />
                   <Textarea
                     value={product.description}
                     onChange={(e) => handleProductChange(index, 'description', e.target.value)}
-                    placeholder="Product description\u2026"
+                    placeholder="Product description…"
                     aria-label="Product description"
                     rows={2}
                   />
                   <Input
                     value={product.product_url || ''}
                     onChange={(e) => handleProductChange(index, 'product_url', e.target.value || null)}
-                    placeholder="https://\u2026"
+                    placeholder="https://…"
                     type="url"
                     aria-label="Product URL"
                   />
@@ -258,7 +258,7 @@ export function ProductInputList({
             <Textarea
               value={newProduct.description}
               onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-              placeholder="Product description\u2026"
+              placeholder="Product description…"
                     aria-label="Product description"
               rows={2}
             />

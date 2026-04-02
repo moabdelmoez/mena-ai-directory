@@ -40,7 +40,7 @@ export function ProductForm({ product, onSubmit, onCancel, isSubmitting = false 
         id="product-name"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Enter product name\u2026"
+        placeholder="Enter product name…"
         required
       />
 
@@ -49,7 +49,7 @@ export function ProductForm({ product, onSubmit, onCancel, isSubmitting = false 
         id="product-description"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder="Describe what this product does\u2026"
+        placeholder="Describe what this product does…"
         rows={3}
         required
       />
@@ -60,7 +60,7 @@ export function ProductForm({ product, onSubmit, onCancel, isSubmitting = false 
         type="url"
         value={productUrl}
         onChange={(e) => setProductUrl(e.target.value)}
-        placeholder="https://\u2026"
+        placeholder="https://…"
       />
 
       {error && (

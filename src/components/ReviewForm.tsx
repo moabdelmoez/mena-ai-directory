@@ -104,7 +104,7 @@ function AuthenticatedReviewForm({ user, onSubmit }: { user: NonNullable<ReturnT
         id="comment"
         value={comment}
         onChange={(e) => setComment(e.target.value)}
-        placeholder="Share your experience with this company\u2026"
+        placeholder="Share your experience with this company…"
         rows={4}
       />
 

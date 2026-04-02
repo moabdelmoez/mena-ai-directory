@@ -35,12 +35,12 @@ export function ReviewReplyForm({ onSubmit, onCancel }: ReviewReplyFormProps) {
       <Textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
-        placeholder="Write a response\u2026"
+        placeholder="Write a response…"
         rows={3}
       />
       <div className="flex items-center gap-2">
         <Button type="submit" size="sm" disabled={isSubmitting || !comment.trim()}>
-          {isSubmitting ? 'Submitting\u2026' : 'Submit Reply'}
+          {isSubmitting ? 'Submitting…' : 'Submit Reply'}
         </Button>
         <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={isSubmitting}>
           Cancel
