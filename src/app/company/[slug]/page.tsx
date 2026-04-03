@@ -22,6 +22,11 @@ const CompanyReviews = nextDynamic(
   { loading: () => <div className="animate-pulse h-32 bg-zinc-100 rounded-xl" /> }
 );
 
+const CompanyInsights = nextDynamic(
+  () => import('@/components/CompanyInsights').then(m => ({ default: m.CompanyInsights })),
+  { loading: () => <div className="animate-pulse h-32 bg-zinc-100 rounded-xl" /> }
+);
+
 /**
  * Safely serialize JSON-LD data for embedding in a <script> tag.
  * Sanitizes all string values to strip HTML tags, then escapes
@@ -112,6 +117,16 @@ export default async function CompanyPage({ params }: Props) {
     }).catch(() => {
       // Non-critical: don't break page render
     });
+  }
+
+  // Resolve user ID for ownership check (needed for Insights tab)
+  let currentUserId: string | null = null;
+  if (stackUser) {
+    try {
+      currentUserId = await getOrCreateUser(stackUser);
+    } catch {
+      // Non-critical
+    }
   }
 
   const products = await getCompanyProducts(company.id);
@@ -295,6 +310,14 @@ export default async function CompanyPage({ params }: Props) {
             companyClaimedBy={company.claimed_by}
           />
         </Card>
+
+        {/* Insights Section — owner only */}
+        {currentUserId && company.claimed_by === currentUserId && (
+          <Card className="mt-8">
+            <h2 className="text-xl font-semibold text-zinc-900 mb-6">Insights</h2>
+            <CompanyInsights companyId={company.id} />
+          </Card>
+        )}
       </div>
     </>
   );
