@@ -14,6 +14,8 @@ import { CompanyLogo } from '@/components/CompanyLogo';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { ClaimProfileButton } from '@/components/ClaimProfileModal';
 import { MediaGallery } from '@/components/MediaGallery';
+import { getOrCreateUser } from '@/lib/auth-helpers';
+import { logProfileView } from '@/lib/profile-views';
 
 const CompanyReviews = nextDynamic(
   () => import('./CompanyReviews').then(m => ({ default: m.CompanyReviews })),
@@ -96,6 +98,20 @@ export default async function CompanyPage({ params }: Props) {
     if (!isBot(ua)) {
       redirect(`/signin?after_auth_return_to=${encodeURIComponent(`/company/${params.slug}`)}`);
     }
+  }
+
+  // Log profile view (fire-and-forget, non-blocking)
+  if (stackUser) {
+    const headersList = await headers();
+    const referer = headersList.get('referer');
+    const host = headersList.get('host') || 'localhost';
+    getOrCreateUser(stackUser).then(viewerId => {
+      if (viewerId && company.claimed_by !== viewerId) {
+        logProfileView(company.id, viewerId, referer, host);
+      }
+    }).catch(() => {
+      // Non-critical: don't break page render
+    });
   }
 
   const products = await getCompanyProducts(company.id);
