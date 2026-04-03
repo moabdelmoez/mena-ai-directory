@@ -150,6 +150,11 @@ export default function CompaniesPage() {
                   Edit
                 </Button>
               </Link>
+              <Link href={`/admin/companies/${company.id}/insights`} className="flex-1">
+                <Button variant="outline" size="sm" className="w-full">
+                  Insights
+                </Button>
+              </Link>
               <Button
                 variant="ghost"
                 size="sm"
@@ -219,6 +224,11 @@ export default function CompaniesPage() {
                     <Link href={`/admin/manage?id=${company.id}`}>
                       <Button variant="outline" size="sm">
                         Edit
+                      </Button>
+                    </Link>
+                    <Link href={`/admin/companies/${company.id}/insights`}>
+                      <Button variant="outline" size="sm">
+                        Insights
                       </Button>
                     </Link>
                     <Button
