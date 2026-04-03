@@ -8,6 +8,7 @@ function getStackServerApp(): StackServerApp {
       tokenStore: 'nextjs-cookie',
       urls: {
         signIn: '/signin',
+        signUp: '/signup',
       },
     });
   }

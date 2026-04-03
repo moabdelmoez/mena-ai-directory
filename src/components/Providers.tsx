@@ -18,7 +18,13 @@ function AppShell() {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const app = useMemo(() => new StackClientApp({ tokenStore: 'nextjs-cookie' }), []);
+  const app = useMemo(() => new StackClientApp({
+      tokenStore: 'nextjs-cookie',
+      urls: {
+        signIn: '/signin',
+        signUp: '/signup',
+      },
+    }), []);
 
   return (
     <Suspense fallback={<AppShell />}>
