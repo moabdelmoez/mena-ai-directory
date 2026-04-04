@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { Providers } from '@/components/Providers';
 import { LayoutShell } from '@/components/LayoutShell';
@@ -46,6 +47,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
   return (
     <html lang="en">
       <head>
@@ -60,6 +63,22 @@ export default function RootLayout({
         <link rel="preconnect" href="https://lh3.googleusercontent.com" />
       </head>
       <body className="font-sans antialiased min-h-screen flex flex-col bg-[var(--background)]">
+        {gaId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${gaId}');
+              `}
+            </Script>
+          </>
+        )}
         <Providers>
           <LayoutShell>{children}</LayoutShell>
         </Providers>
