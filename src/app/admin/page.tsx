@@ -22,6 +22,16 @@ interface Stats {
   topCompanies: Array<{ id: string; name: string; slug: string; views: number }>;
 }
 
+function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-zinc-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg">
+      <p className="font-medium">{label}</p>
+      <p className="text-zinc-300 mt-0.5">{payload[0].value.toLocaleString()} views</p>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
@@ -57,10 +67,23 @@ export default function AdminDashboard() {
         <div className="h-5 bg-zinc-100 rounded-lg w-1/3 mb-10" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-[104px] bg-zinc-200 rounded-2xl" />
+            <div key={i} className="h-[104px] bg-zinc-100 rounded-2xl border border-zinc-200/60" />
           ))}
         </div>
-        <div className="mt-8 h-[380px] bg-zinc-200 rounded-2xl" />
+        <div className="mt-8 bg-zinc-100 border border-zinc-200/60 rounded-2xl p-6">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="lg:w-[60%] space-y-3">
+              <div className="h-4 bg-zinc-200 rounded w-28" />
+              <div className="h-[280px] bg-zinc-200/60 rounded-xl" />
+            </div>
+            <div className="lg:w-[40%] space-y-3">
+              <div className="h-4 bg-zinc-200 rounded w-28" />
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-10 bg-zinc-200/60 rounded-lg" />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -68,35 +91,35 @@ export default function AdminDashboard() {
   const statCards = [
     {
       label: 'Pending Review',
-      value: stats?.pending || 0,
+      value: stats?.pending ?? 0,
       icon: (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       ),
     },
     {
       label: 'Approved',
-      value: stats?.approved || 0,
+      value: stats?.approved ?? 0,
       icon: (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
       ),
     },
     {
       label: 'Rejected',
-      value: stats?.rejected || 0,
+      value: stats?.rejected ?? 0,
       icon: (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
       ),
     },
     {
       label: 'Total Companies',
-      value: stats?.total || 0,
+      value: stats?.total ?? 0,
       icon: (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
       ),
     },
     {
       label: 'Registered Users',
-      value: stats?.registeredUsers || 0,
+      value: stats?.registeredUsers ?? 0,
       icon: (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
       ),
@@ -121,11 +144,11 @@ export default function AdminDashboard() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">{card.label}</p>
-                <p className="text-3xl font-semibold text-zinc-900 mt-2">
-                  {card.value}
+                <p className="text-3xl font-semibold text-zinc-900 mt-2 tabular-nums">
+                  {card.value.toLocaleString()}
                 </p>
               </div>
-              <svg className="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-zinc-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {card.icon}
               </svg>
             </div>
@@ -157,59 +180,68 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      <div className="mt-8 bg-white border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] rounded-2xl p-6">
+      <section className="mt-8 bg-white border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] rounded-2xl p-6" aria-label="Company analytics">
         {topCompanies.length === 0 ? (
-          <div className="flex items-center justify-center h-[300px] text-zinc-400 text-sm">
-            No visit data yet
+          <div className="flex flex-col items-center justify-center h-[300px] text-center">
+            <svg className="w-10 h-10 text-zinc-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+            </svg>
+            <p className="text-sm font-medium text-zinc-400">No visit data yet</p>
+            <p className="text-xs text-zinc-400/70 mt-1">Analytics will appear once companies start receiving views.</p>
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-8">
-            <div className="lg:w-[60%]">
+            <div className="lg:w-[60%] min-w-0">
               <h2 className="text-sm font-semibold text-zinc-900 mb-4">Company Views</h2>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={topCompanies}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                <BarChart data={topCompanies} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
                   <XAxis
                     dataKey="name"
-                    tickFormatter={(name: string) => name.length > 12 ? name.slice(0, 12) + '...' : name}
-                    tick={{ fontSize: 12 }}
+                    tickFormatter={(name: string) => name.length > 12 ? name.slice(0, 12) + '\u2026' : name}
+                    tick={{ fontSize: 11, fill: '#71717a' }}
                     angle={-45}
                     textAnchor="end"
                     height={80}
+                    axisLine={{ stroke: '#e4e4e7' }}
+                    tickLine={false}
                   />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value) => [value, 'Views']}
-                    labelFormatter={(label) => String(label)}
+                  <YAxis
+                    tick={{ fontSize: 11, fill: '#71717a' }}
+                    tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v)}
+                    axisLine={false}
+                    tickLine={false}
+                    width={40}
                   />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f4f4f5' }} />
                   <Bar dataKey="views" fill="#2563eb" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="lg:w-[40%]">
+            <div className="lg:w-[40%] min-w-0 lg:border-l lg:border-zinc-100 lg:pl-8">
               <h2 className="text-sm font-semibold text-zinc-900 mb-4">Top Companies</h2>
               <div>
                 {topCompanies.map((company, index) => (
                   <div
                     key={company.id}
-                    className="flex items-center gap-3 py-2.5 border-b border-zinc-100 last:border-b-0"
+                    className="flex items-center gap-3 py-2.5 border-b border-zinc-100 last:border-b-0 rounded -mx-1 px-1 transition-colors hover:bg-zinc-50"
                   >
                     <div
-                      className={`w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center ${
-                        index < 3 ? 'bg-blue-600 text-white' : 'bg-zinc-100 text-zinc-600'
+                      className={`w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center flex-shrink-0 ${
+                        index < 3 ? 'bg-blue-600 text-white' : 'bg-zinc-100 text-zinc-500'
                       }`}
                     >
                       {index + 1}
                     </div>
                     <span className="text-sm text-zinc-700 truncate flex-1">{company.name}</span>
-                    <span className="text-sm font-semibold text-zinc-900">{company.views}</span>
+                    <span className="text-sm font-semibold text-zinc-900 tabular-nums flex-shrink-0">{company.views.toLocaleString()}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }
