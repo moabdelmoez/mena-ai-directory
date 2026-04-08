@@ -44,7 +44,7 @@ const nextConfig = {
   },
   // Enable experimental features for better performance
   experimental: {
-    optimizePackageImports: ['@supabase/supabase-js', 'framer-motion', '@stackframe/stack', 'openai'],
+    optimizePackageImports: ['@supabase/supabase-js', 'framer-motion', '@stackframe/stack', 'openai', 'recharts'],
   },
   compress: true,
   poweredByHeader: false,

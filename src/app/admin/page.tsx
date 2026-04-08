@@ -3,13 +3,23 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { classNames } from '@/lib/utils';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 interface Stats {
   pending: number;
   approved: number;
   rejected: number;
   total: number;
+  registeredUsers: number;
+  topCompanies: Array<{ id: string; name: string; slug: string; views: number }>;
 }
 
 export default function AdminDashboard() {
@@ -45,11 +55,12 @@ export default function AdminDashboard() {
       <div className="animate-pulse">
         <div className="h-9 bg-zinc-200 rounded-lg w-1/4 mb-2" />
         <div className="h-5 bg-zinc-100 rounded-lg w-1/3 mb-10" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          {[...Array(5)].map((_, i) => (
             <div key={i} className="h-[104px] bg-zinc-200 rounded-2xl" />
           ))}
         </div>
+        <div className="mt-8 h-[380px] bg-zinc-200 rounded-2xl" />
       </div>
     );
   }
@@ -58,10 +69,6 @@ export default function AdminDashboard() {
     {
       label: 'Pending Review',
       value: stats?.pending || 0,
-      bg: 'bg-amber-50',
-      accent: 'text-amber-600',
-      iconBg: 'bg-amber-100',
-      ring: 'ring-amber-200/50',
       icon: (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       ),
@@ -69,10 +76,6 @@ export default function AdminDashboard() {
     {
       label: 'Approved',
       value: stats?.approved || 0,
-      bg: 'bg-emerald-50',
-      accent: 'text-emerald-600',
-      iconBg: 'bg-emerald-100',
-      ring: 'ring-emerald-200/50',
       icon: (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
       ),
@@ -80,10 +83,6 @@ export default function AdminDashboard() {
     {
       label: 'Rejected',
       value: stats?.rejected || 0,
-      bg: 'bg-red-50',
-      accent: 'text-red-600',
-      iconBg: 'bg-red-100',
-      ring: 'ring-red-200/50',
       icon: (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
       ),
@@ -91,15 +90,20 @@ export default function AdminDashboard() {
     {
       label: 'Total Companies',
       value: stats?.total || 0,
-      bg: 'bg-blue-50',
-      accent: 'text-blue-600',
-      iconBg: 'bg-blue-100',
-      ring: 'ring-blue-200/50',
       icon: (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
       ),
     },
+    {
+      label: 'Registered Users',
+      value: stats?.registeredUsers || 0,
+      icon: (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+      ),
+    },
   ];
+
+  const topCompanies = stats?.topCompanies || [];
 
   return (
     <div>
@@ -108,28 +112,22 @@ export default function AdminDashboard() {
         <p className="text-zinc-500 mt-1">Overview of your directory at a glance.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {statCards.map((card) => (
           <div
             key={card.label}
-            className={classNames(
-              'relative rounded-2xl p-6 ring-1 transition-all duration-200',
-              card.bg,
-              card.ring
-            )}
+            className="bg-white border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] rounded-2xl p-6"
           >
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">{card.label}</p>
-                <p className={classNames('text-4xl font-extrabold tracking-tight mt-2', card.accent)}>
+                <p className="text-3xl font-semibold text-zinc-900 mt-2">
                   {card.value}
                 </p>
               </div>
-              <div className={classNames('w-11 h-11 rounded-xl flex items-center justify-center', card.iconBg)}>
-                <svg className={classNames('w-5 h-5', card.accent)} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {card.icon}
-                </svg>
-              </div>
+              <svg className="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {card.icon}
+              </svg>
             </div>
           </div>
         ))}
@@ -158,6 +156,60 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      <div className="mt-8 bg-white border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] rounded-2xl p-6">
+        {topCompanies.length === 0 ? (
+          <div className="flex items-center justify-center h-[300px] text-zinc-400 text-sm">
+            No visit data yet
+          </div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="lg:w-[60%]">
+              <h2 className="text-sm font-semibold text-zinc-900 mb-4">Company Views</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={topCompanies}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="name"
+                    tickFormatter={(name: string) => name.length > 12 ? name.slice(0, 12) + '...' : name}
+                    tick={{ fontSize: 12 }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value) => [value, 'Views']}
+                    labelFormatter={(label) => String(label)}
+                  />
+                  <Bar dataKey="views" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="lg:w-[40%]">
+              <h2 className="text-sm font-semibold text-zinc-900 mb-4">Top Companies</h2>
+              <div>
+                {topCompanies.map((company, index) => (
+                  <div
+                    key={company.id}
+                    className="flex items-center gap-3 py-2.5 border-b border-zinc-100 last:border-b-0"
+                  >
+                    <div
+                      className={`w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center ${
+                        index < 3 ? 'bg-blue-600 text-white' : 'bg-zinc-100 text-zinc-600'
+                      }`}
+                    >
+                      {index + 1}
+                    </div>
+                    <span className="text-sm text-zinc-700 truncate flex-1">{company.name}</span>
+                    <span className="text-sm font-semibold text-zinc-900">{company.views}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
