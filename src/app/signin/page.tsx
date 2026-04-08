@@ -142,7 +142,7 @@ function SignInContent() {
 
   const handleLinkedIn = async () => {
     try {
-      await app.signInWithOAuth('linkedin', { returnTo });
+      await app.signInWithOAuth('linkedin');
     } catch {
       setEmailError('Unable to start LinkedIn sign-in. Please try again or use email.');
     }
