@@ -25,7 +25,9 @@ function SignInContent() {
   const user = useUser();
   const app = useStackApp();
 
-  const returnTo = searchParams.get('after_auth_return_to') || '/';
+  const rawReturnTo = searchParams.get('after_auth_return_to') || '/';
+  // Sanitize returnTo to prevent open redirects — must be a relative path
+  const returnTo = rawReturnTo.startsWith('/') && !rawReturnTo.startsWith('//') ? rawReturnTo : '/';
 
   // Redirect if already logged in
   useEffect(() => {
@@ -138,8 +140,12 @@ function SignInContent() {
     setNonce('');
   };
 
-  const handleLinkedIn = () => {
-    app.signInWithOAuth('linkedin', { returnTo });
+  const handleLinkedIn = async () => {
+    try {
+      await app.signInWithOAuth('linkedin', { returnTo });
+    } catch {
+      setEmailError('Unable to start LinkedIn sign-in. Please try again or use email.');
+    }
   };
 
   if (user) {
