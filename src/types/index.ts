@@ -86,6 +86,15 @@ export interface Review {
   reply?: ReviewReply | null;
 }
 
+export interface InfoRequest {
+  id: string;
+  company_id: string;
+  user_id: string;
+  user_email: string;
+  created_at: string;
+  user?: Pick<User, 'name' | 'avatar_url'>;
+}
+
 export interface MatchingProduct {
   id: string;
   name: string;

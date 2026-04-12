@@ -13,6 +13,7 @@ import { ProductList } from '@/components/ProductList';
 import { CompanyLogo } from '@/components/CompanyLogo';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { ClaimProfileButton } from '@/components/ClaimProfileModal';
+import { RequestInfoButton } from '@/components/RequestInfoButton';
 import { MediaGallery } from '@/components/MediaGallery';
 import { getOrCreateUser } from '@/lib/auth-helpers';
 import { logProfileView } from '@/lib/profile-views';
@@ -187,15 +188,24 @@ export default async function CompanyPage({ params }: Props) {
             <CompanyLogo logo={company.logo} name={company.name} size="lg" logo_bg={company.logo_bg} />
 
             <div className="flex-1">
-              <div className="flex flex-wrap items-start gap-3 mb-2">
-                <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900">
-                  {company.name}
-                </h1>
-                {company.claimed_by ? (
-                  <VerifiedBadge />
-                ) : company.company_url ? (
-                  <ClaimProfileButton companyId={company.id} companySlug={company.slug} companyUrl={company.company_url} />
-                ) : null}
+              <div className="flex items-start justify-between gap-4 mb-2">
+                <div className="flex flex-wrap items-start gap-3">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900">
+                    {company.name}
+                  </h1>
+                  {company.claimed_by ? (
+                    <VerifiedBadge />
+                  ) : company.company_url ? (
+                    <ClaimProfileButton companyId={company.id} companySlug={company.slug} companyUrl={company.company_url} />
+                  ) : null}
+                </div>
+                {stackUser?.primaryEmail && (
+                  <RequestInfoButton
+                    companyId={company.id}
+                    companyName={company.name}
+                    userEmail={stackUser.primaryEmail}
+                  />
+                )}
               </div>
 
               {company.average_rating !== undefined && company.average_rating > 0 && (
