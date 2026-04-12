@@ -46,20 +46,20 @@ export default async function HomePage() {
           <FeatureShowcase
             title="Search Smarter"
             description="Find the right AI companies instantly. Our intelligent search understands what you're looking for — not just keywords."
-            videoSrc="/videos/search.mp4"
-            webmSrc="/videos/search.webm"
+            videoSrc="/videos/searchv2.mp4"
+            webmSrc="/videos/searchv2.webm"
           />
           <FeatureShowcase
             title="Browse by Category"
             description="Explore companies by technology, industry, or region. Filter and discover the Arab world's AI ecosystem at a glance."
-            videoSrc="/videos/category.mp4"
-            webmSrc="/videos/category.webm"
+            videoSrc="/videos/filterv2.mp4"
+            webmSrc="/videos/filterv2.webm"
             reverse
           />
           <FeatureShowcase
             title="Trusted Reviews from Real Users"
             description="Make informed decisions based on authentic feedback from business users who've worked with these companies. Ratings and reviews you can trust."
-            imageSrc="/images/reviews-feature.png"
+            imageSrc="/images/review.png"
           />
         </div>
       </section>
