@@ -272,7 +272,7 @@ export default function AdminInsightsPage() {
 
       {/* Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           <Card className="p-5">
             <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1">Total Views</div>
             <div className="text-2xl font-bold text-zinc-900">{stats.totalViews.toLocaleString()}</div>
@@ -288,6 +288,10 @@ export default function AdminInsightsPage() {
           <Card className="p-5">
             <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1">Unique Visitors</div>
             <div className="text-2xl font-bold text-zinc-900">{stats.uniqueVisitors.toLocaleString()}</div>
+          </Card>
+          <Card className="p-5">
+            <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1">Real Interest</div>
+            <div className="text-2xl font-bold text-zinc-900">{infoRequests.length.toLocaleString()}</div>
           </Card>
         </div>
       )}
