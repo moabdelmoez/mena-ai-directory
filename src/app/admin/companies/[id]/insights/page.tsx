@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, Button, Input } from '@/components/ui';
 import { Pagination } from '@/components/Pagination';
+import type { InfoRequest } from '@/types';
 
 interface ViewerEntry {
   userId: string;
@@ -54,6 +55,7 @@ export default function AdminInsightsPage() {
   const skeletonBaseId = useId();
   const [viewers, setViewers] = useState<ViewersResponse | null>(null);
   const [stats, setStats] = useState<InsightsStats | null>(null);
+  const [infoRequests, setInfoRequests] = useState<InfoRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -65,16 +67,22 @@ export default function AdminInsightsPage() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(
-        `/api/admin/companies/${companyId}/insights/viewers?page=${page}&pageSize=${pageSize}`
-      );
-      if (!res.ok) {
+      const [viewersRes, infoRes] = await Promise.all([
+        fetch(`/api/admin/companies/${companyId}/insights/viewers?page=${page}&pageSize=${pageSize}`),
+        fetch(`/api/companies/${companyId}/info-requests`),
+      ]);
+      if (!viewersRes.ok) {
         router.push('/admin/login');
         return;
       }
-      const data = await res.json();
+      const data = await viewersRes.json();
       setStats(data.stats);
       setViewers({ viewers: data.viewers, total: data.total, page: data.page, pageSize: data.pageSize });
+
+      if (infoRes.ok) {
+        const infoData: InfoRequest[] = await infoRes.json();
+        setInfoRequests(infoData);
+      }
     } catch {
       router.push('/admin/login');
     } finally {
@@ -294,6 +302,94 @@ export default function AdminInsightsPage() {
       </div>
 
       {renderContent()}
+
+      {/* Info Requests Section */}
+      {!isLoading && infoRequests.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold text-zinc-900 mb-4">
+            Info Requests <span className="text-zinc-400 font-normal text-base">({infoRequests.length})</span>
+          </h2>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-3">
+            {infoRequests.map((req) => (
+              <div key={req.id} className="bg-white rounded-2xl border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-4">
+                <div className="flex items-start gap-3">
+                  {req.user?.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={req.user.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center">
+                      <span className="text-zinc-400 text-xs font-medium">
+                        {(req.user?.name ?? req.user_email).charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-zinc-900 truncate">
+                      {req.user?.name ?? <span className="text-zinc-400 italic">No name</span>}
+                    </div>
+                    <div className="text-xs text-zinc-500 truncate mt-0.5">{req.user_email}</div>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-zinc-100 text-xs text-zinc-500">
+                  {formatDate(req.created_at)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white rounded-2xl border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-zinc-100">
+                <thead className="bg-zinc-50/80">
+                  <tr>
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-600 uppercase tracking-wider">
+                      Requester
+                    </th>
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-600 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-600 uppercase tracking-wider">
+                      Date
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-zinc-100">
+                  {infoRequests.map((req) => (
+                    <tr key={req.id} className="hover:bg-zinc-50/50 transition-colors duration-150">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          {req.user?.avatar_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={req.user.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center">
+                              <span className="text-zinc-400 text-xs font-medium">
+                                {(req.user?.name ?? req.user_email).charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                          <span className="text-sm font-medium text-zinc-900">
+                            {req.user?.name ?? <span className="text-zinc-400 italic">No name</span>}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
+                        {req.user_email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
+                        {formatDate(req.created_at)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

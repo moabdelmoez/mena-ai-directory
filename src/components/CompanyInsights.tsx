@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { InfoRequest } from '@/types';
 
 interface InsightsStats {
   totalViews: number;
@@ -121,96 +120,34 @@ function SearchTermsList({ terms }: { terms: Array<{ term: string; count: number
   );
 }
 
-function InfoRequestsList({ companyId }: { companyId: string }) {
-  const [requests, setRequests] = useState<InfoRequest[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchRequests() {
-      try {
-        const res = await fetch(`/api/companies/${companyId}/info-requests`);
-        if (!res.ok) return;
-        const data: InfoRequest[] = await res.json();
-        if (!cancelled) setRequests(data);
-      } catch {
-        // Non-critical
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    fetchRequests();
-    return () => { cancelled = true; };
-  }, [companyId]);
-
-  if (loading) {
-    return <div className="h-24 bg-zinc-100 rounded-2xl animate-pulse" />;
-  }
-
-  return (
-    <div className="bg-white rounded-2xl border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-5">
-      <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-        Info Requests <span className="text-zinc-400 font-normal">({requests.length})</span>
-      </p>
-      {requests.length === 0 ? (
-        <p className="text-sm text-zinc-400">No info requests yet.</p>
-      ) : (
-        <ul className="space-y-3">
-          {requests.map((req) => (
-            <li key={req.id} className="flex items-center justify-between">
-              <div className="flex items-center gap-3 min-w-0">
-                {req.user?.avatar_url ? (
-                  <img
-                    src={req.user.avatar_url}
-                    alt=""
-                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-zinc-200 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-medium text-zinc-500">
-                      {(req.user?.name || req.user_email)[0]?.toUpperCase()}
-                    </span>
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-zinc-900 truncate">
-                    {req.user?.name || 'Unknown'}
-                  </p>
-                  <p className="text-xs text-zinc-500 truncate">{req.user_email}</p>
-                </div>
-              </div>
-              <span className="text-xs text-zinc-400 tabular-nums flex-shrink-0 ml-3">
-                {new Date(req.created_at).toLocaleDateString()}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
 export function CompanyInsights({ companyId }: { companyId: string }) {
   const [stats, setStats] = useState<InsightsStats | null>(null);
+  const [infoRequestCount, setInfoRequestCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function fetchStats() {
+    async function fetchData() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/companies/${companyId}/insights/stats`);
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`);
+        const [statsRes, infoRes] = await Promise.all([
+          fetch(`/api/companies/${companyId}/insights/stats`),
+          fetch(`/api/companies/${companyId}/info-requests`),
+        ]);
+        if (!statsRes.ok) {
+          const body = await statsRes.json().catch(() => ({}));
+          throw new Error((body as { error?: string }).error ?? `HTTP ${statsRes.status}`);
         }
-        const data: InsightsStats = await res.json();
+        const data: InsightsStats = await statsRes.json();
         if (!cancelled) setStats(data);
+
+        if (infoRes.ok) {
+          const infoData: unknown[] = await infoRes.json();
+          if (!cancelled) setInfoRequestCount(infoData.length);
+        }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load insights');
       } finally {
@@ -218,7 +155,7 @@ export function CompanyInsights({ companyId }: { companyId: string }) {
       }
     }
 
-    fetchStats();
+    fetchData();
     return () => {
       cancelled = true;
     };
@@ -227,8 +164,8 @@ export function CompanyInsights({ companyId }: { companyId: string }) {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {[...Array(5)].map((_, i) => (
             <div key={i} className="h-20 bg-zinc-100 rounded-2xl animate-pulse" />
           ))}
         </div>
@@ -247,11 +184,12 @@ export function CompanyInsights({ companyId }: { companyId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <StatCard label="Total Views" value={stats.totalViews} />
         <StatCard label="Last 7 Days" value={stats.last7Days} />
         <StatCard label="Last 30 Days" value={stats.last30Days} />
         <StatCard label="Unique Visitors" value={stats.uniqueVisitors} />
+        <StatCard label="Real Interest" value={infoRequestCount} />
       </div>
 
       <ViewsChart data={stats.viewsByDay} />
@@ -260,8 +198,6 @@ export function CompanyInsights({ companyId }: { companyId: string }) {
         <SourcesBreakdown data={stats.topSources} total={stats.totalViews} />
         <SearchTermsList terms={stats.topSearchTerms} />
       </div>
-
-      <InfoRequestsList companyId={companyId} />
     </div>
   );
 }
