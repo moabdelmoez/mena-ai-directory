@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { COUNTRY_SLUG_MAP } from '@/constants/seo-slugs';
 import { getAllTechCategories, slugifyCategory } from '@/lib/category-slug';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'AI Companies in the Arab World - Browse by Country & Category',
