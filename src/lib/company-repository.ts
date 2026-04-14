@@ -82,6 +82,40 @@ export async function getCompanyProducts(companyId: string): Promise<Product[]> 
   });
 }
 
+export async function getApprovedCompaniesByCountry(country: string): Promise<Company[]> {
+  const { data, error } = await supabaseAdmin
+    .from('companies_with_ratings')
+    .select(COMPANY_WITH_RATINGS_COLUMNS)
+    .eq('status', 'approved')
+    .eq('hq_country', country)
+    .order('average_rating', { ascending: false, nullsFirst: false });
+
+  if (error || !data) return [];
+  return data as Company[];
+}
+
+export async function getApprovedCompaniesByCategory(techCategory: string): Promise<Company[]> {
+  // Get company IDs that have products in this tech_category
+  const { data: classificationRows, error: classError } = await supabaseAdmin
+    .from('product_classification')
+    .select('company_id')
+    .eq('tech_category', techCategory);
+
+  if (classError || !classificationRows?.length) return [];
+
+  const companyIds = [...new Set(classificationRows.map((r) => r.company_id))];
+
+  const { data, error } = await supabaseAdmin
+    .from('companies_with_ratings')
+    .select(COMPANY_WITH_RATINGS_COLUMNS)
+    .eq('status', 'approved')
+    .in('id', companyIds)
+    .order('average_rating', { ascending: false, nullsFirst: false });
+
+  if (error || !data) return [];
+  return data as Company[];
+}
+
 const MEDIA_COLUMNS = 'id, company_id, file_url, file_type, mime_type, file_size, original_filename, sort_order, created_at';
 
 export async function getCompanyMedia(companyId: string): Promise<CompanyMedia[]> {

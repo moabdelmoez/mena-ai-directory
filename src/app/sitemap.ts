@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import { COUNTRY_SLUG_MAP, CATEGORY_SLUG_MAP } from '@/constants/seo-slugs';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mena-ai.directory';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bayanbase.com';
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
@@ -13,10 +14,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: `${baseUrl}/search`,
+      url: `${baseUrl}/ai-companies`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/ai-companies/category`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/register`,
@@ -24,14 +31,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
+    {
+      url: `${baseUrl}/about`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
   ];
+
+  const countryPages: MetadataRoute.Sitemap = Object.keys(COUNTRY_SLUG_MAP).map((slug) => ({
+    url: `${baseUrl}/ai-companies/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.9,
+  }));
+
+  const categoryPages: MetadataRoute.Sitemap = Object.keys(CATEGORY_SLUG_MAP).map((slug) => ({
+    url: `${baseUrl}/ai-companies/category/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.85,
+  }));
+
+  const landingPages = [...countryPages, ...categoryPages];
 
   // Try to fetch companies if Supabase is configured
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
-    return staticPages;
+    return [...staticPages, ...landingPages];
   }
 
   try {
@@ -50,8 +79,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-    return [...staticPages, ...companyPages];
+    return [...staticPages, ...landingPages, ...companyPages];
   } catch {
-    return staticPages;
+    return [...staticPages, ...landingPages];
   }
 }

@@ -1,9 +1,23 @@
+import Link from 'next/link';
 import { SearchBox } from '@/components/SearchBox';
 import { CategoryChips } from '@/components/CategoryChips';
 import { FeatureShowcase } from '@/components/FeatureShowcase';
 import { LogoMarquee } from '@/components/LogoMarquee';
 import { FadeIn } from '@/components/ui';
 import { getFeaturedCompanyLogos } from '@/lib/company-repository';
+import { COUNTRY_SLUG_MAP, CATEGORY_SLUG_MAP } from '@/constants/seo-slugs';
+
+const WEBSITE_JSON_LD = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'BayanBase',
+  url: 'https://www.bayanbase.com',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: 'https://www.bayanbase.com/search?q={search_term_string}',
+    'query-input': 'required name=search_term_string',
+  },
+}).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +26,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: WEBSITE_JSON_LD }} />
       {/* Hero Section */}
       <section className="relative bg-gradient-to-b from-white to-zinc-50/50 py-16 lg:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -39,6 +54,48 @@ export default async function HomePage() {
 
       {/* Logo Marquee */}
       <LogoMarquee companies={featuredCompanies} />
+
+      {/* SEO landing page links */}
+      <section className="py-12 bg-[var(--background)] border-t border-zinc-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-3">
+                Browse by Country
+              </h2>
+              <ul className="flex flex-wrap gap-2">
+                {Object.entries(COUNTRY_SLUG_MAP).map(([slug, name]) => (
+                  <li key={slug}>
+                    <Link
+                      href={`/ai-companies/${slug}`}
+                      className="inline-block px-3 py-1.5 rounded-full text-sm text-zinc-700 bg-white border border-zinc-200 hover:border-zinc-400 transition-colors"
+                    >
+                      AI Companies in {name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-3">
+                Browse by Category
+              </h2>
+              <ul className="flex flex-wrap gap-2">
+                {Object.entries(CATEGORY_SLUG_MAP).map(([slug, name]) => (
+                  <li key={slug}>
+                    <Link
+                      href={`/ai-companies/category/${slug}`}
+                      className="inline-block px-3 py-1.5 rounded-full text-sm text-zinc-700 bg-white border border-zinc-200 hover:border-zinc-400 transition-colors"
+                    >
+                      {name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Features Section */}
       <section className="py-16 bg-[var(--background)]">

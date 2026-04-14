@@ -77,11 +77,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const title = company.hq_country
+    ? `${company.name} - AI Company in ${company.hq_country}`
+    : company.name;
+
   return {
-    title: company.name,
+    title,
     description: company.description,
+    alternates: { canonical: `/company/${params.slug}` },
     openGraph: {
-      title: company.name,
+      title,
       description: company.description,
       type: 'website',
       images: company.logo ? [company.logo] : [],
@@ -133,7 +138,8 @@ export default async function CompanyPage({ params }: Props) {
   const products = await getCompanyProducts(company.id);
   const media = await getCompanyMedia(company.id);
 
-  const jsonLd = {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bayanbase.com';
+  const orgJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: company.name,
@@ -153,12 +159,28 @@ export default async function CompanyPage({ params }: Props) {
       : undefined,
   };
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: baseUrl },
+      { '@type': 'ListItem', position: 2, name: 'AI Companies', item: `${baseUrl}/ai-companies` },
+      { '@type': 'ListItem', position: 3, name: company.name, item: `${baseUrl}/company/${company.slug}` },
+    ],
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: safeJsonLdSerialize(jsonLd),
+          __html: safeJsonLdSerialize(orgJsonLd),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: safeJsonLdSerialize(breadcrumbJsonLd),
         }}
       />
 
@@ -173,7 +195,7 @@ export default async function CompanyPage({ params }: Props) {
             </li>
             <li>/</li>
             <li>
-              <Link href="/search" className="hover:text-zinc-700">
+              <Link href="/ai-companies" className="hover:text-zinc-700">
                 Companies
               </Link>
             </li>

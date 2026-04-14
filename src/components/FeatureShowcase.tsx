@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, useReducedMotion } from 'framer-motion';
 
 interface FeatureShowcaseProps {
@@ -52,7 +53,14 @@ export function FeatureShowcase({
   }, [imageSrc]);
 
   const mediaElement = imageSrc ? (
-    <img src={imageSrc} alt={title} className="w-full h-auto block" />
+    <Image
+      src={imageSrc}
+      alt={title}
+      width={1200}
+      height={750}
+      className="w-full h-auto block"
+      sizes="(max-width: 1024px) 100vw, 50vw"
+    />
   ) : (
     <video
       ref={videoRef}

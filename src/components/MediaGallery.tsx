@@ -75,10 +75,13 @@ export function MediaGallery({ media }: Props) {
               }`}
             >
               {item.file_type === 'image' && (
-                <img
+                <Image
                   src={item.file_url}
                   alt={item.original_filename}
+                  width={200}
+                  height={112}
                   className="w-full h-full object-cover"
+                  sizes="120px"
                 />
               )}
               {item.file_type === 'video' && (

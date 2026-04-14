@@ -5,12 +5,13 @@ import { Providers } from '@/components/Providers';
 import { LayoutShell } from '@/components/LayoutShell';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.bayanbase.com'),
   title: {
     default: 'BayanBase - Discover AI Companies in the Arab World',
     template: '%s | BayanBase',
   },
   description:
-    'Discover and connect with AI companies across the Arab world. Browse AI infrastructure, platforms, and vertical applications in UAE, Saudi Arabia, Qatar, Egypt, and Jordan.',
+    'The Arab world\'s AI company directory. Find and compare AI agents, analytics, vision, and infrastructure companies across Saudi Arabia, UAE, Egypt, and Qatar. Real reviews from business users.',
   keywords: [
     'AI companies',
     'BayanBase',
@@ -18,23 +19,33 @@ export const metadata: Metadata = {
     'AI directory',
     'UAE AI',
     'Saudi Arabia AI',
+    'Egypt AI',
+    'Qatar AI',
     'AI startups',
     'AI platforms',
+    'AI agents',
+    'AI analytics',
+    'MENA AI',
   ],
+  alternates: {
+    canonical: './',
+  },
   openGraph: {
     title: 'BayanBase',
     description:
-      'Discover and connect with AI companies across the Arab world.',
-    url: 'https://mena-ai.directory',
+      'The Arab world\'s AI company directory. Find and compare AI agents, analytics, vision, and infrastructure companies.',
+    url: 'https://www.bayanbase.com',
     siteName: 'BayanBase',
     locale: 'en_US',
     type: 'website',
+    images: [{ url: '/images/og-default.png', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'BayanBase',
     description:
-      'Discover and connect with AI companies across the Arab world.',
+      'The Arab world\'s AI company directory. Find and compare AI agents, analytics, vision, and infrastructure companies.',
+    images: ['/images/og-default.png'],
   },
   robots: {
     index: true,
