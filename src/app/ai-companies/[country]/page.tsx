@@ -5,11 +5,7 @@ import { COUNTRY_SLUG_MAP } from '@/constants/seo-slugs';
 import { getApprovedCompaniesByCountry } from '@/lib/company-repository';
 import { CompanyCard } from '@/components/CompanyCard';
 
-export const revalidate = 3600;
-
-export function generateStaticParams() {
-  return Object.keys(COUNTRY_SLUG_MAP).map((country) => ({ country }));
-}
+export const dynamic = 'force-dynamic';
 
 interface Props {
   params: { country: string };

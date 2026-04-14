@@ -5,11 +5,7 @@ import { CATEGORY_SLUG_MAP } from '@/constants/seo-slugs';
 import { getApprovedCompaniesByCategory } from '@/lib/company-repository';
 import { CompanyCard } from '@/components/CompanyCard';
 
-export const revalidate = 3600;
-
-export function generateStaticParams() {
-  return Object.keys(CATEGORY_SLUG_MAP).map((category) => ({ category }));
-}
+export const dynamic = 'force-dynamic';
 
 interface Props {
   params: { category: string };
