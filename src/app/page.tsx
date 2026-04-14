@@ -5,7 +5,8 @@ import { FeatureShowcase } from '@/components/FeatureShowcase';
 import { LogoMarquee } from '@/components/LogoMarquee';
 import { FadeIn } from '@/components/ui';
 import { getFeaturedCompanyLogos } from '@/lib/company-repository';
-import { COUNTRY_SLUG_MAP, CATEGORY_SLUG_MAP } from '@/constants/seo-slugs';
+import { COUNTRY_SLUG_MAP } from '@/constants/seo-slugs';
+import { getAllTechCategories, slugifyCategory } from '@/lib/category-slug';
 
 const WEBSITE_JSON_LD = JSON.stringify({
   '@context': 'https://schema.org',
@@ -22,7 +23,10 @@ const WEBSITE_JSON_LD = JSON.stringify({
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const featuredCompanies = await getFeaturedCompanyLogos();
+  const [featuredCompanies, techCategories] = await Promise.all([
+    getFeaturedCompanyLogos(),
+    getAllTechCategories().catch(() => [] as string[]),
+  ]);
 
   return (
     <div className="flex flex-col">
@@ -81,16 +85,19 @@ export default async function HomePage() {
                 Browse by Category
               </h2>
               <ul className="flex flex-wrap gap-2">
-                {Object.entries(CATEGORY_SLUG_MAP).map(([slug, name]) => (
-                  <li key={slug}>
-                    <Link
-                      href={`/ai-companies/category/${slug}`}
-                      className="inline-block px-3 py-1.5 rounded-full text-sm text-zinc-700 bg-white border border-zinc-200 hover:border-zinc-400 transition-colors"
-                    >
-                      {name}
-                    </Link>
-                  </li>
-                ))}
+                {techCategories.map((name) => {
+                  const slug = slugifyCategory(name);
+                  return (
+                    <li key={slug}>
+                      <Link
+                        href={`/ai-companies/category/${slug}`}
+                        className="inline-block px-3 py-1.5 rounded-full text-sm text-zinc-700 bg-white border border-zinc-200 hover:border-zinc-400 transition-colors"
+                      >
+                        {name}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>

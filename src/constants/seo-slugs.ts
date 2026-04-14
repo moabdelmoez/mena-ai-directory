@@ -6,13 +6,3 @@ export const COUNTRY_SLUG_MAP: Record<string, string> = {
   'egypt': 'Egypt',
   'qatar': 'Qatar',
 };
-
-export const CATEGORY_SLUG_MAP: Record<string, string> = {
-  'ai-agent': 'AI Agent',
-  'ai-analytics': 'AI Analytics',
-  'ai-vision': 'AI Vision',
-  'ai-voice': 'AI Voice',
-  'gpu-cloud': 'GPU Cloud',
-  'gpu-compute-management': 'GPU Compute Management',
-  'on-prem': 'On Prem',
-};

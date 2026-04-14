@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { CATEGORY_SLUG_MAP } from '@/constants/seo-slugs';
+import { resolveCategorySlug } from '@/lib/category-slug';
 import { getApprovedCompaniesByCategory } from '@/lib/company-repository';
 import { CompanyCard } from '@/components/CompanyCard';
 
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const name = CATEGORY_SLUG_MAP[params.category];
+  const name = await resolveCategorySlug(params.category);
   if (!name) return { title: 'Not Found' };
 
   const year = new Date().getFullYear();
@@ -37,7 +37,7 @@ function safeJsonLd(data: unknown): string {
 }
 
 export default async function CategoryPage({ params }: Props) {
-  const name = CATEGORY_SLUG_MAP[params.category];
+  const name = await resolveCategorySlug(params.category);
   if (!name) notFound();
 
   const companies = await getApprovedCompaniesByCategory(name);

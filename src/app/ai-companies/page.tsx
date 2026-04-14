@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { COUNTRY_SLUG_MAP, CATEGORY_SLUG_MAP } from '@/constants/seo-slugs';
+import { COUNTRY_SLUG_MAP } from '@/constants/seo-slugs';
+import { getAllTechCategories, slugifyCategory } from '@/lib/category-slug';
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: 'AI Companies in the Arab World - Browse by Country & Category',
@@ -9,7 +12,9 @@ export const metadata: Metadata = {
   alternates: { canonical: '/ai-companies' },
 };
 
-export default function AiCompaniesHubPage() {
+export default async function AiCompaniesHubPage() {
+  const categories = await getAllTechCategories();
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-12 md:py-16">
       <header className="mb-12 text-center">
@@ -46,18 +51,21 @@ export default function AiCompaniesHubPage() {
           Browse by Category
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {Object.entries(CATEGORY_SLUG_MAP).map(([slug, name]) => (
-            <Link
-              key={slug}
-              href={`/ai-companies/category/${slug}`}
-              className="rounded-2xl border border-zinc-200 bg-white p-5 hover:shadow-md hover:-translate-y-0.5 transition-all"
-            >
-              <div className="text-base font-medium text-zinc-900">{name}</div>
-              <div className="mt-1 text-sm text-zinc-500">
-                Browse {name} companies
-              </div>
-            </Link>
-          ))}
+          {categories.map((name) => {
+            const slug = slugifyCategory(name);
+            return (
+              <Link
+                key={slug}
+                href={`/ai-companies/category/${slug}`}
+                className="rounded-2xl border border-zinc-200 bg-white p-5 hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <div className="text-base font-medium text-zinc-900">{name}</div>
+                <div className="mt-1 text-sm text-zinc-500">
+                  Browse {name} companies
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
     </div>

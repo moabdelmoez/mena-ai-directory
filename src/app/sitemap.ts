@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
-import { COUNTRY_SLUG_MAP, CATEGORY_SLUG_MAP } from '@/constants/seo-slugs';
+import { COUNTRY_SLUG_MAP } from '@/constants/seo-slugs';
+import { getAllTechCategories, slugifyCategory } from '@/lib/category-slug';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bayanbase.com';
@@ -46,8 +47,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  const categoryPages: MetadataRoute.Sitemap = Object.keys(CATEGORY_SLUG_MAP).map((slug) => ({
-    url: `${baseUrl}/ai-companies/category/${slug}`,
+  const techCategories = await getAllTechCategories().catch(() => [] as string[]);
+  const categoryPages: MetadataRoute.Sitemap = techCategories.map((name) => ({
+    url: `${baseUrl}/ai-companies/category/${slugifyCategory(name)}`,
     lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.85,
