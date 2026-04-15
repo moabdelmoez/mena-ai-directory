@@ -1,12 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
-import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
 import { resolveCategorySlug } from '@/lib/category-slug';
 import { getApprovedCompaniesByCategory } from '@/lib/company-repository';
 import { CompanyCard } from '@/components/CompanyCard';
-import { stackServerApp } from '@/lib/auth';
-import { isBot } from '@/lib/bot-detection';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,14 +39,6 @@ function safeJsonLd(data: unknown): string {
 export default async function CategoryPage({ params }: Props) {
   const name = await resolveCategorySlug(params.category);
   if (!name) notFound();
-
-  const stackUser = await stackServerApp.getUser();
-  if (!stackUser) {
-    const ua = (await headers()).get('user-agent') || '';
-    if (!isBot(ua)) {
-      redirect(`/signin?after_auth_return_to=${encodeURIComponent(`/ai-companies/category/${params.category}`)}`);
-    }
-  }
 
   const companies = await getApprovedCompaniesByCategory(name);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bayanbase.com';
