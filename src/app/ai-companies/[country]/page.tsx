@@ -1,12 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
-import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
 import { COUNTRY_SLUG_MAP } from '@/constants/seo-slugs';
 import { getApprovedCompaniesByCountry } from '@/lib/company-repository';
 import { CompanyCard } from '@/components/CompanyCard';
-import { stackServerApp } from '@/lib/auth';
-import { isBot } from '@/lib/bot-detection';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,14 +39,6 @@ function safeJsonLd(data: unknown): string {
 export default async function CountryPage({ params }: Props) {
   const name = COUNTRY_SLUG_MAP[params.country];
   if (!name) notFound();
-
-  const stackUser = await stackServerApp.getUser();
-  if (!stackUser) {
-    const ua = (await headers()).get('user-agent') || '';
-    if (!isBot(ua)) {
-      redirect(`/signin?after_auth_return_to=${encodeURIComponent(`/ai-companies/${params.country}`)}`);
-    }
-  }
 
   const companies = await getApprovedCompaniesByCountry(name);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bayanbase.com';
