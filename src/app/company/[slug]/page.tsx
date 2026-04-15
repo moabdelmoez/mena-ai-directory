@@ -3,10 +3,9 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import nextDynamic from 'next/dynamic';
 import { headers } from 'next/headers';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getCompanyBySlug, getCompanyProducts, getCompanyMedia } from '@/lib/company-repository';
 import { stackServerApp } from '@/lib/auth';
-import { isBot } from '@/lib/bot-detection';
 import { Card } from '@/components/ui';
 import { StarRating } from '@/components/StarRating';
 import { ProductList } from '@/components/ProductList';
@@ -101,15 +100,7 @@ export default async function CompanyPage({ params }: Props) {
     notFound();
   }
 
-  // Gate: redirect unauthenticated non-bot users to sign-in
   const stackUser = await stackServerApp.getUser();
-  if (!stackUser) {
-    const headersList = await headers();
-    const ua = headersList.get('user-agent') || '';
-    if (!isBot(ua)) {
-      redirect(`/signin?after_auth_return_to=${encodeURIComponent(`/company/${params.slug}`)}`);
-    }
-  }
 
   // Log profile view (fire-and-forget, non-blocking)
   if (stackUser) {
