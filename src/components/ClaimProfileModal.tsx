@@ -199,6 +199,17 @@ function ClaimProfileModal({ companyId, companySlug, companyUrl, open, onClose, 
                 <Button variant="outline" onClick={handleClose}>
                   Cancel
                 </Button>
+                {!user && (
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      localStorage.setItem(PENDING_CLAIM_KEY, JSON.stringify({ companyId, companySlug }));
+                      window.location.href = `/signin?after_auth_return_to=${encodeURIComponent(`/company/${companySlug}`)}`;
+                    }}
+                  >
+                    Sign in to claim
+                  </Button>
+                )}
               </div>
             </>
           )}
