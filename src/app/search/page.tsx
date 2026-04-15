@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense, memo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useUser } from '@stackframe/stack';
 import { SearchBox } from '@/components/SearchBox';
 import { CompanyList } from '@/components/CompanyList';
 import { Pagination } from '@/components/Pagination';
@@ -78,7 +76,6 @@ const AccordionFilter = memo(function AccordionFilter({
 function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const user = useUser();
 
   const [results, setResults] = useState<PaginatedResponse<Company> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -359,38 +356,15 @@ function SearchContent() {
           {/* Results List */}
           {!isLoading && !error && results && (
             <>
-              {!user && results.data.length > 2 ? (
-                <>
-                  <CompanyList companies={results.data.slice(0, 2)} />
-                  <div className="relative mt-4">
-                    <div className="blur-sm pointer-events-none select-none max-h-[400px] overflow-hidden" aria-hidden="true">
-                      <CompanyList companies={results.data.slice(2)} />
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/70 to-white" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Link
-                        href={`/signin?after_auth_return_to=${encodeURIComponent(`/search?${searchParams.toString()}`)}`}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl text-lg shadow-lg active:scale-[0.98] transition-all"
-                      >
-                        Get full access — sign in for free
-                      </Link>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <CompanyList companies={results.data} />
-
-                  {user && results.totalPages > 1 && (
-                    <div className="mt-8">
-                      <Pagination
-                        currentPage={results.page}
-                        totalPages={results.totalPages}
-                        onPageChange={handlePageChange}
-                      />
-                    </div>
-                  )}
-                </>
+              <CompanyList companies={results.data} />
+              {results.totalPages > 1 && (
+                <div className="mt-8">
+                  <Pagination
+                    currentPage={results.page}
+                    totalPages={results.totalPages}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
               )}
             </>
           )}
