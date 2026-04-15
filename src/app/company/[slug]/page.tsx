@@ -212,13 +212,14 @@ export default async function CompanyPage({ params }: Props) {
                     <ClaimProfileButton companyId={company.id} companySlug={company.slug} companyUrl={company.company_url} />
                   ) : null}
                 </div>
-                {stackUser?.primaryEmail && (
-                  <RequestInfoButton
-                    companyId={company.id}
-                    companyName={company.name}
-                    userEmail={stackUser.primaryEmail}
-                  />
-                )}
+                <RequestInfoButton
+                  companyId={company.id}
+                  companyName={company.name}
+                  userEmail={stackUser?.primaryEmail ?? null}
+                  isAuthenticated={!!stackUser}
+                  returnUrl={`/company/${company.slug}`}
+                />
+
               </div>
 
               {company.average_rating !== undefined && company.average_rating > 0 && (

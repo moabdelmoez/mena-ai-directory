@@ -6,13 +6,23 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 interface RequestInfoButtonProps {
   companyId: string;
   companyName: string;
-  userEmail: string;
+  userEmail: string | null;
+  isAuthenticated: boolean;
+  returnUrl: string;
 }
 
-export function RequestInfoButton({ companyId, companyName, userEmail }: RequestInfoButtonProps) {
+export function RequestInfoButton({ companyId, companyName, userEmail, isAuthenticated, returnUrl }: RequestInfoButtonProps) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [error, setError] = useState<string | null>(null);
+
+  function handleClick() {
+    if (!isAuthenticated) {
+      window.location.href = `/signin?after_auth_return_to=${encodeURIComponent(returnUrl)}`;
+      return;
+    }
+    setShowConfirm(true);
+  }
 
   async function handleConfirm() {
     setShowConfirm(false);
@@ -43,7 +53,7 @@ export function RequestInfoButton({ companyId, companyName, userEmail }: Request
     <>
       <button
         type="button"
-        onClick={() => setShowConfirm(true)}
+        onClick={handleClick}
         disabled={status === 'loading' || status === 'success'}
         className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white rounded-xl active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
         style={{
