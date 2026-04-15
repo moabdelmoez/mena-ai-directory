@@ -137,4 +137,63 @@ test.describe('Company Detail Page', () => {
     const status = response?.status();
     expect(status === 404 || status === 500).toBeTruthy();
   });
+
+  test('anonymous visitor sees "Verified User" on reviews, not the reviewer email', async ({ browser }) => {
+    if (!testSlug) {
+      test.skip(true, 'testSlug not available — beforeAll may have failed (no DB/admin creds)');
+      return;
+    }
+
+    const REVIEW_COMMENT = `E2E anon-viewer test comment ${Date.now()}`;
+
+    // --- Step 1: seed a review as admin via the UI form ---
+    const adminPage = await browser.newPage();
+    try {
+      await loginAsAdmin(adminPage);
+      await adminPage.goto(`/company/${testSlug}`);
+      await adminPage.waitForLoadState('networkidle');
+
+      // Select 4 stars — StarRating renders interactive buttons with aria-label "Rate N out of 5"
+      await adminPage.click('button[aria-label="Rate 4 out of 5"]');
+
+      // Fill the review comment textarea (id="comment")
+      await adminPage.fill('#comment', REVIEW_COMMENT);
+
+      // Submit the form
+      await adminPage.click('button[type="submit"]:has-text("Submit Review")');
+
+      // Wait for the review to appear on the page (the comment text becomes visible)
+      await adminPage.waitForSelector(`text=${REVIEW_COMMENT}`, { timeout: 15000 });
+    } finally {
+      await adminPage.close();
+    }
+
+    // --- Step 2: visit as anonymous (new context, no cookies) ---
+    const anonContext = await browser.newContext();
+    const anonPage = await anonContext.newPage();
+    try {
+      await anonPage.goto(`/company/${testSlug}`);
+      await anonPage.waitForLoadState('networkidle');
+
+      // Find the review row that contains our comment
+      const reviewRow = anonPage
+        .locator('div.border-b.border-zinc-200.pb-6')
+        .filter({ hasText: REVIEW_COMMENT });
+
+      // The comment text must be visible
+      await expect(reviewRow.locator(`text=${REVIEW_COMMENT}`)).toBeVisible();
+
+      // The row must show "Verified User" (anonymous branch in ReviewList)
+      await expect(reviewRow.locator('text=Verified User')).toBeVisible();
+
+      // The admin's email must NOT appear anywhere in that row
+      const adminEmail = process.env.ADMIN_EMAIL ?? '';
+      if (adminEmail) {
+        await expect(reviewRow).not.toContainText(adminEmail);
+      }
+    } finally {
+      await anonPage.close();
+      await anonContext.close();
+    }
+  });
 });
