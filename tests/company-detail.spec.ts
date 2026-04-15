@@ -187,10 +187,8 @@ test.describe('Company Detail Page', () => {
       await expect(reviewRow.locator('text=Verified User')).toBeVisible();
 
       // The admin's email must NOT appear anywhere in that row
-      const adminEmail = process.env.ADMIN_EMAIL ?? '';
-      if (adminEmail) {
-        await expect(reviewRow).not.toContainText(adminEmail);
-      }
+      const adminEmail = process.env.ADMIN_EMAIL!;
+      await expect(reviewRow).not.toContainText(adminEmail);
     } finally {
       await anonPage.close();
       await anonContext.close();
