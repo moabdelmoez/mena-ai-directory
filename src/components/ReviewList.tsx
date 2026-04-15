@@ -48,29 +48,56 @@ export const ReviewList = memo(function ReviewList({
     <div className="space-y-6">
       {reviews.map((review) => (
         <div key={review.id} className="border-b border-zinc-200 pb-6 last:border-0">
-          <div className="flex items-start gap-3">
-            {review.user?.avatar_url ? (
-              <Image
-                src={review.user.avatar_url}
-                alt={review.user.name || 'User'}
-                width={40}
-                height={40}
-                sizes="40px"
-                className="rounded-full"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-zinc-200 flex items-center justify-center">
-                <span className="text-zinc-600 font-medium">
-                  {review.user?.name?.charAt(0).toUpperCase() || '?'}
-                </span>
+          {isOwner ? (
+            <div className="flex items-start gap-3">
+              {review.user?.avatar_url ? (
+                <Image
+                  src={review.user.avatar_url}
+                  alt={review.user.name || 'User'}
+                  width={40}
+                  height={40}
+                  sizes="40px"
+                  className="rounded-full"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-zinc-200 flex items-center justify-center">
+                  <span className="text-zinc-600 font-medium">
+                    {review.user?.name?.charAt(0).toUpperCase() || '?'}
+                  </span>
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-zinc-900">
+                      {review.user?.name || 'Anonymous'}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <StarRating rating={review.rating} size="sm" />
+                      <span className="text-sm text-zinc-500">
+                        {formatDate(review.created_at)}
+                      </span>
+                    </div>
+                  </div>
+                  {currentUserId === review.user_id && (
+                    <span className="text-xs text-zinc-400">
+                      To edit or remove, contact{' '}
+                      <a href="mailto:support@bayanbase.com" className="text-blue-600 hover:underline">
+                        support@bayanbase.com
+                      </a>
+                    </span>
+                  )}
+                </div>
+                {review.comment && (
+                  <p className="mt-2 text-zinc-600">{review.comment}</p>
+                )}
               </div>
-            )}
-            <div className="flex-1 min-w-0">
+            </div>
+          ) : (
+            <div>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-zinc-900">
-                    {review.user?.name || 'Anonymous'}
-                  </p>
+                  <p className="font-medium text-zinc-900">Verified User</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <StarRating rating={review.rating} size="sm" />
                     <span className="text-sm text-zinc-500">
@@ -91,7 +118,7 @@ export const ReviewList = memo(function ReviewList({
                 <p className="mt-2 text-zinc-600">{review.comment}</p>
               )}
             </div>
-          </div>
+          )}
 
           {/* Reply display */}
           {review.reply && companyName && (
