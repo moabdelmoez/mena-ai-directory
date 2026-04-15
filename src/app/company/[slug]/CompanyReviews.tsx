@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { useUser } from '@stackframe/stack';
 import { ReviewForm } from '@/components/ReviewForm';
 import { ReviewList } from '@/components/ReviewList';
@@ -9,12 +10,13 @@ import { isCompanyOwner } from '@/lib/company-permissions';
 
 interface CompanyReviewsProps {
   companyId: string;
+  companySlug: string;
   companyName: string;
   companySubmittedBy: string | null;
   companyClaimedBy: string | null;
 }
 
-export function CompanyReviews({ companyId, companyName, companySubmittedBy, companyClaimedBy }: CompanyReviewsProps) {
+export function CompanyReviews({ companyId, companySlug, companyName, companySubmittedBy, companyClaimedBy }: CompanyReviewsProps) {
   const user = useUser();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -162,7 +164,17 @@ export function CompanyReviews({ companyId, companyName, companySubmittedBy, com
     <div className="space-y-8">
       {/* Review Form (only if user hasn't already reviewed) */}
       <div className="border-b border-zinc-200 pb-8">
-        {userReview ? (
+        {!user ? (
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 text-center">
+            <p className="text-sm text-zinc-600 mb-3">Share your experience with {companyName}.</p>
+            <Link
+              href={`/signin?after_auth_return_to=${encodeURIComponent(`/company/${companySlug}`)}`}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 active:scale-[0.98] transition-all"
+            >
+              Sign in to leave a review
+            </Link>
+          </div>
+        ) : userReview ? (
           <p className="text-sm text-zinc-500">
             You have already reviewed this company. To edit or remove your review, contact{' '}
             <a href="mailto:support@bayanbase.com" className="text-blue-600 hover:underline">
