@@ -15,6 +15,17 @@ export default function RegisterPage() {
 
   useEffect(() => {
     setMounted(true);
+    fetch('/api/filter-options')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.tech_categories) && Array.isArray(data.industries)) {
+          setClassificationOptions({
+            tech_categories: data.tech_categories,
+            industries: data.industries,
+          });
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const [formData, setFormData] = useState({
@@ -25,6 +36,10 @@ export default function RegisterPage() {
     hq_country: '',
   });
   const [products, setProducts] = useState<ProductInput[]>([]);
+  const [classificationOptions, setClassificationOptions] = useState<{
+    tech_categories: string[];
+    industries: string[];
+  }>({ tech_categories: [], industries: [] });
   const [logo, setLogo] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -286,6 +301,7 @@ export default function RegisterPage() {
             products={products}
             onChange={setProducts}
             maxProducts={10}
+            classificationOptions={classificationOptions}
           />
 
           {error && (

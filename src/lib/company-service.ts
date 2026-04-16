@@ -3,6 +3,7 @@ import { generateCompanyEmbedding, generateProductEmbedding } from './openai';
 import { generateSlug } from './utils';
 import { ProductInput } from '@/types';
 import { MENA_COUNTRIES } from '@/constants';
+import { loadApprovedTaxonomies, canonicalize } from './taxonomy';
 
 // Safe FormData extraction — validates values are strings, not File objects
 export function getFormString(formData: FormData, key: string): string {
@@ -126,18 +127,23 @@ async function insertProducts(
     warnings.push('Some products could not be saved');
   }
 
-  // Insert classifications for products that have tech_category or industry
+  // Insert classifications for products that have tech_category or industry.
+  // Trim + canonicalize casing against existing approved values so "fintech"
+  // and "Fintech" don't coexist.
   if (insertedProducts && insertedProducts.length > 0) {
+    const approved = await loadApprovedTaxonomies();
     const classificationInserts = products
       .map((product, index) => {
-        if (!product.tech_category && !product.industry) return null;
+        const tech = canonicalize(product.tech_category, approved.tech_categories);
+        const industry = canonicalize(product.industry, approved.industries);
+        if (!tech && !industry) return null;
         const insertedId = insertedProducts[index]?.id;
         if (!insertedId) return null;
         return {
           product_id: insertedId,
           company_id: companyId,
-          tech_category: product.tech_category || null,
-          industry: product.industry || null,
+          tech_category: tech,
+          industry,
         };
       })
       .filter((c): c is NonNullable<typeof c> => c !== null);

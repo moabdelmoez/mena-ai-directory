@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useId, useRef } from 'react';
-import { Input, Textarea, Button } from '@/components/ui';
+import { Input, Textarea, Button, Combobox } from '@/components/ui';
 import { ProductInput } from '@/types';
 
 interface ProductWithKey extends ProductInput {
@@ -98,11 +98,6 @@ export function ProductInputList({
     onChange(updated);
   }, [products, onChange]);
 
-  const showClassificationFields = !!(
-    classificationOptions &&
-    (classificationOptions.tech_categories.length > 0 || classificationOptions.industries.length > 0)
-  );
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -145,36 +140,30 @@ export function ProductInputList({
                     type="url"
                     aria-label="Product URL"
                   />
-                  {classificationOptions && (classificationOptions.tech_categories.length > 0 || classificationOptions.industries.length > 0) && (
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-medium text-zinc-600 mb-1">Tech Category</label>
-                        <select
-                          value={product.tech_category || ''}
-                          onChange={(e) => handleProductChange(index, 'tech_category', e.target.value || null)}
-                          className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
-                        >
-                          <option value="">None</option>
-                          {classificationOptions.tech_categories.map((tc) => (
-                            <option key={tc} value={tc}>{tc}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-zinc-600 mb-1">Industry</label>
-                        <select
-                          value={product.industry || ''}
-                          onChange={(e) => handleProductChange(index, 'industry', e.target.value || null)}
-                          className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
-                        >
-                          <option value="">None</option>
-                          {classificationOptions.industries.map((ind) => (
-                            <option key={ind} value={ind}>{ind}</option>
-                          ))}
-                        </select>
-                      </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-600 mb-1">Tech Category</label>
+                      <Combobox
+                        value={product.tech_category || null}
+                        onChange={(v) => handleProductChange(index, 'tech_category', v)}
+                        options={classificationOptions?.tech_categories ?? []}
+                        allowAdd
+                        placeholder="Select or type to add new…"
+                        ariaLabel="Tech Category"
+                      />
                     </div>
-                  )}
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-600 mb-1">Industry</label>
+                      <Combobox
+                        value={product.industry || null}
+                        onChange={(v) => handleProductChange(index, 'industry', v)}
+                        options={classificationOptions?.industries ?? []}
+                        allowAdd
+                        placeholder="Select or type to add new…"
+                        ariaLabel="Industry"
+                      />
+                    </div>
+                  </div>
                   <div className="flex gap-2 justify-end">
                     <Button
                       type="button"
@@ -268,36 +257,30 @@ export function ProductInputList({
               placeholder="https://..."
               type="url"
             />
-            {showClassificationFields && (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-zinc-600 mb-1">Tech Category</label>
-                  <select
-                    value={newProduct.tech_category || ''}
-                    onChange={(e) => setNewProduct({ ...newProduct, tech_category: e.target.value || null })}
-                    className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
-                  >
-                    <option value="">None</option>
-                    {classificationOptions!.tech_categories.map((tc) => (
-                      <option key={tc} value={tc}>{tc}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-600 mb-1">Industry</label>
-                  <select
-                    value={newProduct.industry || ''}
-                    onChange={(e) => setNewProduct({ ...newProduct, industry: e.target.value || null })}
-                    className="w-full text-sm border border-zinc-300 rounded-md px-2 py-1.5 bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
-                  >
-                    <option value="">None</option>
-                    {classificationOptions!.industries.map((ind) => (
-                      <option key={ind} value={ind}>{ind}</option>
-                    ))}
-                  </select>
-                </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-zinc-600 mb-1">Tech Category</label>
+                <Combobox
+                  value={newProduct.tech_category || null}
+                  onChange={(v) => setNewProduct({ ...newProduct, tech_category: v })}
+                  options={classificationOptions?.tech_categories ?? []}
+                  allowAdd
+                  placeholder="Select or type to add new…"
+                  ariaLabel="Tech Category"
+                />
               </div>
-            )}
+              <div>
+                <label className="block text-xs font-medium text-zinc-600 mb-1">Industry</label>
+                <Combobox
+                  value={newProduct.industry || null}
+                  onChange={(v) => setNewProduct({ ...newProduct, industry: v })}
+                  options={classificationOptions?.industries ?? []}
+                  allowAdd
+                  placeholder="Select or type to add new…"
+                  ariaLabel="Industry"
+                />
+              </div>
+            </div>
             <div className="flex gap-2 justify-end">
               <Button
                 type="button"

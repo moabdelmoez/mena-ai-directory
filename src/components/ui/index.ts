@@ -1,4 +1,5 @@
 export { Button } from './Button';
+export { Combobox } from './Combobox';
 export { Input } from './Input';
 export { Select } from './Select';
 export { Textarea } from './Textarea';

@@ -6,16 +6,19 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 300; // Revalidate every 5 minutes
 
 export async function GET() {
-  // Two focused queries instead of fetching all rows
+  // Only surface values attached to approved companies. New values introduced
+  // on pending registrations stay hidden until the company is approved.
   const [techResult, industryResult] = await Promise.all([
     supabaseAdmin
       .from('product_classification')
-      .select('tech_category')
-      .not('tech_category', 'is', null),
+      .select('tech_category, companies!inner(status)')
+      .not('tech_category', 'is', null)
+      .eq('companies.status', 'approved'),
     supabaseAdmin
       .from('product_classification')
-      .select('industry')
-      .not('industry', 'is', null),
+      .select('industry, companies!inner(status)')
+      .not('industry', 'is', null)
+      .eq('companies.status', 'approved'),
   ]);
 
   const tech_categories = [...new Set(

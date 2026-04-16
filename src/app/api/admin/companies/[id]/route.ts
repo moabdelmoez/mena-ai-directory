@@ -8,6 +8,7 @@ import { generateCompanyEmbedding, generateProductEmbedding } from '@/lib/openai
 import { MENA_COUNTRIES } from '@/constants';
 import { ProductInput } from '@/types';
 import { validateLogo, uploadLogo, deleteLogoByUrl, parseAndValidateProducts, getFormString, getFormStringOrNull, getFormFile } from '@/lib/company-service';
+import { loadApprovedTaxonomies, canonicalize } from '@/lib/taxonomy';
 import { deleteMediaFromR2 } from '@/lib/r2';
 
 interface ProductWithId extends ProductInput {
@@ -143,10 +144,11 @@ async function syncProducts(
     await supabaseAdmin.from('products').delete().in('id', toDelete);
   }
 
+  const approved = await loadApprovedTaxonomies();
   for (const product of products) {
     const dbId = await upsertProduct(product, companyId, companyName, existingMap);
     if (dbId) {
-      await syncClassification(dbId, companyId, product);
+      await syncClassification(dbId, companyId, product, approved);
     }
   }
 }
@@ -209,16 +211,19 @@ async function syncClassification(
   productDbId: string,
   companyId: string,
   product: ProductWithId,
+  approved: { tech_categories: string[]; industries: string[] },
 ): Promise<void> {
-  if (product.tech_category || product.industry) {
+  const tech = canonicalize(product.tech_category, approved.tech_categories);
+  const industry = canonicalize(product.industry, approved.industries);
+  if (tech || industry) {
     await supabaseAdmin
       .from('product_classification')
       .upsert(
         {
           product_id: productDbId,
           company_id: companyId,
-          tech_category: product.tech_category ?? null,
-          industry: product.industry ?? null,
+          tech_category: tech,
+          industry,
         },
         { onConflict: 'product_id' }
       );
