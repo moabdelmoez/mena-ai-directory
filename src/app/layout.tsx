@@ -63,7 +63,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="theme-color" content="#FAFAFA" />
+        <meta name="theme-color" content="#FFFFFF" />
         <link rel="icon" type="image/png" href="/images/favicon/favicon-96x96.png" sizes="96x96" />
         <link rel="icon" type="image/svg+xml" href="/images/favicon/favicon.svg" />
         <link rel="shortcut icon" href="/images/favicon/favicon.ico" />

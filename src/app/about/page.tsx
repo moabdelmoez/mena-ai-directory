@@ -92,13 +92,13 @@ function TimelineNode({
           transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
           className="relative z-10 w-8 h-8 md:w-12 md:h-12 rounded-full bg-blue-300 shrink-0 ml-2 md:ml-0"
         />
-        <span className="relative z-10 text-xs font-semibold uppercase tracking-wider text-zinc-400 md:mt-3 bg-[#FAFAFA] px-3 py-1">
+        <span className="relative z-10 text-xs font-semibold uppercase tracking-wider text-zinc-400 md:mt-3 bg-[#FFFFFF] px-3 py-1">
           {label}
         </span>
       </div>
 
       {/* Content — covers the line with page background */}
-      <div className="pl-14 md:pl-0 relative z-10 bg-[#FAFAFA]">
+      <div className="pl-14 md:pl-0 relative z-10 bg-[#FFFFFF]">
         <div className="max-w-5xl mx-auto">
           {children}
         </div>
