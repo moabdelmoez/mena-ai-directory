@@ -43,3 +43,8 @@ next-env.d.ts
 # assets served externally
 /logos/
 graphify-out/
+
+# internal / local-only (not for public repo)
+/.agents/
+/docs/
+/PRD.md
