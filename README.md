@@ -1,4 +1,4 @@
-# BayanBase
+# MENA AI Directory
 
 A G2-style directory platform for AI companies operating in the Arab world. Features a Google-like minimalist search UI with hybrid semantic + keyword search powered by OpenAI embeddings and PostgreSQL pgvector.
 
